@@ -13,23 +13,27 @@
     * `ROUTER_PASSWORD`: Your router's web management password.
     * `PPPOE_USER`: Your ISP-provided username.
     * `PPPOE_PASS`: Your ISP-provided password.
+    * `ASN` : Your desired ASN that you want change to.
     * You can use commands:
     ```bash
     echo PANEL_PASSWORD="your_secure_password" >> .env
     echo PPPOE_USERNAME="your_username" >> .env
     echo PPPOE_PASSWORD="your_pppoe_password" >> .env
+    echo ASN="your_desired_asn" >> .env
     ```
 2.  **Run the Script** Execute the tool from your terminal:
     ```bash
     python pppoe.py
     ```
+    arguments:
+    -f, --force: Force to make a DHCP request regardless ASN.
+    -a, --asn: Provide a ASN in form of CLI argument instead environment variable.
 
 ---
 
 ###  Tips
 
 * **TP-Link Focus:** The hardcoded API endpoints and JSON structures are currently based on **TP-Link** firmware logic.
-* **ASN Targeting:** This tool is currently optimized to seek a specific **ASN**(i.e., China Mobile). You may need to modify the logic if you simply want any new IP address regardless of the network provider.
 
 ---
 *Thanks for using!*

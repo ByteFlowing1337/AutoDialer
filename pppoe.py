@@ -1,80 +1,35 @@
-import time
-import requests
-import os
-from dotenv import load_dotenv
-from get_router_ip import get_router_ip
-from tplink_security_encode import tplink_security_encode
+from sys import argv
+from utils import ASN, check_ISP, make_pppoe_reconnection
 
-load_dotenv()
-requests.certs.verify = False
-PLANE_PASSWORD = os.getenv("PANEL_PASSWORD")
-PPPOE_USERNAME = os.getenv("PPPOE_USERNAME")
-PPPOE_PASSWORD = os.getenv("PPPOE_PASSWORD")
+def main(FORCE=False, ASN=ASN):
+    ISP = check_ISP()
+    #No providing ASN, no --force, exit.
+    if ASN is None and not FORCE:
+        print("No ASN provided, exiting.")
+        print("Try running the script with -f or --force flag or provide an ASN with the -a or --asn flag.")
+        exit(1)
 
-router_ip = get_router_ip()
-if not router_ip:
-    print("Could not determine router IP address.")
-    exit(1)
-
-def check_ISP():
-    response = requests.get(f"https://ipinfo.io/json",proxies={"http": None, "https": None},timeout=5)
-    data = response.json()
-    print(f"ISP: {data.get('org')}")
-    return data.get("org")
-
-#The payload below is based on TP-Link,
-#it may not works on other brands of routers.
-#If so, you need to replace the payload.
-def login_router(password) -> str:
-    url = f"http://{router_ip}"
-    payload = {
-        "method": "do",
-        "login": {
-            "password": password
-        }
-    }
-    response = requests.post(url, json=payload)
-    json_response = response.json()
-    print(json_response)
-    return json_response.get("stok")
-
-
-def set_credentials(username, password, stok):
-    url = f"http://{router_ip}/stok={stok}/ds"
-    payload = {
-        "protocol": {
-            "wan": {"wan_type": "pppoe"},
-            "pppoe": {"username": username, "password": password}
-        },
-        "method": "set"
-    }
-    
-    response = requests.post(url, json=payload)
-    print(response.text)
-
-def pppoe(action, stok):
-    url = f"http://{router_ip}/stok={stok}/ds"
-    payload = {
-        "network": {
-            "change_wan_status": {
-                "proto": "pppoe",
-                "operate": action
-            }
-        },
-            "method": "do"
-    }
-    response = requests.post(url, json=payload)
-    print(response.text)
-
+    while not ISP.startswith(f"{ASN}"):
+        print(f"Current ISP: {ISP}")
+        make_pppoe_reconnection()
+        ISP = check_ISP()
+        print(f"ISP after reconnection: {ISP}")
+        if ISP.startswith(f"{ASN}"):
+            print("Successfully switched to the desired ASN.")
+        if FORCE:
+            print("Forced reconnection completed.")
+            break
 
 if __name__ == "__main__":
-    #AS9808 is China Mobile, so we only run this code if the ISP is not China Mobile
-    ISP = check_ISP()
-    while not ISP.startswith("AS9808"):
-        print(f"Current ISP: {ISP}")
-        stok = login_router(tplink_security_encode(PLANE_PASSWORD))
-        set_credentials(PPPOE_USERNAME, PPPOE_PASSWORD, stok)
-        pppoe("connect", stok)
-        # Wait for a time to make sure DHCP has assgined a new IP address
-        time.sleep(30)
-        pppoe("disconnect", stok)
+    if len(argv) == 1:
+        main()
+    else:
+        match argv[1]:
+            case "-f" | "--force":
+                print("Forcing PPPoE reconnection...")
+                main(FORCE=True)
+            case "-a" | "--asn":
+                if len(argv) < 3:
+                    print("Please provide an ASN after the -a or --asn flag.")
+                    exit(1)
+                main(FORCE=False, ASN=argv[2])
