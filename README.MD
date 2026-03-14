@@ -7,21 +7,34 @@
 * **Cross-Platform:** Compatible with Windows, Linux, FeeeBSD, macOS, etc.
 * **Automation-Ready:** Easily integrated into workflows where frequent IP changes are required.
 
-###  How to use **auto-pppoe**?
+### How to use **auto-pppoe**?
 
-1.  **Set Environment Variables** Configure your router's administrative credentials and your ISP's PPPoE details:
-    * `ROUTER_PASSWORD`: Your router's web management password.
-    * `PPPOE_USER`: Your ISP-provided username.
-    * `PPPOE_PASS`: Your ISP-provided password.
-    * `ASN` : Your desired ASN that you want change to. <br>
-    You can use commands:
-    ```bash
-    echo PANEL_PASSWORD="your_secure_password" >> .env
-    echo PPPOE_USERNAME="your_username" >> .env
-    echo PPPOE_PASSWORD="your_pppoe_password" >> .env
-    echo ASN="your_desired_asn" >> .env
-    ```
-2.  **Run the Script** Execute the tool from your terminal:
+#### 1. Set Environment Variables
+To get started, you need to configure your router's administrative credentials and your ISP's PPPoE details. These variables allow the script to authenticate and manage your connection.
+
+| Variable | Description |
+| :--- | :--- |
+| **`ROUTER_PASSWORD`** | The web management password for your router. |
+| **`PPPOE_USER`** | Your ISP-provided username. |
+| **`PPPOE_PASS`** | Your ISP-provided password. |
+| **`ASN`** | The specific Autonomous System Number you wish to switch to. |
+
+---
+
+#### Quick Setup
+You can quickly initialize your environment by running the following commands in your terminal. This will create (or append to) a `.env` file:
+
+```bash
+# Set your credentials
+echo "ROUTER_PASSWORD='your_secure_password'" >> .env
+echo "PPPOE_USER='your_username'" >> .env
+echo "PPPOE_PASS='your_pppoe_password'" >> .env
+echo "ASN='your_desired_asn'" >> .env
+```
+[!IMPORTANT]
+Keep your .env file secure! Ensure it is added to your .gitignore to prevent accidentally sharing your credentials on public repositories.
+
+#### 2.  **Run the Script** Execute the tool from your terminal:
     ```bash
     python pppoe.py
     ```
