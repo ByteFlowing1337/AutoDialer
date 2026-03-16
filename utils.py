@@ -63,7 +63,8 @@ def set_credentials(username, password, stok):
     else:
         print("Failed to set PPPoE credentials.")
         print(response.text)
-
+        exit(1)
+        
 def pppoe(action, stok):
     url = f"http://{router_ip}/stok={stok}/ds"
     payload = {
@@ -81,6 +82,7 @@ def pppoe(action, stok):
     else:
         print(f"Failed to {action} PPPoE.")
         print(response.text)
+        exit(1)
 
 def make_pppoe_reconnection():
     stok = login_router(tplink_security_encode(PLANE_PASSWORD))
