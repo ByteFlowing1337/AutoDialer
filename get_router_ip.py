@@ -19,8 +19,7 @@ def get_router_ip_on_linux():
             return ip
     return None
 
-##This should also work on macOS
-def get_router_ip_on_freebsd():
+def get_router_ip_on_unix():
     import subprocess
     result = subprocess.run("netstat -rn", capture_output=True, text=True, shell=True)
     for line in result.stdout.splitlines():
@@ -34,5 +33,5 @@ if platform_system == "Windows":
     get_router_ip = get_router_ip_on_windows
 elif platform_system == "Linux":
     get_router_ip = get_router_ip_on_linux
-elif platform_system == "Darwin" or platform_system == "FreeBSD":
-    get_router_ip = get_router_ip_on_freebsd
+elif platform_system == "Unix" or platform_system == "macOS":
+    get_router_ip = get_router_ip_on_unix
