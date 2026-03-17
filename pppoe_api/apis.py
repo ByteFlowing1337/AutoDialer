@@ -2,11 +2,11 @@ import os
 import requests
 
 from dotenv import load_dotenv
-from tplink_security_encode import tplink_security_encode
-from get_router_ip import get_router_ip
+from encode.tplink_security_encode import tplink_security_encode
+from pppoe_api.get_gateway import get_gateway_ip
 from time import sleep
 
-router_ip = get_router_ip()
+router_ip = get_gateway_ip()
 if not router_ip:
     print("Could not determine router IP address.")
     exit(1)

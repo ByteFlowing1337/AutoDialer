@@ -1,7 +1,7 @@
 import platform
+import subprocess
 
-def get_router_ip_on_windows():
-    import subprocess
+def get_gateway_ip_on_windows():
     result = subprocess.run("ipconfig", capture_output=True, text=True)
     for line in result.stdout.splitlines():
         if "Default Gateway" in line:
@@ -10,8 +10,7 @@ def get_router_ip_on_windows():
                 return ip
     return None
 
-def get_router_ip_on_linux():
-    import subprocess
+def get_gateway_ip_on_linux():
     result = subprocess.run("ip route", capture_output=True, text=True, shell=True)
     for line in result.stdout.splitlines():
         if "default" in line:
@@ -19,8 +18,7 @@ def get_router_ip_on_linux():
             return ip
     return None
 
-def get_router_ip_on_unix():
-    import subprocess
+def get_gateway_ip_on_unix(): 
     result = subprocess.run("netstat -rn", capture_output=True, text=True, shell=True)
     for line in result.stdout.splitlines():
         if "default" in line:
@@ -30,8 +28,8 @@ def get_router_ip_on_unix():
 
 platform_system = platform.system()
 if platform_system == "Windows":
-    get_router_ip = get_router_ip_on_windows
+    get_gateway_ip = get_gateway_ip_on_windows
 elif platform_system == "Linux":
-    get_router_ip = get_router_ip_on_linux
+    get_gateway_ip = get_gateway_ip_on_linux
 elif platform_system == "Unix" or platform_system == "macOS":
-    get_router_ip = get_router_ip_on_unix
+    get_gateway_ip = get_gateway_ip_on_unix
