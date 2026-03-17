@@ -16,7 +16,7 @@ To get started, you need to configure your router's administrative credentials a
 | :--- | :--- |
 | **`ROUTER_PASSWORD`** | The web management password for your router. |
 | **`PPPOE_USER`** | Your ISP-provided username. |
-| **`PPPOE_PASS`** | Your ISP-provided password. |
+| **`PPPOE_PASSWORD`** | Your ISP-provided password. |
 | **`ASN`** | The specific Autonomous System Number you wish to switch to. |
 
 ---
@@ -28,7 +28,7 @@ You can quickly initialize your environment by running the following commands in
 # Set your credentials
 echo "ROUTER_PASSWORD='your_secure_password'" >> .env
 echo "PPPOE_USER='your_username'" >> .env
-echo "PPPOE_PASS='your_pppoe_password'" >> .env
+echo "PPPOE_PASSWORD='your_pppoe_password'" >> .env
 echo "ASN='your_desired_asn'" >> .env
 ```
 [IMPORTANT] <br>
