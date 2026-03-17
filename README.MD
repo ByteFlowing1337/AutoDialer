@@ -1,13 +1,13 @@
-# auto-pppoe
+# AutoDialer
 
-**auto-pppoe** is a Python-based automation script designed to trigger PPPoE reconnection requests via your router's API to rotate your public IP address automatically.
+**AutoDialer** is a cross-platfrom, API-Driven, Python-based automation script designed to trigger PPPoE reconnection requests via your router's API to rotate your public IP address automatically.
 
-###  Why use **auto-pppoe**?
+###  Why use **AutoDialer**?
 * **Convenience:** Quickly rotate your public IP address (on dynamic lines) without manual router reboots.
 * **Cross-Platform:** Compatible with Windows, Linux, FeeeBSD, macOS, etc.
 * **Automation-Ready:** Easily integrated into workflows where frequent IP changes are required.
 
-### How to use **auto-pppoe**?
+### How to use **AutoDialer**?
 
 #### 1. Set Environment Variables
 To get started, you need to configure your router's administrative credentials and your ISP's PPPoE details. These variables allow the script to authenticate and manage your connection.
