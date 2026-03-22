@@ -1,4 +1,4 @@
-import apis
+from apis import TPLinkAPI
 
 def print_devices_table(devices: list) -> None:
     if not devices:
@@ -19,6 +19,6 @@ def print_devices_table(devices: list) -> None:
         )
 
 def tplink_get_devices():
-    router = apis.TPLinkAPI()
+    router = TPLinkAPI()
     devices = router.get_connected_devices()
     print_devices_table(devices)
