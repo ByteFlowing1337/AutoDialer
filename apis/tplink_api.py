@@ -116,3 +116,14 @@ class TPLinkAPI:
         # Wait for a time to make sure DHCP has assigned a new IP address
         sleep(30)
         self.pppoe("connect")
+    
+    def get_connected_devices(self) -> dict:
+        payload = {"hosts_info":{"table":"host_info","name":"cap_host_num"},"network":{"name":"iface_mac"},"hyfi":{"table":["connected_ext"]},"method":"get"}
+        response = self.__request(payload)
+        if response.get("error_code") == 0:
+            print(f"response: {response}")
+            return response.get("hosts_info", {}).get("host_info", [])
+        else:
+            print("Failed to get connected devices.")
+            print(response)
+            return []
