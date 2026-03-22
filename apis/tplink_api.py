@@ -3,7 +3,7 @@ import requests
 
 from dotenv import load_dotenv
 from encode.tplink_security_encode import tplink_security_encode
-from pppoe_api.get_gateway import get_gateway_ip
+from apis.get_gateway import get_gateway_ip
 from time import sleep
 
 router_ip = get_gateway_ip()

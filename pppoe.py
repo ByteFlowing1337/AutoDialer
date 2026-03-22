@@ -1,5 +1,5 @@
 from sys import argv
-from pppoe_api.apis import ASN, check_isp, make_pppoe_reconnection
+from apis.tplink_api import ASN, check_isp,make_pppoe_reconnection
 
 def main(FORCE=False, ASN=ASN):
     isp = check_isp()
