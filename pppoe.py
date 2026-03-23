@@ -1,3 +1,5 @@
+import time
+from pathlib import Path
 from sys import argv
 from config.config import ASN
 
@@ -22,6 +24,14 @@ def run_reconnection(force: bool = False, asn: str | None = ASN) -> None:
     while not isp.startswith(f"{asn}"):
         router.make_pppoe_reconnection()
         isp = apis.check_isp()
+        if isp is None:
+            print("Failed to check ISP after reconnection, retrying...")
+            for _ in range(3):
+                time.sleep(5)
+                isp = apis.check_isp()
+                if isp is not None:
+                    break
+            continue
         print(f"ISP after reconnection: {isp}")
         if isp.startswith(f"{asn}"):
             print("Successfully switched to the desired ASN.")
@@ -45,7 +55,7 @@ def main() -> None:
                 run_reconnection(force=False, asn=argv[2])
             case _:
                 print(f"Unknown argument: {argv[1]}")
-                if argv[0].startswith("python"):
+                if Path(argv[0]).suffix.lower() == ".py":
                     print("Usage: python pppoe.py [-f|--force] [-a|--asn <ASN>]")
                 else:
                     print("Usage: autodialer [-f|--force] [-a|--asn <ASN>]")
