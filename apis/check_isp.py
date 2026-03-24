@@ -1,7 +1,12 @@
 import requests
 import time
 
-def check_isp(verbose=False) -> str | None:
+def check_isp(verbose: bool = False) -> str | None:
+    """Return the current ISP org string, or ``None`` on failure.
+
+    Network/request and JSON parsing errors are handled internally (printed)
+    and do not propagate to callers.
+    """
     try:
         response = requests.get(f"https://ipinfo.io/json",
                                 proxies={"http": "", "https": ""},timeout=4)
