@@ -6,7 +6,21 @@ import apis
 
 
 def is_target_asn(isp: str | None, asn: str | None) -> bool:
-    return bool(asn and isinstance(isp, str) and isp.startswith(asn))
+    if not asn or not isinstance(isp, str):
+        return False
+
+    raw_asn = asn.strip().upper()
+    if raw_asn.startswith("AS"):
+        raw_asn = raw_asn[2:].strip()
+
+    if not raw_asn:
+        return False
+
+    normalized_asn = f"AS{raw_asn}"
+
+    first_token = isp.split(maxsplit=1)[0].strip().upper() 
+
+    return first_token == normalized_asn
 
 def run_reconnection(force: bool = False, asn: str | None = ASN) -> None:
     #No providing ASN, no --force, exit.
