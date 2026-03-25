@@ -4,7 +4,7 @@ authors = [{name = "Byte Flow", email = "fakeshadow1337@gmail.com"}]
 description = "AutoDialer is an automation script designed to interact with routers using APIs."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license = "GPL-3.0-only"
 dynamic = ["version"]
 classifiers= [
     "Programming Language :: Python :: 3.14",
