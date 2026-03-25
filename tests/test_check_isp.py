@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-from autodialer.apis.check_isp import check_isp, check_isp_with_retries
+from autodialer import check_isp, check_isp_with_retries
 
 
 class TestCheckIsp(unittest.TestCase):
