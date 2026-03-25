@@ -1,14 +1,17 @@
 import unittest
 from unittest.mock import Mock, patch
 from typing import Any
+import importlib
 
 import requests
 
 from autodialer import check_isp, check_isp_with_retries
 
+check_isp_module = importlib.import_module("autodialer.apis.check_isp")
+
 
 class TestCheckIsp(unittest.TestCase):
-    @patch("autodialer.apis.check_isp.requests.get")
+    @patch.object(check_isp_module.requests, "get")
     def test_check_isp_success_returns_org(self, mock_get: Any):
         response = Mock()
         response.raise_for_status.return_value = None
@@ -19,12 +22,12 @@ class TestCheckIsp(unittest.TestCase):
 
         self.assertEqual(result, "AS1234 Example ISP")
 
-    @patch("autodialer.apis.check_isp.requests.get", side_effect=requests.Timeout)
+    @patch.object(check_isp_module.requests, "get", side_effect=requests.Timeout)
     def test_check_isp_timeout_returns_none(self, _mock_get: Any):
         result = check_isp()
         self.assertIsNone(result)
 
-    @patch("autodialer.apis.check_isp.requests.get")
+    @patch.object(check_isp_module.requests, "get")
     def test_check_isp_invalid_payload_returns_none(self, mock_get: Any):
         response = Mock()
         response.raise_for_status.return_value = None
@@ -37,8 +40,8 @@ class TestCheckIsp(unittest.TestCase):
 
 
 class TestCheckIspWithRetries(unittest.TestCase):
-    @patch("autodialer.apis.check_isp.time.sleep")
-    @patch("autodialer.apis.check_isp.check_isp", side_effect=[None, None, "AS9999 Retry ISP"])
+    @patch.object(check_isp_module.time, "sleep")
+    @patch.object(check_isp_module, "check_isp", side_effect=[None, None, "AS9999 Retry ISP"])
     def test_retries_until_success(self, mock_check_isp: Any, mock_sleep: Any):
         result = check_isp_with_retries(retries=3, delay=1)
 
@@ -46,8 +49,8 @@ class TestCheckIspWithRetries(unittest.TestCase):
         self.assertEqual(mock_check_isp.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 2)
 
-    @patch("autodialer.apis.check_isp.time.sleep")
-    @patch("autodialer.apis.check_isp.check_isp", return_value=None)
+    @patch.object(check_isp_module.time, "sleep")
+    @patch.object(check_isp_module, "check_isp", return_value=None)
     def test_returns_none_after_all_retries(self, mock_check_isp: Any, mock_sleep: Any):
         result = check_isp_with_retries(retries=2, delay=1)
 
@@ -55,7 +58,7 @@ class TestCheckIspWithRetries(unittest.TestCase):
         self.assertEqual(mock_check_isp.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 2)
 
-    @patch("autodialer.apis.check_isp.check_isp", return_value=None)
+    @patch.object(check_isp_module, "check_isp", return_value=None)
     def test_invalid_retry_parameters_return_none(self, _mock_check_isp: Any):
         self.assertIsNone(check_isp_with_retries(retries=-1, delay=1))
         self.assertIsNone(check_isp_with_retries(retries=1, delay=0))
