@@ -1,9 +1,9 @@
 import os
-import dotenv
+import dotenv  # type: ignore[import-not-found]
 
 dotenv.load_dotenv()
 
-PANEL_PASSWORD = os.getenv("PANEL_PASSWORD")
-PPPOE_USERNAME = os.getenv("PPPOE_USERNAME")
-PPPOE_PASSWORD = os.getenv("PPPOE_PASSWORD")
-ASN: str | None = os.getenv("ASN") if os.getenv("ASN") else None
+PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD") or None
+PPPOE_USERNAME: str | None = os.getenv("PPPOE_USERNAME") or None
+PPPOE_PASSWORD: str | None = os.getenv("PPPOE_PASSWORD") or None
+ASN: str | None = os.getenv("ASN") or None

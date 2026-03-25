@@ -22,7 +22,9 @@ class TestGetGatewayIp(unittest.TestCase):
 
     @patch("autodialer.apis.get_gateway.subprocess.run")
     def test_linux_gateway_parsed(self, mock_run: Any):
-        mock_run.return_value = Mock(stdout="default via 10.0.0.1 dev eth0 proto dhcp\n")
+        mock_run.return_value = Mock(
+            stdout="default via 10.0.0.1 dev eth0 proto dhcp\n"
+        )
 
         result = get_gateway_ip_on_linux()
 

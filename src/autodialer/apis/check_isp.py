@@ -1,6 +1,7 @@
 import requests
 import time
 
+
 def check_isp(verbose: bool = False) -> str | None:
     """Return the current ISP org string, or ``None`` on failure.
 
@@ -14,8 +15,9 @@ def check_isp(verbose: bool = False) -> str | None:
             always printed on failure.
     """
     try:
-        response = requests.get(f"https://ipinfo.io/json",
-                                proxies={"http": "", "https": ""}, timeout=4)
+        response = requests.get(
+            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=4
+        )
         response.raise_for_status()
         data = response.json()
         org = data.get("org")
@@ -36,6 +38,7 @@ def check_isp(verbose: bool = False) -> str | None:
         print("Error parsing ISP response.")
         return None
 
+
 def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
@@ -50,9 +53,10 @@ def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
     if isp is not None:
         return isp
 
-
     if retries < 0 or delay <= 0:
-        print("Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer.")
+        print(
+            "Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer."
+        )
         return None
 
     if retries == 0:

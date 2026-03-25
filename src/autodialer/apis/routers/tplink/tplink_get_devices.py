@@ -1,5 +1,6 @@
 from autodialer.apis import TPLinkAPI
 
+
 def print_devices_table(devices: list) -> None:
     if not devices:
         print("No devices connected.")
@@ -17,6 +18,7 @@ def print_devices_table(devices: list) -> None:
             f"{d['down_kbps']:>6} "
             f"{'Y' if d['is_current'] else 'N':>3}"
         )
+
 
 def tplink_get_devices():
     router = TPLinkAPI()

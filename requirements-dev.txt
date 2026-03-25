@@ -8,6 +8,7 @@ wheel
 # Linting
 ruff
 mypy
+types-requests
 
 # Testing
 pytest
