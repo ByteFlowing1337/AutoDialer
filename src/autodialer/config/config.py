@@ -1,17 +1,9 @@
 import os
-import dotenv
+import dotenv  # type: ignore[import-not-found]
 
 dotenv.load_dotenv()
 
-
-def _require_env(name: str) -> str:
-    value = os.getenv(name)
-    if value is None or value == "":
-        raise ValueError(f"Missing required environment variable: {name}")
-    return value
-
-
-PANEL_PASSWORD: str = _require_env("PANEL_PASSWORD")
-PPPOE_USERNAME: str = _require_env("PPPOE_USERNAME")
-PPPOE_PASSWORD: str = _require_env("PPPOE_PASSWORD")
+PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD") or None
+PPPOE_USERNAME: str | None = os.getenv("PPPOE_USERNAME") or None
+PPPOE_PASSWORD: str | None = os.getenv("PPPOE_PASSWORD") or None
 ASN: str | None = os.getenv("ASN") or None

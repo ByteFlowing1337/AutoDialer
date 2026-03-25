@@ -18,7 +18,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependency
-        run: pip install ruff mypy
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
       - name: Run ruff check
         run: ruff check
       - name: Run ruff format check

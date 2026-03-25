@@ -43,11 +43,22 @@ class TPLinkAPI:
         if router_ip is None:
             print("Could not determine router IP address.")
             exit(1)
+
+        if PANEL_PASSWORD is None or PPPOE_USERNAME is None or PPPOE_PASSWORD is None:
+            print(
+                "Missing required environment variables: PANEL_PASSWORD, PPPOE_USERNAME, or PPPOE_PASSWORD"
+            )
+            exit(1)
+
+        panel_password: str = PANEL_PASSWORD
+        pppoe_username: str = PPPOE_USERNAME
+        pppoe_password: str = PPPOE_PASSWORD
+
         self.router_ip = router_ip
         self.session = requests.Session()
-        self.password = encode.tplink_security_encode(PANEL_PASSWORD)
-        self.username = PPPOE_USERNAME
-        self.pppoe_password = PPPOE_PASSWORD
+        self.password = encode.tplink_security_encode(panel_password)
+        self.username = pppoe_username
+        self.pppoe_password = pppoe_password
         self.stok = self.__login_router()
 
     def __post(self, payload) -> dict:
@@ -122,7 +133,9 @@ class TPLinkAPI:
         devices: list[dict] = []
 
         for item in raw_hosts:
-            host = next(iter(item.values()), {})  # host_info_0 / host_info_1 -> {...}
+            host: dict[str, str] = next(
+                iter(item.values()), {}
+            )  # host_info_0 / host_info_1 -> {...}
             devices.append(
                 {
                     "hostname": unquote(host.get("hostname", "")) or "(unknown)",
