@@ -6,10 +6,21 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = {file = "LICENSE"}
 dynamic = ["version"]
+classifiers= [
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Utilities",
+]
 dependencies = [
     "python-dotenv>=1,<2",
     "requests<3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ByteFlowing1337/AutoDialer"
 
 [project.scripts]
 autodialer = "autodialer.pppoe:main"
