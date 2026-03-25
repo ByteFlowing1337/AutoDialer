@@ -49,7 +49,7 @@ def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
 
 
     if retries < 0 or delay <= 0:
-        print("Invalid retries or delay parameters. Retries and delay should be positive integers.")
+        print("Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer.")
         return None
 
     if retries == 0:
