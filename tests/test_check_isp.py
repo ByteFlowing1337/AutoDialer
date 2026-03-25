@@ -41,7 +41,9 @@ class TestCheckIsp(unittest.TestCase):
 
 class TestCheckIspWithRetries(unittest.TestCase):
     @patch.object(check_isp_module.time, "sleep")
-    @patch.object(check_isp_module, "check_isp", side_effect=[None, None, "AS9999 Retry ISP"])
+    @patch.object(
+        check_isp_module, "check_isp", side_effect=[None, None, "AS9999 Retry ISP"]
+    )
     def test_retries_until_success(self, mock_check_isp: Any, mock_sleep: Any):
         result = check_isp_with_retries(retries=3, delay=1)
 
