@@ -23,11 +23,14 @@ def is_target_asn(isp: str | None, asn: str | None) -> bool:
 
     return first_token == normalized_asn
 
+
 def run_reconnection(force: bool = False, asn: str | None = ASN) -> None:
     # No ASN provided and no --force flag; exiting.
     if asn is None and not force:
         print("No ASN provided, exiting.")
-        print("Try running the script with -f or --force flag or provide an ASN with the -a or --asn flag.")
+        print(
+            "Try running the script with -f or --force flag or provide an ASN with the -a or --asn flag."
+        )
         exit(1)
 
     router = TPLinkAPI()
@@ -64,7 +67,9 @@ def run_reconnection(force: bool = False, asn: str | None = ASN) -> None:
             print("Successfully switched to the desired ASN.")
             break
         if tries >= max_attempts:
-            print("Reached maximum reconnection attempts without switching to the desired ASN.")
+            print(
+                "Reached maximum reconnection attempts without switching to the desired ASN."
+            )
             exit(1)
 
 
@@ -88,6 +93,7 @@ def main() -> None:
                 else:
                     print("Usage: autodialer [-f|--force] [-a|--asn <ASN>]")
                 exit(1)
+
 
 if __name__ == "__main__":
     main()

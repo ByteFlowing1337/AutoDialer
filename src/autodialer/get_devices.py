@@ -2,6 +2,7 @@ from pathlib import Path
 from sys import argv
 from autodialer.apis.routers.tplink.tplink_get_devices import tplink_get_devices
 
+
 def main() -> None:
     if len(argv) == 1:
         tplink_get_devices()

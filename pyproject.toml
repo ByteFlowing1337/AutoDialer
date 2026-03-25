@@ -3,11 +3,15 @@ name = "AutoDialer"
 authors = [{name = "Byte Flow", email = "fakeshadow1337@gmail.com"}]
 description = "AutoDialer is an automation script designed to interact with routers using APIs."
 readme = "README.md"
-requires-python = ">=3.13"
-license = {file = "LICENSE"}
+requires-python = ">=3.10"
+license = "GPL-3.0-only"
 dynamic = ["version"]
 classifiers= [
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.10",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Operating System :: POSIX :: BSD",
