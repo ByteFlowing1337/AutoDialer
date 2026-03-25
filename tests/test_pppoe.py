@@ -1,6 +1,6 @@
 import unittest
 
-from autodialer.pppoe import is_target_asn
+from autodialer import is_target_asn
 
 
 class TestIsTargetAsn(unittest.TestCase):

@@ -1,25 +1,39 @@
 # AutoDialer
 
-**AutoDialer** is a cross-platform, API-driven, Python-based automation script designed to trigger PPPoE reconnection requests via your router API and rotate your public IP address automatically.
+AutoDialer is a cross-platform Python CLI package for router APIs, designed to rotate public IP addresses automatically and streamline router interactions.
 
-##  Why use **AutoDialer**?
-* **Convenience:** Quickly rotate your public IP address (on dynamic lines) without manual router reboots.
-* **Cross-Platform:** Compatible with Windows, Linux, FreeBSD, macOS, etc.
-* **Automation-Ready:** Easily integrated into workflows where frequent IP changes are required.
+## Why AutoDialer?
+- Convenient IP rotation on dynamic lines without manual router reboot.
+- Cross-platform (Windows, Linux, macOS, FreeBSD).
+- CLI-first usage for scripts and automation.
 
+## Installation
 
-## How to use **AutoDialer**?
+### Using pip (recommended)
+```bash
+pip install autodialer
+```
 
-### 0) Install Dependencies
+### Using uv
+If you prefer `uv` for faster environment and dependency management:
 
-#### Option A: Use `uv` (recommended)
+```bash
+# install from PyPI
+uv tool install autodialer
+
+# run directly
+autodialer
+```
+
+For local development:
 
 ```bash
 uv sync
+uv pip install -e .
+uv run autodialer --help
 ```
 
-#### Option B: Use `pip` (without `uv`)
-
+### From source (development)
 ```bash
 python -m venv .venv
 
@@ -29,68 +43,46 @@ python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
 
-pip install requests "python-dotenv>=1,<2"
+python -m pip install -e .
 ```
 
-#### Option C: Install as package with `uv`
+## Configuration
 
-```bash
-uv sync
-uv pip install -e .
-```
-
-Then run via project scripts:
-
-```bash
-uv run autodialer
-uv run autodialer-devices
-```
-
-### 1) Set Environment Variables
-To get started, you need to configure your router's administrative credentials and your ISP's PPPoE details. These variables allow the script to authenticate and manage your connection.
+Create a `.env` file in your working directory:
 
 | Variable | Description |
 | :--- | :--- |
-| **`PANEL_PASSWORD`** | The web management password for your router. |
-| **`PPPOE_USERNAME`** | Your ISP-provided username. |
-| **`PPPOE_PASSWORD`** | Your ISP-provided password. |
-| **`ASN`** | The specific Autonomous System Number you wish to switch to. |
+| `PANEL_PASSWORD` | Router panel password |
+| `PPPOE_USERNAME` | ISP PPPoE username |
+| `PPPOE_PASSWORD` | ISP PPPoE password |
+| `ASN` | Target ASN (optional unless not using `--force`) |
 
----
+Example:
+```bash
+PANEL_PASSWORD='your_router_panel_password'
+PPPOE_USERNAME='your_pppoe_username'
+PPPOE_PASSWORD='your_pppoe_password'
+ASN='AS9929'
+```
 
-#### Quick Setup
-You can quickly initialize your environment by running the following commands in your terminal. This will create (or append to) a `.env` file:
+## Usage
+
+After installation, use the CLI directly:
 
 ```bash
-# Set your credentials
-echo "PANEL_PASSWORD='your_secure_password'" >> .env
-echo "PPPOE_USERNAME='your_username'" >> .env
-echo "PPPOE_PASSWORD='your_pppoe_password'" >> .env
-echo "ASN='your_desired_asn'" >> .env
+autodialer
+autodialer --force
+autodialer --asn AS9929
+autodialer-devices --tplink
 ```
-**[IMPORTANT]** <br>
-Keep your .env file secure! Ensure it is added to your .gitignore to prevent accidentally sharing your credentials on public repositories.
 
-### 2)  **Run the Script** Execute the tool from your terminal:
-    # Standard Python
-    python pppoe.py
+Arguments:
+- `-f`, `--force`: force reconnection even if ASN is already matched.
+- `-a`, `--asn`: target ASN (for example `AS9929` or `9929`).
 
-    # Using uv
-    uv run python pppoe.py
-
-    # Using package scripts
-    uv run autodialer
-    uv run autodialer-devices
-
-    arguments:
-    -f, --force: Force reconnection regardless of ASN.<br>
-    -a, --asn: Pass ASN via CLI<br>
+## Notes
+- Current API payloads are primarily tailored for TP-Link router firmware behavior.
+- Keep `.env` private and never commit credentials.
 
 ---
-
-##  Tips
-
-* **Specific API Focus:** The hardcoded API endpoints and JSON structures are currently based on **TP-Link** firmware logic.
-
----
-*Thanks for using!*
+Thanks for using AutoDialer.

@@ -1,0 +1,13 @@
+-e .
+
+# Build Packages
+build
+setuptools
+wheel
+
+# Linting
+ruff
+mypy
+
+# Testing
+pytest
