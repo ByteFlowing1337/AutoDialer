@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 from typing import Any
 
-from autodialer.apis.get_gateway import (
+from autodialer import (
     get_gateway_ip_on_linux,
     get_gateway_ip_on_unix,
     get_gateway_ip_on_windows,

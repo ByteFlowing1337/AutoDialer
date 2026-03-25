@@ -1,25 +1,41 @@
 [project]
 name = "AutoDialer"
-version = "0.2.0"
+authors = [{name = "Byte Flow", email = "fakeshadow1337@gmail.com"}]
 description = "AutoDialer is an automation script designed to interact with routers using APIs."
-readme = "README.MD"
+readme = "README.md"
 requires-python = ">=3.13"
+license = {file = "LICENSE"}
+dynamic = ["version"]
+classifiers= [
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Utilities",
+]
 dependencies = [
     "python-dotenv>=1,<2",
     "requests<3",
 ]
 
+[project.urls]
+Homepage = "https://github.com/ByteFlowing1337/AutoDialer"
+
 [project.scripts]
-autodialer = "pppoe:main"
-autodialer-devices = "get_devices:main"
+autodialer = "autodialer.pppoe:main"
+autodialer-devices = "autodialer.get_devices:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["pppoe", "get_devices"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+version = {attr = "autodialer.__version__"}
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["apis*", "config*", "encode*"]
+where = ["src"]
+include = ["autodialer*"]
