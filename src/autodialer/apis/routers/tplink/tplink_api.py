@@ -1,7 +1,7 @@
 import requests
 from autodialer import encode
 
-from autodialer.apis.get_gateway import get_gateway_ip
+from autodialer.apis.utils.get_gateway import get_gateway_ip
 from time import sleep
 from typing import Literal
 from urllib.parse import unquote
@@ -137,9 +137,10 @@ class TPLinkAPI:
         if not self.set_credentials():
             return False
 
-        self.tplink_change_wan_status_request(
+        if not self.tplink_change_wan_status_request(
             action="disconnect", method="do", proto="pppoe"
-        )
+        ):
+            return False
         # Wait for a time to make sure DHCP has assigned a new IP address
         sleep(30)
         if self.tplink_change_wan_status_request(
@@ -179,5 +180,7 @@ class TPLinkAPI:
             )
         return devices
 
-    def dhcp_renew(self) -> None:
-        self.tplink_change_wan_status_request(action="renew", method="do", proto="dhcp")
+    def dhcp_renew(self) -> bool:
+        return self.tplink_change_wan_status_request(
+            action="renew", method="do", proto="dhcp"
+        )

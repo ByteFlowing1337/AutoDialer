@@ -1,12 +1,12 @@
 from autodialer.apis import TPLinkAPI, check_isp_with_retries
-from autodialer.apis.is_target_asn import is_target_asn
+from autodialer.apis.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from sys import argv
 from pathlib import Path
 
 
 class Reconnection:
-    def __init__(self, router):
+    def __init__(self, router: TPLinkAPI):
         self.router = router
 
     def _get_wan_proto(self) -> str | None:
@@ -19,8 +19,7 @@ class Reconnection:
         if proto == "pppoe":
             return self.router.make_pppoe_reconnection()
         if proto == "dhcp":
-            self.router.dhcp_renew()
-            return True
+            return self.router.dhcp_renew()
 
         print(f"Unsupported WAN protocol: {proto}")
         return False
@@ -75,17 +74,8 @@ class Reconnection:
                 print(f"Forcing {proto or 'WAN'} reconnection...")
                 self.run_reconnection(force=True)
             case "-a" | "--asn":
-                if len(argv) < 3:
-                    print("Please provide an ASN after the -a or --asn flag.")
-                    exit(1)
                 self.run_reconnection(force=False, asn=argv[2])
-            case _:
-                print(f"Unknown argument: {argv[1]}")
-                if Path(argv[0]).suffix.lower() == ".py":
-                    print("Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>]")
-                else:
-                    print("Usage: autodialer [-f|--force] [-a|--asn <ASN>]")
-                exit(1)
+
 
 
 def parse_arguments() -> None:
