@@ -105,7 +105,7 @@ class TPLinkAPI:
 
     def tplink_change_wan_status_request(
         self, action: Literal["connect", "disconnect", "renew"], method: str, proto: str
-    ) -> None:
+    ) -> bool:
         payload = {
             "network": {"change_wan_status": {"proto": proto, "operate": action}},
             "method": method,
@@ -113,9 +113,11 @@ class TPLinkAPI:
         response = self.__request(payload)
         if response.get("error_code") == 0:
             print(f"{proto} {action} successful.")
+            return True
         else:
             print(f"Failed to {action} {proto}.")
             print(response)
+            return False
 
     def tplink_get_wan_status(self) -> dict:
         payload = {
@@ -140,10 +142,11 @@ class TPLinkAPI:
         )
         # Wait for a time to make sure DHCP has assigned a new IP address
         sleep(30)
-        self.tplink_change_wan_status_request(
+        if self.tplink_change_wan_status_request(
             action="connect", method="do", proto="pppoe"
-        )
-        return True
+        ):
+            return True
+        return False
 
     def get_connected_devices(self) -> list:
         payload = {
