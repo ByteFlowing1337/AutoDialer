@@ -4,6 +4,7 @@ import socket
 import struct
 import subprocess
 from collections.abc import Callable, Iterable
+from urllib.parse import quote
 
 
 def _is_ip_address(value: str) -> bool:
@@ -20,6 +21,36 @@ def _extract_first_ip(tokens: Iterable[str]) -> str | None:
         if _is_ip_address(candidate):
             return candidate
     return None
+
+
+def format_ip_for_url_host(value: str) -> str:
+    candidate = value.strip()
+    if not candidate:
+        return candidate
+
+    if candidate.startswith("[") and candidate.endswith("]"):
+        candidate = candidate[1:-1]
+
+    address_part = candidate
+    zone_id: str | None = None
+    zone_is_encoded = False
+    if "%25" in candidate:
+        address_part, zone_id = candidate.split("%25", 1)
+        zone_is_encoded = True
+    elif "%" in candidate:
+        address_part, zone_id = candidate.split("%", 1)
+
+    try:
+        parsed = ipaddress.ip_address(address_part)
+    except ValueError:
+        return value
+
+    if isinstance(parsed, ipaddress.IPv6Address):
+        if zone_id is not None:
+            encoded_zone = zone_id if zone_is_encoded else quote(zone_id, safe="")
+            return f"[{parsed.compressed}%25{encoded_zone}]"
+        return f"[{parsed.compressed}]"
+    return parsed.compressed
 
 
 def _get_gateway_ip_unsupported() -> str | None:
