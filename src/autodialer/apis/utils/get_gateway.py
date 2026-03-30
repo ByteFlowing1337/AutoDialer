@@ -89,13 +89,13 @@ def get_gateway_ip_on_linux() -> str | None:
         if "via" in fields:
             via_index = fields.index("via") + 1
             if via_index < len(fields):
-                gateway = fields[via_index]
-                if _is_ip_address(gateway):
-                    return gateway
+                via_gateway = fields[via_index]
+                if _is_ip_address(via_gateway):
+                    return via_gateway
 
-        gateway = _extract_first_ip(fields[1:])
-        if gateway is not None:
-            return gateway
+        parsed_gateway = _extract_first_ip(fields[1:])
+        if parsed_gateway is not None:
+            return parsed_gateway
     return None
 
 
