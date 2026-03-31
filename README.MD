@@ -52,6 +52,7 @@ Create a `.env` file in your working directory:
 
 | Variable | Description |
 | :--- | :--- |
+| `PANEL_USERNAME` | Router panel username (defaults to `admin`) |
 | `PANEL_PASSWORD` | Router panel password |
 | `PPPOE_USERNAME` | ISP PPPoE username (required for PPPoE lines) |
 | `PPPOE_PASSWORD` | ISP PPPoE password (required for PPPoE lines) |
@@ -59,6 +60,7 @@ Create a `.env` file in your working directory:
 
 Example:
 ```bash
+PANEL_USERNAME='admin'
 PANEL_PASSWORD='your_router_panel_password'
 PPPOE_USERNAME='your_pppoe_username'
 PPPOE_PASSWORD='your_pppoe_password'
@@ -84,9 +86,10 @@ Behavior:
 - AutoDialer detects current WAN protocol and applies matching reconnection action.
 - PPPoE uses disconnect/connect flow with configured PPPoE credentials.
 - DHCP uses DHCP renew flow and shares the same ASN/check/retry control logic.
+- ASUSWRT routers use panel authentication plus WAN restart through the ASUS web API.
 
 ## Notes
-- Current API payloads are primarily tailored for TP-Link router firmware behavior.
+- TP-Link and ASUS routers are supported by default.
 - Keep `.env` private and never commit credentials.
 
 ---

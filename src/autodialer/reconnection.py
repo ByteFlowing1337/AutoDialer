@@ -1,4 +1,6 @@
-from autodialer.apis import TPLinkAPI, check_isp_with_retries
+from typing import Protocol
+
+from autodialer.apis import check_isp_with_retries
 from autodialer.apis.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from autodialer.apis.utils.get_vendor_api import get_vendor_api
@@ -6,15 +8,20 @@ from sys import argv
 from pathlib import Path
 
 
+class RouterAPI(Protocol):
+    def get_wan_proto(self) -> str | None: ...
+
+    def make_pppoe_reconnection(self) -> bool: ...
+
+    def dhcp_renew(self) -> bool: ...
+
+
 class Reconnection:
-    def __init__(self, router: TPLinkAPI):
+    def __init__(self, router: RouterAPI):
         self.router = router
 
     def _get_wan_proto(self) -> str | None:
-        status = self.router.tplink_get_wan_status()
-        wan_status = status.get("network", {}).get("wan_status", {})
-        proto = wan_status.get("proto")
-        return proto if isinstance(proto, str) else None
+        return self.router.get_wan_proto()
 
     def _apply_reconnection(self, proto: str) -> bool:
         if proto == "pppoe":

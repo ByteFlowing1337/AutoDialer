@@ -135,6 +135,12 @@ class TPLinkAPI:
             print(response)
             return {}
 
+    def get_wan_proto(self) -> str | None:
+        status = self.tplink_get_wan_status()
+        wan_status = status.get("network", {}).get("wan_status", {})
+        proto = wan_status.get("proto")
+        return proto if isinstance(proto, str) else None
+
     def make_pppoe_reconnection(self) -> bool:
         if not self.set_credentials():
             return False
