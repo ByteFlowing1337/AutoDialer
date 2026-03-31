@@ -84,7 +84,7 @@ class TPLinkAPI:
     def set_credentials(self) -> bool:
         if not self.username or not self.pppoe_password:
             print(
-                "Missing PPPoE credentials. Set PPPOE_USERNAME and PPPOE_PASSWORD for PPPoE reconnection."
+                "Missing PPPoE credentials override. Will reuse the credentials already saved on the router."
             )
             return False
 
@@ -142,7 +142,7 @@ class TPLinkAPI:
         return proto if isinstance(proto, str) else None
 
     def make_pppoe_reconnection(self) -> bool:
-        if not self.set_credentials():
+        if self.username and self.pppoe_password and not self.set_credentials():
             return False
 
         if not self.tplink_change_wan_status_request(
