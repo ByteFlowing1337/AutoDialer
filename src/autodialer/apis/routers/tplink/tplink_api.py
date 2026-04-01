@@ -1,7 +1,6 @@
 import requests
 from autodialer import encode
 
-from autodialer.apis.utils import print_devices_table
 from autodialer.apis.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 from time import sleep
 from typing import Literal
@@ -33,9 +32,7 @@ class TPLinkAPI:
         stok: The session token obtained after logging into the router, used for authenticated requests.
     """
 
-    SUPPORTED_VENDORS = (
-        "TP-Link",
-    )
+    SUPPORTED_VENDORS = ("TP-Link",)
 
     router_ip: str
     password: str
