@@ -1,11 +1,11 @@
 import requests
+import logging
 from autodialer import encode
 
 from autodialer.apis.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 from time import sleep
 from typing import Literal
 from urllib.parse import unquote
-
 from autodialer.config.config import PANEL_PASSWORD, PPPOE_USERNAME, PPPOE_PASSWORD
 
 
@@ -43,11 +43,11 @@ class TPLinkAPI:
     def __init__(self):
         router_ip = get_gateway_ip()
         if router_ip is None:
-            print("Could not determine router IP address.")
+            logging.error("Could not determine router IP address.")
             exit(1)
 
         if PANEL_PASSWORD is None:
-            print("Missing required environment variable: PANEL_PASSWORD")
+            logging.error("Missing required environment variable: PANEL_PASSWORD")
             exit(1)
 
         panel_password: str = PANEL_PASSWORD
@@ -77,14 +77,14 @@ class TPLinkAPI:
         if response.get("error_code") == 0 and response.get("stok") is not None:
             return response.get("stok")
         else:
-            print("Login failed.")
-            print(response)
+            logging.error("Login failed.")
+            logging.debug(response)
             exit(1)
         return None
 
     def set_credentials(self) -> bool:
         if not self.username or not self.pppoe_password:
-            print(
+            logging.warning(
                 "Missing PPPoE credentials override. Will reuse the credentials already saved on the router."
             )
             return False
@@ -101,8 +101,8 @@ class TPLinkAPI:
         if response.get("error_code") == 0:
             return True
         else:
-            print("Failed to set PPPoE credentials.")
-            print(response)
+            logging.error("Failed to set PPPoE credentials.")
+            logging.debug(response)
             return False
 
     def tplink_change_wan_status_request(
@@ -116,8 +116,8 @@ class TPLinkAPI:
         if response.get("error_code") == 0:
             return True
         else:
-            print(f"Failed to {action} {proto}.")
-            print(response)
+            logging.error(f"Failed to {action} {proto}.")
+            logging.debug(response)
             return False
 
     def tplink_get_wan_status(self) -> dict:
@@ -130,8 +130,8 @@ class TPLinkAPI:
         if response.get("error_code") == 0:
             return response
         else:
-            print("Failed to get WAN status.")
-            print(response)
+            logging.error("Failed to get WAN status.")
+            logging.debug(response)
             return {}
 
     def get_wan_proto(self) -> str | None:
@@ -166,6 +166,8 @@ class TPLinkAPI:
         }
         response = self.__request(payload)
         if response.get("error_code") != 0:
+            logging.error("Failed to get connected devices.")
+            logging.debug(response)
             return []
 
         raw_hosts = response.get("hosts_info", {}).get("host_info", [])
