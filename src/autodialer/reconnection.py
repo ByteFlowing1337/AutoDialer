@@ -40,7 +40,7 @@ class Reconnection:
             return
 
         max_attempts = 5
-        for _ in range(1, max_attempts + 1):
+        for _ in range(max_attempts):
             if not self._apply_reconnection(proto):
                 exit(1)
             isp = check_isp_with_retries()
