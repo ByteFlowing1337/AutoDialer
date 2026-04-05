@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Any
 from xml.etree import ElementTree as ET
 
 import requests
@@ -191,6 +192,65 @@ class ZteApi(RouterAPI):
 
         return parsed
 
+    @staticmethod
+    def _read_xml_instance(instance: ET.Element) -> dict[str, str]:
+        values: dict[str, str] = {}
+        children = list(instance)
+        index = 0
+        while index + 1 < len(children):
+            name_node = children[index]
+            value_node = children[index + 1]
+            if name_node.tag == "ParaName" and value_node.tag == "ParaValue":
+                key = (name_node.text or "").strip()
+                if key:
+                    values[key] = (value_node.text or "").strip()
+                index += 2
+                continue
+            index += 1
+        return values
+
+    @staticmethod
+    def _read_speed(value: str | None) -> int:
+        if value is None:
+            return 0
+        try:
+            return max(0, int(float(value.strip() or "0")))
+        except ValueError:
+            return 0
+
+    @staticmethod
+    def _is_active_device(instance: dict[str, str]) -> bool:
+        return instance.get("Active", "").strip() == "1"
+
+    @staticmethod
+    def _read_device_name(instance: dict[str, str]) -> str:
+        for key in ("HostName", "DevName", "AliasName", "ParentDeviceName"):
+            value = instance.get(key, "").strip()
+            if value:
+                return value
+        return "(unknown)"
+
+    @staticmethod
+    def _read_connection_type(instance: dict[str, str]) -> str:
+        interface = instance.get("Interface", "").strip().lower()
+        band = instance.get("Band", "").strip()
+        connect_type = instance.get("ConnectType", "").strip()
+        interface_type = instance.get("InterfaceType", "").strip()
+        if (
+            connect_type == "1"
+            or interface.startswith("wlan")
+            or interface_type == "3"
+            or bool(band)
+        ):
+            return "wireless"
+        return "wired"
+
+    @staticmethod
+    def _is_current_device(instance: dict[str, str]) -> bool:
+        local_mac = instance.get("LocalMacAddr", "").strip().lower()
+        mac = instance.get("MACAddress", "").strip().lower()
+        return bool(local_mac and mac and local_mac == mac)
+
     def get_wan_proto(self) -> str | None:
         url = f"http://{self.router_ip}/?_type=vueData&_tag=home_internetreg_lua"
         try:
@@ -310,3 +370,52 @@ class ZteApi(RouterAPI):
             return False
 
         return self._dhcp_renew_once() == "success"
+
+    def get_connected_devices(self) -> list[dict[str, Any]]:
+        url = f"http://{self.router_ip}"
+        paramaters = {"_type": "vueData", "_tag": "localnet_lan_info_lua"}
+        try:
+            response = self.session.get(url, params=paramaters, timeout=5)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            logger.error(f"Failed to get connected devices: {e}")
+            return []
+
+        try:
+            root = ET.fromstring(response.text.strip())
+        except ET.ParseError:
+            logger.error("Failed to parse ZTE connected devices.")
+            return []
+
+        lan_info = root.find("OBJ_LAN_INFO_ID")
+        if lan_info is None:
+            logger.error("Failed to locate ZTE LAN info payload.")
+            return []
+
+        devices: list[dict[str, Any]] = []
+        for instance_node in lan_info.findall("Instance"):
+            instance = self._read_xml_instance(instance_node)
+            if not self._is_active_device(instance):
+                continue
+
+            mac = instance.get("MACAddress", "").strip() or "-"
+            devices.append(
+                {
+                    "hostname": self._read_device_name(instance),
+                    "ip": instance.get("IPAddress", "").strip() or "-",
+                    "mac": mac,
+                    "type": self._read_connection_type(instance),
+                    "is_current": self._is_current_device(instance),
+                    "up_kbps": self._read_speed(instance.get("UploadSpeed")),
+                    "down_kbps": self._read_speed(instance.get("DownloadSpeed")),
+                }
+            )
+
+        devices.sort(
+            key=lambda device: (
+                not device["is_current"],
+                device["hostname"].lower(),
+                device["mac"],
+            )
+        )
+        return devices

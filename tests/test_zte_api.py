@@ -341,3 +341,110 @@ class TestZteApi(unittest.TestCase):
                 timeout=5,
             ),
         )
+
+    @patch.object(zte_module, "PANEL_USERNAME", "admin")
+    @patch.object(zte_module, "PANEL_PASSWORD", "panel-password")
+    @patch.object(zte_module, "get_gateway_ip", return_value="192.168.5.1")
+    @patch.object(zte_module, "zte_security_encode", return_value="encoded-password")
+    @patch.object(zte_module.requests, "Session")
+    def test_get_connected_devices_filters_inactive_and_marks_current_device(
+        self,
+        mock_session_cls: Any,
+        _mock_encode: Any,
+        _mock_gateway_ip: Any,
+    ):
+        session = Mock()
+        session.cookies = requests.cookies.RequestsCookieJar()
+
+        token_response = Mock()
+        token_response.raise_for_status.return_value = None
+        token_response.json.return_value = {
+            "logintoken": "login-token",
+            "_sessionToken": "pre-auth-session",
+        }
+
+        login_response = Mock()
+        login_response.raise_for_status.return_value = None
+        login_response.json.return_value = {
+            "loginErrMsg": "",
+            "sess_token": "post-auth-session",
+        }
+
+        devices_response = Mock()
+        devices_response.raise_for_status.return_value = None
+        devices_response.text = """
+<ajax_response_xml_root>
+  <IF_ERRORPARAM>SUCC</IF_ERRORPARAM>
+  <OBJ_LAN_INFO_ID>
+    <Instance>
+      <ParaName>Active</ParaName><ParaValue>1</ParaValue>
+      <ParaName>HostName</ParaName><ParaValue>LAPTOP-4GM1T0LH</ParaValue>
+      <ParaName>IPAddress</ParaName><ParaValue>192.168.5.2</ParaValue>
+      <ParaName>MACAddress</ParaName><ParaValue>76:10:d6:e8:94:62</ParaValue>
+      <ParaName>LocalMacAddr</ParaName><ParaValue>76:10:d6:e8:94:62</ParaValue>
+      <ParaName>Interface</ParaName><ParaValue>wlan4</ParaValue>
+      <ParaName>Band</ParaName><ParaValue>5G</ParaValue>
+      <ParaName>ConnectType</ParaName><ParaValue>1</ParaValue>
+      <ParaName>InterfaceType</ParaName><ParaValue>3</ParaValue>
+      <ParaName>UploadSpeed</ParaName><ParaValue>183</ParaValue>
+      <ParaName>DownloadSpeed</ParaName><ParaValue>945</ParaValue>
+    </Instance>
+    <Instance>
+      <ParaName>Active</ParaName><ParaValue>1</ParaValue>
+      <ParaName>HostName</ParaName><ParaValue></ParaValue>
+      <ParaName>DevName</ParaName><ParaValue>NAS</ParaValue>
+      <ParaName>IPAddress</ParaName><ParaValue>192.168.5.10</ParaValue>
+      <ParaName>MACAddress</ParaName><ParaValue>4e:8c:1c:88:1e:ed</ParaValue>
+      <ParaName>LocalMacAddr</ParaName><ParaValue>76:10:d6:e8:94:62</ParaValue>
+      <ParaName>Interface</ParaName><ParaValue>eth0</ParaValue>
+      <ParaName>Band</ParaName><ParaValue></ParaValue>
+      <ParaName>ConnectType</ParaName><ParaValue>0</ParaValue>
+      <ParaName>InterfaceType</ParaName><ParaValue>1</ParaValue>
+      <ParaName>UploadSpeed</ParaName><ParaValue>12</ParaValue>
+      <ParaName>DownloadSpeed</ParaName><ParaValue>34</ParaValue>
+    </Instance>
+    <Instance>
+      <ParaName>Active</ParaName><ParaValue>0</ParaValue>
+      <ParaName>HostName</ParaName><ParaValue>Offline Phone</ParaValue>
+      <ParaName>IPAddress</ParaName><ParaValue>0.0.0.0</ParaValue>
+      <ParaName>MACAddress</ParaName><ParaValue>08:1c:6e:c7:84:5e</ParaValue>
+      <ParaName>LocalMacAddr</ParaName><ParaValue>76:10:d6:e8:94:62</ParaValue>
+      <ParaName>InterfaceType</ParaName><ParaValue>3</ParaValue>
+    </Instance>
+  </OBJ_LAN_INFO_ID>
+</ajax_response_xml_root>
+"""
+
+        def post_side_effect(*args: Any, **kwargs: Any):
+            session.cookies.set("SID", "sid-value", domain="192.168.5.1", path="/")
+            return login_response
+
+        session.get.side_effect = [token_response, devices_response]
+        session.post.side_effect = post_side_effect
+        mock_session_cls.return_value = session
+
+        router = ZteApi()
+
+        self.assertEqual(
+            router.get_connected_devices(),
+            [
+                {
+                    "hostname": "LAPTOP-4GM1T0LH",
+                    "ip": "192.168.5.2",
+                    "mac": "76:10:d6:e8:94:62",
+                    "type": "wireless",
+                    "is_current": True,
+                    "up_kbps": 183,
+                    "down_kbps": 945,
+                },
+                {
+                    "hostname": "NAS",
+                    "ip": "192.168.5.10",
+                    "mac": "4e:8c:1c:88:1e:ed",
+                    "type": "wired",
+                    "is_current": False,
+                    "up_kbps": 12,
+                    "down_kbps": 34,
+                },
+            ],
+        )
