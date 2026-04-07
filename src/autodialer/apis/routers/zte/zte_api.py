@@ -89,9 +89,9 @@ class ZteApi(RouterAPI):
 
     def _get_session_token(self) -> dict | None:
         url = f"http://{self.router_host}"
-        paramaters = {"_type": "loginsceneData", "_tag": "login_token_json"}
+        parameters = {"_type": "loginsceneData", "_tag": "login_token_json"}
         try:
-            response = self.session.get(url, params=paramaters, timeout=5)
+            response = self.session.get(url, params=parameters, timeout=5)
             response.raise_for_status()
             data = response.json()
             if not isinstance(data, dict):
