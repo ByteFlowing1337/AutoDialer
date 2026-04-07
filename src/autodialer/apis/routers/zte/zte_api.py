@@ -107,7 +107,7 @@ class ZteApi(RouterAPI):
 
     def _login_router(self) -> str | None:
         url = f"http://{self.router_host}"
-        paramaters = {"_type": "loginData", "_tag": "login_entry"}
+        parameters = {"_type": "loginData", "_tag": "login_entry"}
 
         payload = {
             "Username": PANEL_USERNAME,
@@ -121,7 +121,7 @@ class ZteApi(RouterAPI):
 
         try:
             response = self.session.post(
-                url, params=paramaters, data=payload, timeout=5
+                url, params=parameters, data=payload, timeout=5
             )
             response.raise_for_status()
             data = response.json()
@@ -148,7 +148,7 @@ class ZteApi(RouterAPI):
 
     def _get_xsrf_token(self) -> str | None:
         url = f"http://{self.router_host}"
-        paramaters = {"_type": "hiddenData", "_tag": "vue_userif_data"}
+        parameters = {"_type": "hiddenData", "_tag": "vue_userif_data"}
         headers = {
             "Accept": "*/*",
             "Origin": f"http://{self.router_host}",
@@ -158,7 +158,7 @@ class ZteApi(RouterAPI):
         try:
             response = self.session.get(
                 url,
-                params=paramaters,
+                params=parameters,
                 headers=headers,
                 timeout=5,
             )
@@ -293,7 +293,7 @@ class ZteApi(RouterAPI):
 
     def _restart_once(self) -> str:
         url = f"http://{self.router_host}"
-        paramaters = {"_type": "vueData", "_tag": "vue_derestart_data"}
+        parameters = {"_type": "vueData", "_tag": "vue_derestart_data"}
         xsrf_token = self._get_xsrf_token()
         if xsrf_token is None:
             return "failed"
@@ -311,7 +311,7 @@ class ZteApi(RouterAPI):
         try:
             response = self.session.post(
                 url,
-                params=paramaters,
+                params=parameters,
                 headers=headers,
                 data=payload,
                 timeout=5,
@@ -391,9 +391,9 @@ class ZteApi(RouterAPI):
 
     def get_connected_devices(self) -> list[dict[str, Any]]:
         url = f"http://{self.router_host}"
-        paramaters = {"_type": "vueData", "_tag": "localnet_lan_info_lua"}
+        parameters = {"_type": "vueData", "_tag": "localnet_lan_info_lua"}
         try:
-            response = self.session.get(url, params=paramaters, timeout=5)
+            response = self.session.get(url, params=parameters, timeout=5)
             response.raise_for_status()
         except requests.RequestException as e:
             logger.error(f"Failed to get connected devices: {e}")
