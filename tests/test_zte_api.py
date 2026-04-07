@@ -7,10 +7,10 @@ import requests
 
 
 zte_module = importlib.import_module("autodialer.apis.routers.zte.zte_api")
-ZteApi = zte_module.ZteApi
+ZTEApi = zte_module.ZTEApi
 
 
-class TestZteApi(unittest.TestCase):
+class TestZTEApi(unittest.TestCase):
     @patch.object(zte_module, "PANEL_USERNAME", "admin")
     @patch.object(zte_module, "PANEL_PASSWORD", "panel-password")
     @patch.object(zte_module, "get_gateway_ip", return_value="192.168.5.1")
@@ -53,7 +53,7 @@ class TestZteApi(unittest.TestCase):
         session.post.side_effect = post_side_effect
         mock_session_cls.return_value = session
 
-        router = ZteApi()
+        router = ZTEApi()
 
         self.assertEqual(router.get_wan_proto(), "dhcp")
         self.assertEqual(router.sessiontoken, "post-auth-session")
@@ -138,7 +138,7 @@ class TestZteApi(unittest.TestCase):
         session.post.side_effect = post_side_effect
         mock_session_cls.return_value = session
 
-        router = ZteApi()
+        router = ZTEApi()
 
         self.assertTrue(router.dhcp_renew())
         self.assertEqual(
@@ -221,7 +221,7 @@ class TestZteApi(unittest.TestCase):
         session.post.side_effect = post_side_effect
         mock_session_cls.return_value = session
 
-        router = ZteApi()
+        router = ZTEApi()
 
         self.assertFalse(router.dhcp_renew())
 
@@ -321,7 +321,7 @@ class TestZteApi(unittest.TestCase):
         session.post.side_effect = post_side_effect
         mock_session_cls.return_value = session
 
-        router = ZteApi()
+        router = ZTEApi()
 
         self.assertTrue(router.dhcp_renew())
         self.assertEqual(
@@ -423,7 +423,7 @@ class TestZteApi(unittest.TestCase):
         session.post.side_effect = post_side_effect
         mock_session_cls.return_value = session
 
-        router = ZteApi()
+        router = ZTEApi()
 
         self.assertEqual(
             router.get_connected_devices(),
