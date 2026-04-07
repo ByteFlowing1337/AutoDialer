@@ -30,8 +30,9 @@ Vendor detection is implemented in `src/autodialer/apis/utils/check_vendor.py`.
 The current logic:
 
 - requests `http://<gateway>`,
-- inspects the first part of the response body plus the `Server` and `Location` headers,
-- compares those values against a set of known vendor markers, and
+- checks the HTML `<title>` when present,
+- falls back to redirect URLs and `Location` headers,
+- scans response headers and the HTML body for known vendor markers, and
 - returns the first matching vendor name.
 
 The registry lookup in `src/autodialer/apis/utils/get_vendor_api.py` then discovers router implementations dynamically by scanning `*_api.py` files and reading each class's `SUPPORTED_VENDORS`.
@@ -63,7 +64,7 @@ The TP-Link integration currently supports:
 
 Its payloads are JSON requests sent to the TP-Link web API after logging in and obtaining a `stok`.
 
-### ASUS / ASUS AiMesh
+### ASUS
 
 The ASUS integration currently supports:
 
