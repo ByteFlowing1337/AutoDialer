@@ -13,19 +13,6 @@ pip install autodialer
 ```
 
 
-### From source (development)
-```bash
-python -m venv .venv
-
-# Windows (PowerShell)
-. .\.venv\Scripts\Activate.ps1
-
-# Linux/macOS
-source .venv/bin/activate
-
-python -m pip install -e .
-```
-
 ## Configuration
 
 Create a `.env` file in your working directory:
