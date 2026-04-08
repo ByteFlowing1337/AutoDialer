@@ -60,8 +60,8 @@ Behavior:
 
 ## Documentation
 
-- Setup and CLI details: [`docs/getting-started.md`](getting-started.md)
-- Detection and reconnection flow: [`docs/how-it-works.md`](how-it-works.md)
+- Setup and CLI details: [`getting-started.md`](getting-started.md)
+- Detection and reconnection flow: [`how-it-works.md`](how-it-works.md)
 
 ---
 Thanks for using AutoDialer.
