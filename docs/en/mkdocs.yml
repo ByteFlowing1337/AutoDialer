@@ -1,3 +1,7 @@
 site_name: AutoDialer
 theme:
   name: material
+  icon:
+    repo: fontawesome/brands/github
+repo_name: AutoDialer
+repo_url: https://github.com/ByteFlowing1337/AutoDialer
