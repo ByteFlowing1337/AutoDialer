@@ -1,4 +1,4 @@
-# Welcome
+# AutoDialer
 AutoDialer is a cross-platform Python CLI package for router APIs, designed to rotate public IP addresses automatically and streamline router interactions.
 
 ## Why AutoDialer?
