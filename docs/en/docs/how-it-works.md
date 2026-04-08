@@ -50,29 +50,6 @@ The registry lookup in `src/autodialer/apis/utils/get_vendor_api.py` then discov
 - the target ASN is reached, or
 - 5 reconnection attempts have been exhausted.
 
-## Protocol-Specific Behavior
-
-### TP-Link
-
-The TP-Link integration currently supports:
-
-- WAN protocol detection
-- PPPoE disconnect/connect reconnection
-- DHCP renew
-- optional PPPoE credential overwrite before reconnecting
-- connected-device listing
-
-Its payloads are JSON requests sent to the TP-Link web API after logging in and obtaining a `stok`.
-
-### ASUS
-
-The ASUS integration currently supports:
-
-- WAN protocol detection
-- WAN restart for PPPoE and DHCP flows
-- connected-device listing
-
-It authenticates with the ASUS web interface, stores the `asus_token`, and sends authenticated requests to ASUS CGI endpoints.
 
 ## Router Support Status
 
