@@ -1,6 +1,8 @@
 site_name: AutoDialer
 theme:
   name: material
+  logo: icon.png
+  favicon: icon.png
   icon:
     repo: fontawesome/brands/github
   features:
