@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class Reconnection:
     def __init__(self, router: RouterAPI):
         self.router = router
+        self.max_attempts = 5
 
     def _get_wan_proto(self) -> str | None:
         return self.router.get_wan_proto()
@@ -48,20 +49,31 @@ class Reconnection:
             return
 
         if change:
-            current_ip: str = get_ip_address()
-            after_reconnection_ip: str = current_ip
-            attemps = 0
-            while (current_ip == after_reconnection_ip) and attemps < 5:
-                if not self._apply_reconnection(proto):
-                    exit(1)
-                after_reconnection_ip = get_ip_address()
-                attemps += 1
-            if attemps == 5:
-                logger.error("Failed to change IP address after 5 attempts.")
+            if (current_ip := get_ip_address()) is None:
+                logger.error("Unable to fetch current IP address. Exiting.")
                 exit(1)
 
-        max_attempts = 5
-        for _ in range(max_attempts):
+            after_reconnection_ip: str | None = current_ip
+            attempts = 0
+            while (
+                current_ip == after_reconnection_ip
+            ) and attempts < self.max_attempts:
+                if not self._apply_reconnection(proto):
+                    exit(1)
+                if (after_reconnection_ip := get_ip_address()) is None:
+                    logger.error(
+                        "Unable to fetch IP address after reconnection. Exiting."
+                    )
+                    exit(1)
+                attempts += 1
+            if current_ip != after_reconnection_ip:
+                return
+            logger.error(
+                "Failed to change IP address after %d attempts.", self.max_attempts
+            )
+            exit(1)
+
+        for _ in range(self.max_attempts):
             if not self._apply_reconnection(proto):
                 exit(1)
             isp = check_isp_with_retries()
