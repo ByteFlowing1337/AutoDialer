@@ -19,7 +19,7 @@ def get_ip_address() -> str | None:
                 source, proxies={"http": "", "https": ""}, timeout=5
             )
             response.raise_for_status()
-            ip: str = response.text.replace("\n", "").replace(" ", "")
+            ip: str = response.text.strip()
             if ipaddress.ip_address(ip):
                 return ip
         except requests.RequestException as e:
