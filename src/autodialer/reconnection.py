@@ -5,6 +5,7 @@ from autodialer.apis import check_isp_with_retries
 from autodialer.apis.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from autodialer.apis.utils.get_vendor_api import get_vendor_api
+from autodialer.apis.utils.get_ip_address import get_ip_address
 from sys import argv
 from pathlib import Path
 
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 class Reconnection:
     def __init__(self, router: RouterAPI):
         self.router = router
+        self.max_attempts = 5
 
     def _get_wan_proto(self) -> str | None:
         return self.router.get_wan_proto()
@@ -28,7 +30,9 @@ class Reconnection:
         logger.error("Unsupported WAN protocol: %s", proto)
         return False
 
-    def run_reconnection(self, force: bool = False, asn: str | None = ASN) -> None:
+    def run_reconnection(
+        self, force: bool = False, asn: str | None = ASN, change: bool = False
+    ) -> None:
 
         proto = self._get_wan_proto()
 
@@ -40,12 +44,44 @@ class Reconnection:
             if not self._apply_reconnection(proto):
                 exit(1)
             isp = check_isp_with_retries()
+            ip = get_ip_address()
             if isp is not None:
-                logger.info("ISP after forced reconnection: %s", isp)
+                logger.info("IP info after forced reconnection: %s %s", ip, isp)
             return
 
-        max_attempts = 5
-        for _ in range(max_attempts):
+        if change:
+            if (current_ip := get_ip_address()) is None:
+                logger.error("Unable to fetch current IP address. Exiting.")
+                exit(1)
+
+            after_reconnection_ip: str | None = current_ip
+            attempts = 0
+            while (
+                current_ip == after_reconnection_ip
+            ) and attempts < self.max_attempts:
+                if not self._apply_reconnection(proto):
+                    exit(1)
+                if (after_reconnection_ip := get_ip_address()) is None:
+                    logger.error(
+                        "Unable to fetch IP address after reconnection. Exiting."
+                    )
+                    exit(1)
+                attempts += 1
+            if current_ip != after_reconnection_ip:
+                isp = check_isp_with_retries()
+                logger.info(
+                    "IP info after reconnection: %s -> %s %s",
+                    current_ip,
+                    after_reconnection_ip,
+                    isp,
+                )
+                return
+            logger.error(
+                "Failed to change IP address after %d attempts.", self.max_attempts
+            )
+            exit(1)
+
+        for _ in range(self.max_attempts):
             if not self._apply_reconnection(proto):
                 exit(1)
             isp = check_isp_with_retries()
@@ -66,14 +102,20 @@ class Reconnection:
                 self.run_reconnection(force=True)
             case "-a" | "--asn":
                 self.run_reconnection(force=False, asn=argv[2])
+            case "-c" | "--change":
+                self.run_reconnection(force=False, change=True)
 
 
 def parse_arguments(asn: str | None) -> None:
     if len(argv) == 1:
-        logger.error("No ASN provided, exiting.")
-        logger.error(
-            "Try running with -f/--force or provide an ASN with -a/--asn <ASN>."
-        )
+        if Path(argv[0]).suffix.lower() == ".py":
+            logger.error(
+                "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            )
+        else:
+            logger.error(
+                "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            )
         exit(1)
 
     match argv[1]:
@@ -90,14 +132,18 @@ def parse_arguments(asn: str | None) -> None:
             if is_target_asn(isp, asn):
                 exit(0)
             return
+        case "-c" | "--change":
+            return
         case _:
             logger.error("Unknown argument: %s", argv[1])
             if Path(argv[0]).suffix.lower() == ".py":
                 logger.error(
-                    "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>]"
+                    "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
                 )
             else:
-                logger.error("Usage: autodialer [-f|--force] [-a|--asn <ASN>]")
+                logger.error(
+                    "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+                )
             exit(1)
 
 
