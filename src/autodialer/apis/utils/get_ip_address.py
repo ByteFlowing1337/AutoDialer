@@ -13,5 +13,5 @@ def get_ip_address() -> str | None:
         ip: str = response.text.replace("\n", "").replace(" ", "")
         return ip
     except requests.RequestException as e:
-        logger.error(f"Error fetching IP address: {e}")
+        logger.error("Error fetching IP address: %s", e)
         return None
