@@ -44,8 +44,9 @@ class Reconnection:
             if not self._apply_reconnection(proto):
                 exit(1)
             isp = check_isp_with_retries()
+            ip = get_ip_address()
             if isp is not None:
-                logger.info("ISP after forced reconnection: %s", isp)
+                logger.info("IP info after forced reconnection: %s %s", ip, isp)
             return
 
         if change:
@@ -67,6 +68,8 @@ class Reconnection:
                     exit(1)
                 attempts += 1
             if current_ip != after_reconnection_ip:
+                isp = check_isp_with_retries()
+                logger.info("IP info after reconnection: %s %s", isp, current_ip)
                 return
             logger.error(
                 "Failed to change IP address after %d attempts.", self.max_attempts
