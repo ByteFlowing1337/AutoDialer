@@ -108,10 +108,7 @@ class Reconnection:
 
 def parse_arguments(asn: str | None) -> None:
     if len(argv) == 1:
-        logger.error("No ASN provided, exiting.")
-        logger.error(
-            "Try running with -f/--force or provide an ASN with -a/--asn <ASN>."
-        )
+        logger.error("Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]")
         exit(1)
 
     match argv[1]:

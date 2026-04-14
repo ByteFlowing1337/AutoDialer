@@ -1,3 +1,5 @@
+import ipaddress
+
 import requests
 import logging
 
@@ -18,7 +20,8 @@ def get_ip_address() -> str | None:
             )
             response.raise_for_status()
             ip: str = response.text.replace("\n", "").replace(" ", "")
-            return ip
+            if ipaddress.ip_address(ip):
+                return ip
         except requests.RequestException as e:
             logger.error("Error fetching IP address from %s: %s", source, e)
 
