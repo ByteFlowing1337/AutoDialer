@@ -28,6 +28,14 @@ class TestParseArguments(unittest.TestCase):
 
 
 class TestReconnection(unittest.TestCase):
+    @staticmethod
+    def _make_router(proto: str = "dhcp", reconnect_result: bool = True) -> Mock:
+        router = Mock()
+        router.get_wan_proto.return_value = proto
+        router.dhcp_renew.return_value = reconnect_result
+        router.make_pppoe_reconnection.return_value = reconnect_result
+        return router
+
     def test_get_wan_proto_uses_router_contract(self):
         router = Mock()
         router.get_wan_proto.return_value = "dhcp"
@@ -44,6 +52,61 @@ class TestReconnection(unittest.TestCase):
 
         self.assertTrue(reconnection._apply_reconnection("pppoe"))
         router.make_pppoe_reconnection.assert_called_once_with()
+
+    @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch.object(reconnection_module, "get_ip_address", return_value=None)
+    def test_change_mode_exits_when_initial_ip_fetch_fails(
+        self, mock_get_ip_address: Any, mock_exit: Any
+    ):
+        router = self._make_router()
+        reconnection = reconnection_module.Reconnection(router)
+
+        with self.assertRaises(SystemExit) as context:
+            reconnection.run_reconnection(change=True)
+
+        self.assertEqual(context.exception.code, 1)
+        mock_get_ip_address.assert_called_once_with()
+        router.dhcp_renew.assert_not_called()
+        mock_exit.assert_called_once_with(1)
+
+    @patch("builtins.exit")
+    @patch.object(
+        reconnection_module,
+        "get_ip_address",
+        side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
+    )
+    def test_change_mode_retries_until_ip_changes(
+        self, mock_get_ip_address: Any, mock_exit: Any
+    ):
+        router = self._make_router()
+        reconnection = reconnection_module.Reconnection(router)
+
+        reconnection.run_reconnection(change=True)
+
+        self.assertEqual(router.dhcp_renew.call_count, 2)
+        self.assertEqual(mock_get_ip_address.call_count, 3)
+        mock_exit.assert_not_called()
+
+    @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch.object(
+        reconnection_module,
+        "get_ip_address",
+        side_effect=["203.0.113.10", "203.0.113.10", "203.0.113.10", "203.0.113.10"],
+    )
+    def test_change_mode_exits_after_exhausting_attempts(
+        self, mock_get_ip_address: Any, mock_exit: Any
+    ):
+        router = self._make_router()
+        reconnection = reconnection_module.Reconnection(router)
+        reconnection.max_attempts = 3
+
+        with self.assertRaises(SystemExit) as context:
+            reconnection.run_reconnection(change=True)
+
+        self.assertEqual(context.exception.code, 1)
+        self.assertEqual(router.dhcp_renew.call_count, 3)
+        self.assertEqual(mock_get_ip_address.call_count, 4)
+        mock_exit.assert_called_once_with(1)
 
 
 if __name__ == "__main__":
