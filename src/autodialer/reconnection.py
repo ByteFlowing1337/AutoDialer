@@ -108,7 +108,14 @@ class Reconnection:
 
 def parse_arguments(asn: str | None) -> None:
     if len(argv) == 1:
-        logger.error("Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]")
+        if Path(argv[0]).suffix.lower() == ".py":
+            logger.error(
+                "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            )
+        else:
+            logger.error(
+                "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            )
         exit(1)
 
     match argv[1]:
