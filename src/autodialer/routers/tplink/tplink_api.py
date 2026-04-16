@@ -1,8 +1,8 @@
 import logging
 import requests
-from autodialer import encode
-from autodialer.apis.routers.base_api import RouterAPI
-from autodialer.apis.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
+from autodialer.routers.base_api import RouterAPI
+from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 from time import sleep
 from typing import Literal
 from urllib.parse import unquote
@@ -55,7 +55,7 @@ class TPLinkAPI(RouterAPI):
 
         self.router_ip = router_ip
         self.session = requests.Session()
-        self.password = encode.tplink_security_encode(panel_password)
+        self.password = tplink_security_encode(panel_password)
         self.username = PPPOE_USERNAME or ""
         self.pppoe_password = PPPOE_PASSWORD or ""
         self.stok = self.__login_router()

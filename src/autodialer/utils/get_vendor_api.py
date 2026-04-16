@@ -4,7 +4,7 @@ from importlib import import_module
 from inspect import getmembers, isclass
 from pathlib import Path
 
-from autodialer.apis.utils.check_vendor import check_router_vendor
+from autodialer.utils.check_vendor import check_router_vendor
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def _iter_router_api_module_names() -> list[str]:
 
         relative_path = api_file.relative_to(routers_dir).with_suffix("")
         module_suffix = ".".join(relative_path.parts)
-        module_names.append(f"autodialer.apis.routers.{module_suffix}")
+        module_names.append(f"autodialer.routers.{module_suffix}")
 
     return sorted(module_names)
 

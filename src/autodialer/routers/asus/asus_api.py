@@ -7,8 +7,8 @@ from urllib.parse import quote
 
 import requests
 
-from autodialer.apis.routers.base_api import RouterAPI
-from autodialer.apis.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.routers.base_api import RouterAPI
+from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 from autodialer.config.config import PANEL_PASSWORD, PANEL_USERNAME
 
 USER_AGENT = "AutoDialer"

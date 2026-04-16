@@ -5,9 +5,9 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from autodialer.apis.utils.get_ip_address import get_ip_address
+from autodialer.utils.get_ip_address import get_ip_address
 
-get_ip_address_module = importlib.import_module("autodialer.apis.utils.get_ip_address")
+get_ip_address_module = importlib.import_module("autodialer.utils.get_ip_address")
 
 
 class TestGetIpAddress(unittest.TestCase):
