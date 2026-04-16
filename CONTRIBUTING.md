@@ -55,8 +55,8 @@ pre-commit run --all-files
 ## Project Layout
 
 - `src/autodialer/`: package source
-- `src/autodialer/apis/routers/`: router-specific integrations
-- `src/autodialer/apis/utils/`: gateway detection, ISP checks, vendor detection, and helper utilities
+- `src/autodialer/routers/`: router-specific integrations
+- `src/autodialer/utils/`: gateway detection, ISP checks, vendor detection, and helper utilities
 - `tests/`: unit tests
 
 ## Coding Expectations

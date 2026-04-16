@@ -6,7 +6,7 @@ from unittest.mock import Mock, call, patch
 import requests
 
 
-zte_module = importlib.import_module("autodialer.apis.routers.zte.zte_api")
+zte_module = importlib.import_module("autodialer.routers.zte.zte_api")
 ZTEApi = zte_module.ZTEApi
 
 

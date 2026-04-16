@@ -1,11 +1,11 @@
 import logging
 
-from autodialer.apis.routers.base_api import RouterAPI
-from autodialer.apis import check_isp_with_retries
-from autodialer.apis.utils.is_target_asn import is_target_asn
+from autodialer.routers.base_api import RouterAPI
+from autodialer.utils.check_isp import check_isp_with_retries
+from autodialer.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
-from autodialer.apis.utils.get_vendor_api import get_vendor_api
-from autodialer.apis.utils.get_ip_address import get_ip_address
+from autodialer.utils.get_vendor_api import get_vendor_api
+from autodialer.utils.get_ip_address import get_ip_address
 from sys import argv
 from pathlib import Path
 

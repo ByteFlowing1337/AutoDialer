@@ -5,10 +5,10 @@ from xml.etree import ElementTree as ET
 
 import requests
 
-from autodialer.apis.routers.base_api import RouterAPI
-from autodialer.apis.utils.get_gateway import get_gateway_ip, format_ip_for_url_host
+from autodialer.routers.base_api import RouterAPI
+from autodialer.utils.get_gateway import get_gateway_ip, format_ip_for_url_host
 from autodialer.config.config import PANEL_PASSWORD, PANEL_USERNAME
-from autodialer.encode.zte_encode import zte_security_encode
+from autodialer.routers.zte.zte_encode import zte_security_encode
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@ import re
 from collections.abc import Iterator
 
 import requests
-from autodialer.apis.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 
 
 logger = logging.getLogger(__name__)
