@@ -66,6 +66,13 @@ def _iter_response_chain(response: requests.Response) -> Iterator[requests.Respo
 
 
 def check_router_vendor() -> str | None:
+    """
+    Check the router vendor by parsing the title, headers, and location of the response from the router's web interface. \n
+    Used in `get_vendor_api()` to determine which router API to use. \n
+    Returns:
+        str | None:
+        The router vendor string if detected, or None if the vendor cannot be determined.
+    """
     gateway = get_gateway_ip()
     if gateway is None:
         logger.error("Unable to determine router IP address.")

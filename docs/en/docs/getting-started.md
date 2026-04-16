@@ -74,6 +74,12 @@ This reconnects the active WAN link once and then checks the ISP/org value repor
 autodialer --asn AS9929
 ```
 
+### Change the IP address
+
+```bash
+autodialer --change
+```
+
 In ASN mode:
 
 - AutoDialer checks the current ISP first.
@@ -91,8 +97,6 @@ This prints a table containing hostname, IP, MAC address, connection type, trans
 
 ## Current CLI Constraints
 
-- `autodialer` without arguments is currently treated as invalid usage.
-- `autodialer-devices` does not currently accept vendor flags; vendor selection is automatic.
 - Router support depends on the vendor fingerprint and the specific firmware behavior matching the implementation in this repository.
 
 ## Troubleshooting
@@ -103,4 +107,4 @@ If AutoDialer fails before reconnecting, the most common causes are:
 - The default gateway could not be detected on the current operating system.
 - The router vendor could not be fingerprinted from the router's web interface.
 - The router vendor was detected, but the firmware/API does not match the implemented request payloads closely enough.
-- The public IP check against `ipinfo.io` failed because the connection was unavailable or timed out.
+- The public IP/ASN check failed because the connection was unavailable or timed out.

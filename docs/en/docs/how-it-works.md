@@ -8,8 +8,8 @@ AutoDialer follows a small, predictable flow:
 2. Send an HTTP request to the router homepage and infer the vendor from response fingerprints.
 3. Load the matching router API class from `src/autodialer/routers/`.
 4. Query the current WAN protocol.
-5. Run the protocol-specific reconnect action.
-6. Verify the resulting ISP/org string with `ipinfo.io`.
+5. Run the protocol-specific action.
+6. Verify the resulting IP/ASN string with online APIs.
 
 The CLI entry point for reconnection lives in `src/autodialer/reconnection.py`, and the device listing entry point lives in `src/autodialer/get_devices.py`.
 
@@ -19,7 +19,7 @@ Gateway detection is implemented in `src/autodialer/utils/get_gateway.py`.
 
 - Windows uses `route print -4`.
 - Linux reads `/proc/net/route` first, then falls back to `ip -4 route show default`.
-- macOS, FreeBSD, OpenBSD, and NetBSD use `route -n get default`, then fall back to `netstat -rn`.
+- macOS or BSD use `route -n get default`, then fall back to `netstat -rn`.
 
 The helper also normalizes IPv4 and IPv6 addresses so they can be used safely in router URLs.
 
@@ -50,6 +50,8 @@ The registry lookup in `src/autodialer/utils/get_vendor_api.py` then discovers r
 - the target ASN is reached, or
 - 5 reconnection attempts have been exhausted.
 
+### `--change`
+`autodialer --change` changes your IP address, if you are on the dynamic line.
 
 ## Router Support Status
 

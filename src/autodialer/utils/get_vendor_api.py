@@ -64,6 +64,15 @@ def _get_vendor_api_registry() -> dict[str, type]:
 
 
 def get_vendor_api() -> type | None:
+    """
+    Get the vendor api class. \n
+    Example: \n
+    ```
+    vendor = get_vendor_api() \n
+    router = vendor() \n
+    ```
+    where the vendor is the RouterAPI class in base_router_api.py.
+    """
     vendor = check_router_vendor()
     if vendor is None:
         return None

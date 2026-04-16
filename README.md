@@ -46,11 +46,13 @@ After installation, use the CLI directly:
 autodialer --force
 autodialer --asn AS9929
 autodialer-devices
+autodialer --change
 ```
 
 Arguments:
 - `-f`, `--force`: force reconnection even if ASN is already matched.
 - `-a`, `--asn`: target ASN (for example `AS9929` or `9929`).
+- `c`, `--change`: change the IP address.
 
 Behavior:
 - `autodialer` currently requires either `--force` or `--asn <ASN>`.
