@@ -97,6 +97,7 @@ This prints a table containing hostname, IP, MAC address, connection type, trans
 
 ## Current CLI Constraints
 
+- Running `autodialer` with no arguments is invalid and exits with a usage error. Use one of the supported mode flags such as `--force`, `--asn <ASN>`, or `--change`.
 - Router support depends on the vendor fingerprint and the specific firmware behavior matching the implementation in this repository.
 
 ## Troubleshooting
