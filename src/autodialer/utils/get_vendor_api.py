@@ -65,13 +65,16 @@ def _get_vendor_api_registry() -> dict[str, type]:
 
 def get_vendor_api() -> type | None:
     """
-    Get the vendor api class. \n
-    Example: \n
-    ```
-    vendor = get_vendor_api() \n
-    router = vendor() \n
-    ```
-    where the vendor is the RouterAPI class in base_router_api.py.
+    Get the vendor-specific router API class.
+
+    Returns a concrete implementation of the router API (for example,
+    ``AsusAPI``), or ``None`` if the router vendor cannot be detected or
+    no API implementation is registered for that vendor.
+
+    Example:
+        api_class = get_vendor_api()
+        if api_class is not None:
+            router = api_class()
     """
     vendor = check_router_vendor()
     if vendor is None:
