@@ -51,8 +51,11 @@ The registry lookup in `src/autodialer/utils/get_vendor_api.py` then discovers r
 - 5 reconnection attempts have been exhausted.
 
 ### `--change`
-`autodialer --change` changes your IP address, if you are on the dynamic line.
 
+`autodialer --change` is intended for dynamic IP connections. It reconnects and checks whether your public IP address has changed, retrying until either:
+
+- a different public IP address is detected, or
+- 5 reconnection attempts have been exhausted.
 ## Router Support Status
 
 The repository currently contains these router API modules:
