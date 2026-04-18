@@ -38,8 +38,8 @@ def _iter_router_api_module_names() -> list[str]:
 
 
 @lru_cache(maxsize=1)
-def _get_vendor_api_registry() -> dict[str, type]:
-    registry: dict[str, type] = {}
+def _get_vendor_api_registry() -> dict[str, type[RouterAPI]]:
+    registry: dict[str, type[RouterAPI]] = {}
 
     for module_name in _iter_router_api_module_names():
         module = import_module(module_name)
