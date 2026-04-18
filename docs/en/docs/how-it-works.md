@@ -8,8 +8,8 @@ AutoDialer follows a small, predictable flow:
 2. Send an HTTP request to the router homepage and infer the vendor from response fingerprints.
 3. Load the matching router API class from `src/autodialer/routers/`.
 4. Query the current WAN protocol.
-5. Run the protocol-specific reconnect action.
-6. Verify the resulting ISP/org string with `ipinfo.io`.
+5. Run the protocol-specific action.
+6. Verify the resulting IP/ASN string with online APIs.
 
 The CLI entry point for reconnection lives in `src/autodialer/reconnection.py`, and the device listing entry point lives in `src/autodialer/get_devices.py`.
 
@@ -19,7 +19,7 @@ Gateway detection is implemented in `src/autodialer/utils/get_gateway.py`.
 
 - Windows uses `route print -4`.
 - Linux reads `/proc/net/route` first, then falls back to `ip -4 route show default`.
-- macOS, FreeBSD, OpenBSD, and NetBSD use `route -n get default`, then fall back to `netstat -rn`.
+- macOS or BSD use `route -n get default`, then fall back to `netstat -rn`.
 
 The helper also normalizes IPv4 and IPv6 addresses so they can be used safely in router URLs.
 
@@ -50,7 +50,12 @@ The registry lookup in `src/autodialer/utils/get_vendor_api.py` then discovers r
 - the target ASN is reached, or
 - 5 reconnection attempts have been exhausted.
 
+### `--change`
 
+`autodialer --change` is intended for dynamic IP connections. It reconnects and checks whether your public IP address has changed, retrying until either:
+
+- a different public IP address is detected, or
+- 5 reconnection attempts have been exhausted.
 ## Router Support Status
 
 The repository currently contains these router API modules:
@@ -69,7 +74,7 @@ To add a new router integration:
 
 1. Create a new `*_api.py` module under `src/autodialer/routers/`.
 2. Add a class with a `SUPPORTED_VENDORS` attribute.
-3. Implement the methods expected by `RouterAPI` in `src/autodialer/routers/base_api.py`.
+3. Implement the methods expected by `RouterAPI` in `src/autodialer/routers/base_router_api.py`.
 4. Add or update vendor fingerprints in `src/autodialer/utils/check_vendor.py`.
 5. Add unit tests for the new behavior under `tests/`.
 

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from sys import argv
 from autodialer.utils.get_vendor_api import get_vendor_api
-from autodialer.routers.base_api import RouterAPI
+from autodialer.routers.base_router_api import RouterAPI
 
 
 logger = logging.getLogger(__name__)
