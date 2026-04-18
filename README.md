@@ -13,9 +13,11 @@ AutoDialer is a cross-platform Python CLI package for router APIs, designed to r
 pip install autodialer
 ```
 
-## Notes
-- **Only** TP-Link, ZTE and ASUS routers are supported now.
-- Keep `.env` private and never commit credentials.
+> [!NOTE]
+> **Only** TP-Link, ZTE and ASUS routers are supported now.
+
+> [!WARNING]
+> Keep `.env` private and never commit credentials.
 
 ## Configuration
 
