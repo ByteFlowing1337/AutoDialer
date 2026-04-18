@@ -3,6 +3,7 @@ from functools import lru_cache
 from importlib import import_module
 from inspect import getmembers, isclass
 from pathlib import Path
+from autodialer.routers.base_router_api import RouterAPI
 
 from autodialer.utils.check_vendor import check_router_vendor
 
@@ -37,8 +38,8 @@ def _iter_router_api_module_names() -> list[str]:
 
 
 @lru_cache(maxsize=1)
-def _get_vendor_api_registry() -> dict[str, type]:
-    registry: dict[str, type] = {}
+def _get_vendor_api_registry() -> dict[str, type[RouterAPI]]:
+    registry: dict[str, type[RouterAPI]] = {}
 
     for module_name in _iter_router_api_module_names():
         module = import_module(module_name)
@@ -63,7 +64,22 @@ def _get_vendor_api_registry() -> dict[str, type]:
     return registry
 
 
-def get_vendor_api() -> type | None:
+def get_vendor_api() -> type[RouterAPI] | None:
+    """
+    Get the vendor-specific router API class.
+
+    Returns:
+        type[RouterAPI] | None: A concrete implementation of the router API (for example,
+        ``AsusAPI``), or ``None`` if the router vendor cannot be detected or
+        no API implementation is registered for that vendor.
+
+    Example:
+    ```
+    api_class = get_vendor_api()
+    if api_class is not None:
+        router = api_class()
+    ```
+    """
     vendor = check_router_vendor()
     if vendor is None:
         return None

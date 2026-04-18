@@ -1,7 +1,7 @@
 import logging
 import requests
 from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
-from autodialer.routers.base_api import RouterAPI
+from autodialer.routers.base_router_api import RouterAPI
 from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
 from time import sleep
 from typing import Literal

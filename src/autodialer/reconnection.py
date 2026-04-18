@@ -1,6 +1,6 @@
 import logging
 
-from autodialer.routers.base_api import RouterAPI
+from autodialer.routers.base_router_api import RouterAPI
 from autodialer.utils.check_isp import check_isp_with_retries
 from autodialer.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
