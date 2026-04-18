@@ -52,10 +52,10 @@ autodialer --change
 Arguments:
 - `-f`, `--force`: force reconnection even if ASN is already matched.
 - `-a`, `--asn`: target ASN (for example `AS9929` or `9929`).
-- `c`, `--change`: change the IP address.
+- `-c`, `--change`: change the IP address.
 
 Behavior:
-- `autodialer` currently requires either `--force` or `--asn <ASN>`.
+- `autodialer` with no arguments is invalid; use one of `--force`, `--asn <ASN>`, or `--change`.
 - AutoDialer detects current WAN protocol and applies matching reconnection action.
 - PPPoE uses disconnect/connect flow and reuses the router's saved credentials by default.
 - If `PPPOE_USERNAME` and `PPPOE_PASSWORD` are set, AutoDialer updates the router's PPPoE config before reconnecting.
