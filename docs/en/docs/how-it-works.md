@@ -74,7 +74,7 @@ To add a new router integration:
 
 1. Create a new `*_api.py` module under `src/autodialer/routers/`.
 2. Add a class with a `SUPPORTED_VENDORS` attribute.
-3. Implement the methods expected by `RouterAPI` in `src/autodialer/routers/base_api.py`.
+3. Implement the methods expected by `RouterAPI` in `src/autodialer/routers/base_router_api.py`.
 4. Add or update vendor fingerprints in `src/autodialer/utils/check_vendor.py`.
 5. Add unit tests for the new behavior under `tests/`.
 
