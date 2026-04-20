@@ -19,7 +19,7 @@ class Reconnection:
         self.router = router
         self.max_attempts = max_attempts
         # Delay in seconds between reconnection attempts,
-        # ensuring DHCP leases have time to expire and new IPs to be assigned
+        # ensuring public(ISP's) DHCP leases have time to expire and new IPs to be assigned
         self.delay = delay
 
     def _get_wan_proto(self) -> str | None:
@@ -69,7 +69,7 @@ class Reconnection:
 
                 sleep(
                     self.delay
-                )  # Wait for DHCP lease to expire and new IP to be assigned
+                )  # Wait for public(ISP's) DHCP lease to expire and new IP to be assigned
 
                 if (after_reconnection_ip := get_ip_address()) is None:
                     logger.error(
@@ -95,14 +95,15 @@ class Reconnection:
         for _ in range(self.max_attempts):
             if not self._apply_reconnection(proto):
                 exit(1)
+
+            sleep(self.delay)
+
             isp = check_isp_with_retries()
             if isp is None:
                 exit(1)
 
             if is_target_asn(isp, asn):
                 return
-
-            sleep(self.delay)
 
         logger.error(
             "Reached maximum reconnection attempts without switching to the desired ASN."

@@ -1,7 +1,7 @@
 import importlib
 import unittest
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 
 reconnection_module = importlib.import_module("autodialer.reconnection")
@@ -9,7 +9,6 @@ reconnection_module = importlib.import_module("autodialer.reconnection")
 
 class TestParseArguments(unittest.TestCase):
     @patch.object(reconnection_module, "is_target_asn", return_value=True)
-    @patch("autodialer.reconnection.sleep")
     @patch.object(
         reconnection_module,
         "check_isp_with_retries",
@@ -20,7 +19,6 @@ class TestParseArguments(unittest.TestCase):
         self,
         _mock_exit: Any,
         _mock_check_isp: Any,
-        mock_sleep: Any,
         _mock_is_target_asn: Any,
     ):
         with patch.object(
@@ -57,6 +55,49 @@ class TestReconnection(unittest.TestCase):
 
         self.assertTrue(reconnection._apply_reconnection("pppoe"))
         router.make_pppoe_reconnection.assert_called_once_with()
+
+    @patch("builtins.exit")
+    @patch.object(reconnection_module, "is_target_asn")
+    @patch.object(reconnection_module, "check_isp_with_retries")
+    @patch("autodialer.reconnection.sleep")
+    def test_asn_mode_sleeps_before_each_isp_check(
+        self,
+        mock_sleep: Any,
+        mock_check_isp_with_retries: Any,
+        mock_is_target_asn: Any,
+        mock_exit: Any,
+    ):
+        router = self._make_router(proto="dhcp")
+        reconnection = reconnection_module.Reconnection(router, delay=7, max_attempts=3)
+
+        events: list[str] = []
+        isp_values = iter(["AS111 Example ISP", "AS222 Target ISP"])
+
+        def sleep_side_effect(_delay: int) -> None:
+            events.append("sleep")
+
+        def isp_side_effect() -> str:
+            events.append("check_isp")
+            return next(isp_values)
+
+        def is_target_side_effect(isp: str, _asn: str | None) -> bool:
+            events.append("is_target")
+            return isp.startswith("AS222")
+
+        mock_sleep.side_effect = sleep_side_effect
+        mock_check_isp_with_retries.side_effect = isp_side_effect
+        mock_is_target_asn.side_effect = is_target_side_effect
+
+        reconnection.run_reconnection(asn="AS222")
+
+        self.assertEqual(router.dhcp_renew.call_count, 2)
+        self.assertEqual(mock_sleep.call_args_list, [call(7), call(7)])
+        self.assertEqual(mock_check_isp_with_retries.call_count, 2)
+        self.assertEqual(
+            events,
+            ["sleep", "check_isp", "is_target", "sleep", "check_isp", "is_target"],
+        )
+        mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
     @patch("autodialer.reconnection.sleep")
