@@ -1,4 +1,7 @@
 import logging
+from time import sleep
+from sys import argv
+from pathlib import Path
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.utils.check_isp import check_isp_with_retries
@@ -6,17 +9,18 @@ from autodialer.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from autodialer.utils.get_vendor_api import get_vendor_api
 from autodialer.utils.get_ip_address import get_ip_address
-from sys import argv
-from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
 
 
 class Reconnection:
-    def __init__(self, router: RouterAPI):
+    def __init__(self, router: RouterAPI, delay: int = 30, max_attempts: int = 5):
         self.router = router
-        self.max_attempts = 5
+        self.max_attempts = max_attempts
+        # Delay in seconds between reconnection attempts,
+        # ensuring public(ISP's) DHCP leases have time to expire and new IPs to be assigned
+        self.delay = delay
 
     def _get_wan_proto(self) -> str | None:
         return self.router.get_wan_proto()
@@ -56,17 +60,24 @@ class Reconnection:
 
             after_reconnection_ip: str | None = current_ip
             attempts = 0
+
             while (
                 current_ip == after_reconnection_ip
             ) and attempts < self.max_attempts:
                 if not self._apply_reconnection(proto):
                     exit(1)
+
+                sleep(
+                    self.delay
+                )  # Wait for public(ISP's) DHCP lease to expire and new IP to be assigned
+
                 if (after_reconnection_ip := get_ip_address()) is None:
                     logger.error(
                         "Unable to fetch IP address after reconnection. Exiting."
                     )
                     exit(1)
                 attempts += 1
+
             if current_ip != after_reconnection_ip:
                 isp = check_isp_with_retries()
                 logger.info(
@@ -84,6 +95,9 @@ class Reconnection:
         for _ in range(self.max_attempts):
             if not self._apply_reconnection(proto):
                 exit(1)
+
+            sleep(self.delay)
+
             isp = check_isp_with_retries()
             if isp is None:
                 exit(1)

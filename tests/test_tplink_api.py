@@ -32,11 +32,9 @@ class TestTPLinkAPI(unittest.TestCase):
 
         router = TPLinkAPI()
 
-        with patch.object(tplink_module, "sleep") as mock_sleep:
-            result = router.make_pppoe_reconnection()
+        result = router.make_pppoe_reconnection()
 
         self.assertTrue(result)
-        mock_sleep.assert_called_once_with(30)
 
     @patch.object(tplink_module, "PANEL_PASSWORD", "panel-password")
     @patch.object(tplink_module, "PPPOE_USERNAME", "campus-user")
@@ -63,11 +61,9 @@ class TestTPLinkAPI(unittest.TestCase):
 
         router = TPLinkAPI()
 
-        with patch.object(tplink_module, "sleep") as mock_sleep:
-            result = router.make_pppoe_reconnection()
+        result = router.make_pppoe_reconnection()
 
         self.assertTrue(result)
-        mock_sleep.assert_called_once_with(30)
 
     @patch.object(tplink_module, "PANEL_PASSWORD", "panel-password")
     @patch.object(tplink_module, "PPPOE_USERNAME", "campus-user")
@@ -91,7 +87,6 @@ class TestTPLinkAPI(unittest.TestCase):
         router = TPLinkAPI()
 
         with (
-            patch.object(tplink_module, "sleep") as mock_sleep,
             patch.object(
                 router,
                 "tplink_change_wan_status_request",
@@ -101,5 +96,4 @@ class TestTPLinkAPI(unittest.TestCase):
             result = router.make_pppoe_reconnection()
 
         self.assertFalse(result)
-        mock_sleep.assert_not_called()
         mock_change_status.assert_not_called()

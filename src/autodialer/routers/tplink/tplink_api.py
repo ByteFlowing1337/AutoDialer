@@ -3,7 +3,6 @@ import requests
 from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
-from time import sleep
 from typing import Literal
 from urllib.parse import unquote
 from autodialer.config.config import PANEL_PASSWORD, PPPOE_USERNAME, PPPOE_PASSWORD
@@ -150,8 +149,7 @@ class TPLinkAPI(RouterAPI):
             action="disconnect", method="do", proto="pppoe"
         ):
             return False
-        # Wait for a time to make sure DHCP has assigned a new IP address
-        sleep(30)
+
         if self.tplink_change_wan_status_request(
             action="connect", method="do", proto="pppoe"
         ):
