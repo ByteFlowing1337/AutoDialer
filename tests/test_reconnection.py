@@ -9,6 +9,7 @@ reconnection_module = importlib.import_module("autodialer.reconnection")
 
 class TestParseArguments(unittest.TestCase):
     @patch.object(reconnection_module, "is_target_asn", return_value=True)
+    @patch("autodialer.reconnection.sleep")
     @patch.object(
         reconnection_module,
         "check_isp_with_retries",
@@ -16,7 +17,11 @@ class TestParseArguments(unittest.TestCase):
     )
     @patch("builtins.exit", side_effect=SystemExit(0))
     def test_asn_mode_exits_early_when_already_on_target_asn(
-        self, _mock_exit: Any, _mock_check_isp: Any, _mock_is_target_asn: Any
+        self,
+        _mock_exit: Any,
+        _mock_check_isp: Any,
+        mock_sleep: Any,
+        _mock_is_target_asn: Any,
     ):
         with patch.object(
             reconnection_module, "argv", ["autodialer", "--asn", "AS9929"]
@@ -54,9 +59,10 @@ class TestReconnection(unittest.TestCase):
         router.make_pppoe_reconnection.assert_called_once_with()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch("autodialer.reconnection.sleep")
     @patch.object(reconnection_module, "get_ip_address", return_value=None)
     def test_change_mode_exits_when_initial_ip_fetch_fails(
-        self, mock_get_ip_address: Any, mock_exit: Any
+        self, mock_get_ip_address: Any, mock_sleep: Any, mock_exit: Any
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
@@ -70,13 +76,17 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_called_once_with(1)
 
     @patch("builtins.exit")
+    @patch("autodialer.reconnection.sleep")
     @patch.object(
         reconnection_module,
         "get_ip_address",
         side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
     )
     def test_change_mode_retries_until_ip_changes(
-        self, mock_get_ip_address: Any, mock_exit: Any
+        self,
+        mock_get_ip_address: Any,
+        mock_sleep: Any,
+        mock_exit: Any,
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
@@ -88,13 +98,14 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch("autodialer.reconnection.sleep")
     @patch.object(
         reconnection_module,
         "get_ip_address",
         side_effect=["203.0.113.10", "203.0.113.10", "203.0.113.10", "203.0.113.10"],
     )
     def test_change_mode_exits_after_exhausting_attempts(
-        self, mock_get_ip_address: Any, mock_exit: Any
+        self, mock_get_ip_address: Any, mock_sleep: Any, mock_exit: Any
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)

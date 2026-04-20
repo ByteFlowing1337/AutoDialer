@@ -1,6 +1,6 @@
 import logging
 import requests
-from time import sleep
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
         return None
 
     for _ in range(retries):
-        sleep(delay)
+        time.sleep(delay)
         isp = check_isp()
         if isp is not None:
             return isp

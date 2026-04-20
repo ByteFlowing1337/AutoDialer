@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class Reconnection:
-    def __init__(self, router: RouterAPI):
+    def __init__(self, router: RouterAPI, delay: int = 30, max_attempts: int = 5):
         self.router = router
-        self.max_attempts = 5
+        self.max_attempts = max_attempts
         # Delay in seconds between reconnection attempts,
         # ensuring DHCP leases have time to expire and new IPs to be assigned
-        self.delay = 30
+        self.delay = delay
 
     def _get_wan_proto(self) -> str | None:
         return self.router.get_wan_proto()
@@ -66,13 +66,17 @@ class Reconnection:
             ) and attempts < self.max_attempts:
                 if not self._apply_reconnection(proto):
                     exit(1)
+
+                sleep(
+                    self.delay
+                )  # Wait for DHCP lease to expire and new IP to be assigned
+
                 if (after_reconnection_ip := get_ip_address()) is None:
                     logger.error(
                         "Unable to fetch IP address after reconnection. Exiting."
                     )
                     exit(1)
                 attempts += 1
-                sleep(self.delay)
 
             if current_ip != after_reconnection_ip:
                 isp = check_isp_with_retries()
