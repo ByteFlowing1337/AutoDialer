@@ -1,4 +1,7 @@
 import logging
+from time import sleep
+from sys import argv
+from pathlib import Path
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.utils.check_isp import check_isp_with_retries
@@ -6,8 +9,6 @@ from autodialer.utils.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from autodialer.utils.get_vendor_api import get_vendor_api
 from autodialer.utils.get_ip_address import get_ip_address
-from sys import argv
-from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,9 @@ class Reconnection:
     def __init__(self, router: RouterAPI):
         self.router = router
         self.max_attempts = 5
+        # Delay in seconds between reconnection attempts,
+        # ensuring DHCP leases have time to expire and new IPs to be assigned
+        self.delay = 30
 
     def _get_wan_proto(self) -> str | None:
         return self.router.get_wan_proto()
@@ -56,6 +60,7 @@ class Reconnection:
 
             after_reconnection_ip: str | None = current_ip
             attempts = 0
+
             while (
                 current_ip == after_reconnection_ip
             ) and attempts < self.max_attempts:
@@ -67,6 +72,8 @@ class Reconnection:
                     )
                     exit(1)
                 attempts += 1
+                sleep(self.delay)
+
             if current_ip != after_reconnection_ip:
                 isp = check_isp_with_retries()
                 logger.info(
@@ -90,6 +97,8 @@ class Reconnection:
 
             if is_target_asn(isp, asn):
                 return
+
+            sleep(self.delay)
 
         logger.error(
             "Reached maximum reconnection attempts without switching to the desired ASN."
