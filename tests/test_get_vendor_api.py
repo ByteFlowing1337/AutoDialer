@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import patch
 
 
-vendor_api_module = importlib.import_module("autodialer.routers.get_vendor_api")
+vendor_api_module = importlib.import_module("autodialer.network.get_vendor_api")
 
 
 class TestGetVendorApi(unittest.TestCase):
