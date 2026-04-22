@@ -6,9 +6,9 @@ from .network.get_gateway import (
     get_gateway_ip_on_unix,
     get_gateway_ip_on_windows,
 )
+from .network.is_target_asn import is_target_asn
 from .routers.asus.asus_api import AsusAPI
 from .routers.tplink.tplink_api import TPLinkAPI
-from .network.is_target_asn import is_target_asn
 
 __all__ = [
     "AsusAPI",
