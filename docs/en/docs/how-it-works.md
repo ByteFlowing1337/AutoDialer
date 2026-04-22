@@ -35,7 +35,7 @@ The current logic:
 - scans response headers and the HTML body for known vendor markers, and
 - returns the first matching vendor name.
 
-The registry lookup in `src/autodialer/network/get_vendor_api.py` then discovers router implementations dynamically by scanning `*_api.py` files and reading each class's `SUPPORTED_VENDORS`.
+The registry lookup in `src/autodialer/routers/get_vendor_api.py` then discovers router implementations dynamically by scanning `*_api.py` files and reading each class's `SUPPORTED_VENDORS`.
 
 ## Reconnection Modes
 

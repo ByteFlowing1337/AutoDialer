@@ -7,7 +7,7 @@ from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.check_isp import check_isp_with_retries
 from autodialer.network.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
-from autodialer.network.get_vendor_api import get_vendor_api
+from autodialer.routers.get_vendor_api import get_vendor_api
 from autodialer.network.get_ip_address import get_ip_address
 
 

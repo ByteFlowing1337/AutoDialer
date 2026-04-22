@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from sys import argv
-from autodialer.network.get_vendor_api import get_vendor_api
+from autodialer.routers.get_vendor_api import get_vendor_api
 from autodialer.routers.base_router_api import RouterAPI
 
 
