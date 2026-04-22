@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import requests
 
 
-check_vendor_module = importlib.import_module("autodialer.utils.check_vendor")
+check_vendor_module = importlib.import_module("autodialer.network.check_vendor")
 
 
 class TestCheckRouterVendor(unittest.TestCase):
