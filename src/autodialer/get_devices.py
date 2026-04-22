@@ -1,11 +1,30 @@
 import logging
 from pathlib import Path
 from sys import argv
-from autodialer.utils.get_vendor_api import get_vendor_api
+from autodialer.network.get_vendor_api import get_vendor_api
 from autodialer.routers.base_router_api import RouterAPI
 
 
 logger = logging.getLogger(__name__)
+
+
+def print_devices_table(devices: list) -> None:
+    if not devices:
+        print("No devices connected.")
+        return
+    header = f"{'HOSTNAME':25} {'IP':15} {'MAC':18} {'TYPE':9} {'UP':>6} {'DOWN':>6} {'ME':>3}"
+    print(header)
+    print("-" * len(header))
+    for d in devices:
+        print(
+            f"{d['hostname'][:25]:25} "
+            f"{d['ip'][:15]:15} "
+            f"{d['mac'][:18]:18} "
+            f"{d['type'][:9]:9} "
+            f"{d['up_kbps']:>6} "
+            f"{d['down_kbps']:>6} "
+            f"{'Y' if d['is_current'] else 'N':>3}"
+        )
 
 
 def main() -> None:
@@ -15,10 +34,6 @@ def main() -> None:
         router: RouterAPI | None = vendor() if vendor is not None else None
         if router is not None:
             devices = router.get_connected_devices()
-            from autodialer.utils.print_devices_table import (
-                print_devices_table,
-            )
-
             print_devices_table(devices)
         else:
             logger.error("No router API available to fetch connected devices.")

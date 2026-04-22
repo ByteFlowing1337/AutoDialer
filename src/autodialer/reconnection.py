@@ -4,11 +4,11 @@ from sys import argv
 from pathlib import Path
 
 from autodialer.routers.base_router_api import RouterAPI
-from autodialer.utils.check_isp import check_isp_with_retries
-from autodialer.utils.is_target_asn import is_target_asn
+from autodialer.network.check_isp import check_isp_with_retries
+from autodialer.network.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
-from autodialer.utils.get_vendor_api import get_vendor_api
-from autodialer.utils.get_ip_address import get_ip_address
+from autodialer.network.get_vendor_api import get_vendor_api
+from autodialer.network.get_ip_address import get_ip_address
 
 
 logger = logging.getLogger(__name__)

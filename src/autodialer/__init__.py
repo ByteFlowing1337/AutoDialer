@@ -1,14 +1,14 @@
 __version__ = "0.3.0"
 
-from .utils.check_isp import check_isp, check_isp_with_retries
-from .utils.get_gateway import (
+from .network.check_isp import check_isp, check_isp_with_retries
+from .network.get_gateway import (
     get_gateway_ip_on_linux,
     get_gateway_ip_on_unix,
     get_gateway_ip_on_windows,
 )
 from .routers.asus.asus_api import AsusAPI
 from .routers.tplink.tplink_api import TPLinkAPI
-from .utils.is_target_asn import is_target_asn
+from .network.is_target_asn import is_target_asn
 
 __all__ = [
     "AsusAPI",
