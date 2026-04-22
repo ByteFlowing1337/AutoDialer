@@ -7,7 +7,7 @@ from autodialer import (
     get_gateway_ip_on_unix,
     get_gateway_ip_on_windows,
 )
-from autodialer.utils.get_gateway import format_ip_for_url_host
+from autodialer.network.get_gateway import format_ip_for_url_host
 
 
 class TestGetGatewayIp(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestGetGatewayIp(unittest.TestCase):
     def test_format_ip_for_url_host_scoped_ipv6(self):
         self.assertEqual(format_ip_for_url_host("fe80::1%en0"), "[fe80::1%25en0]")
 
-    @patch("autodialer.utils.get_gateway.subprocess.run")
+    @patch("autodialer.network.get_gateway.subprocess.run")
     def test_windows_gateway_parsed(self, mock_run: Any):
         mock_run.return_value = Mock(
             stdout=(
@@ -47,7 +47,7 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "10.0.0.1")
 
-    @patch("autodialer.utils.get_gateway.subprocess.run")
+    @patch("autodialer.network.get_gateway.subprocess.run")
     @patch("builtins.open", side_effect=OSError)
     def test_linux_gateway_fallback_parsed(self, _: Any, mock_run: Any):
         mock_run.return_value = Mock(
@@ -58,7 +58,7 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "10.0.0.1")
 
-    @patch("autodialer.utils.get_gateway.subprocess.run")
+    @patch("autodialer.network.get_gateway.subprocess.run")
     def test_unix_gateway_parsed(self, mock_run: Any):
         mock_run.return_value = Mock(
             stdout=(
@@ -73,7 +73,7 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "172.16.0.1")
 
-    @patch("autodialer.utils.get_gateway.subprocess.run")
+    @patch("autodialer.network.get_gateway.subprocess.run")
     def test_no_gateway_returns_none_windows_and_unix(self, mock_run: Any):
         mock_run.side_effect = [
             Mock(stdout=""),
@@ -84,7 +84,7 @@ class TestGetGatewayIp(unittest.TestCase):
         self.assertIsNone(get_gateway_ip_on_windows())
         self.assertIsNone(get_gateway_ip_on_unix())
 
-    @patch("autodialer.utils.get_gateway.subprocess.run")
+    @patch("autodialer.network.get_gateway.subprocess.run")
     @patch("builtins.open", side_effect=OSError)
     def test_no_gateway_returns_none_linux(self, _: Any, mock_run: Any):
         mock_run.return_value = Mock(stdout="")

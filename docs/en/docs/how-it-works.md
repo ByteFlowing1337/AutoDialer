@@ -15,7 +15,7 @@ The CLI entry point for reconnection lives in `src/autodialer/reconnection.py`, 
 
 ## Gateway Detection
 
-Gateway detection is implemented in `src/autodialer/utils/get_gateway.py`.
+Gateway detection is implemented in `src/autodialer/network/get_gateway.py`.
 
 - Windows uses `route print -4`.
 - Linux reads `/proc/net/route` first, then falls back to `ip -4 route show default`.
@@ -25,7 +25,7 @@ The helper also normalizes IPv4 and IPv6 addresses so they can be used safely in
 
 ## Vendor Detection
 
-Vendor detection is implemented in `src/autodialer/utils/check_vendor.py`.
+Vendor detection is implemented in `src/autodialer/network/check_vendor.py`.
 
 The current logic:
 
@@ -35,7 +35,7 @@ The current logic:
 - scans response headers and the HTML body for known vendor markers, and
 - returns the first matching vendor name.
 
-The registry lookup in `src/autodialer/utils/get_vendor_api.py` then discovers router implementations dynamically by scanning `*_api.py` files and reading each class's `SUPPORTED_VENDORS`.
+The registry lookup in `src/autodialer/routers/get_vendor_api.py` then discovers router implementations dynamically by scanning `*_api.py` files and reading each class's `SUPPORTED_VENDORS`.
 
 ## Reconnection Modes
 
@@ -75,7 +75,7 @@ To add a new router integration:
 1. Create a new `*_api.py` module under `src/autodialer/routers/`.
 2. Add a class with a `SUPPORTED_VENDORS` attribute.
 3. Implement the methods expected by `RouterAPI` in `src/autodialer/routers/base_router_api.py`.
-4. Add or update vendor fingerprints in `src/autodialer/utils/check_vendor.py`.
+4. Add or update vendor fingerprints in `src/autodialer/network/check_vendor.py`.
 5. Add unit tests for the new behavior under `tests/`.
 
 Because router APIs are vendor- and firmware-specific, keep request payloads isolated to the router module and prefer tests that mock network calls rather than reaching real devices.

@@ -5,7 +5,7 @@ from inspect import getmembers, isclass
 from pathlib import Path
 from autodialer.routers.base_router_api import RouterAPI
 
-from autodialer.utils.check_vendor import check_router_vendor
+from autodialer.network.check_vendor import check_router_vendor
 
 
 logger = logging.getLogger(__name__)

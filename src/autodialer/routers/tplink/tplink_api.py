@@ -2,7 +2,7 @@ import logging
 import requests
 from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
 from autodialer.routers.base_router_api import RouterAPI
-from autodialer.utils.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 from typing import Literal
 from urllib.parse import unquote
 from autodialer.config.config import PANEL_PASSWORD, PPPOE_USERNAME, PPPOE_PASSWORD
