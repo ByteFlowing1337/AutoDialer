@@ -1,8 +1,10 @@
 site_name: AutoDialer
+site_url: https://autodialer.me
+site_description: AutoDialer is a cross-platform Python CLI package for router APIs, designed to rotate public IP addresses automatically and streamline router interactions.
 theme:
   name: material
-  logo: icon.png
-  favicon: icon.png
+  logo: imgs/icon.png
+  favicon: imgs/icon.png
   icon:
     repo: fontawesome/brands/github
   features:
