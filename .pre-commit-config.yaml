@@ -28,3 +28,10 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+
+      - id: unittest-check-push
+        name: unittest check (pre-push)
+        entry: python -m unittest discover -s tests
+        language: python
+        pass_filenames: false
+        stages: [pre-push]

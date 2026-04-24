@@ -36,7 +36,7 @@ class Reconnection:
         return False
 
     def run_reconnection(
-        self, mode: Literal["force", "asn", "change"], **asn: str | None
+        self, mode: Literal["force", "asn", "change"], *, asn: str | None
     ) -> None:
 
         proto = self._get_wan_proto()
@@ -112,7 +112,7 @@ class Reconnection:
                     if isp is None:
                         exit(1)
 
-                    if is_target_asn(isp, **asn):
+                    if is_target_asn(isp, asn=asn):
                         return
 
                 logger.error(
@@ -123,11 +123,11 @@ class Reconnection:
     def main(self) -> None:
         match argv[1]:
             case "-f" | "--force":
-                self.run_reconnection(mode="force")
+                self.run_reconnection(mode="force", asn=None)
             case "-a" | "--asn":
                 self.run_reconnection(mode="asn", asn=argv[2])
             case "-c" | "--change":
-                self.run_reconnection(mode="change")
+                self.run_reconnection(mode="change", asn=None)
 
 
 def parse_arguments(asn: str | None) -> None:
