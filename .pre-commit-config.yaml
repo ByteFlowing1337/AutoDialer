@@ -31,7 +31,9 @@ repos:
 
       - id: unittest-check-push
         name: unittest check (pre-push)
-        entry: python -m unittest discover -s tests
+        entry: python -m unittest discover -s tests -t .
         language: python
+        additional_dependencies:
+          - .
         pass_filenames: false
         stages: [pre-push]
