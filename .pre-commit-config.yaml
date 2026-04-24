@@ -35,5 +35,7 @@ repos:
         language: python
         additional_dependencies:
           - .
+          - requests<3
+          - python-dotenv>=1,<2
         pass_filenames: false
         stages: [pre-push]
