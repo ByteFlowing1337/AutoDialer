@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 import requests
 from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
 from autodialer.routers.base_router_api import RouterAPI
@@ -150,10 +151,13 @@ class TPLinkAPI(RouterAPI):
         ):
             return False
 
+        sleep(25)  # Wait for DHCP release and reassignment
+
         if self.tplink_change_wan_status_request(
             action="connect", method="do", proto="pppoe"
         ):
             return True
+
         return False
 
     def get_connected_devices(self) -> list:

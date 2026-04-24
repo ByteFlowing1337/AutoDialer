@@ -50,7 +50,9 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     exit(1)
 
-                sleep(self.delay)
+                # Wait for internet recovery from reconnection
+                while not (isinstance(_ := get_ip_address(), str)):
+                    sleep(5)
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
@@ -72,7 +74,9 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    sleep(self.delay)
+                    # Wait for internet recovery from reconnection
+                    while not (isinstance(_ := get_ip_address(), str)):
+                        sleep(5)
 
                     if (after_reconnection_ip := get_ip_address()) is None:
                         logger.error(
@@ -100,7 +104,9 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    sleep(self.delay)
+                    # Wait for internet recovery from reconnection
+                    while not (isinstance(_ := get_ip_address(), str)):
+                        sleep(5)
 
                     isp = check_isp_with_retries()
                     if isp is None:
