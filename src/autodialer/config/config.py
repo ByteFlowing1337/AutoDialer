@@ -1,10 +1,19 @@
 import os
 import dotenv  # type: ignore[import-not-found]
+import logging
 
 dotenv.load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 PANEL_USERNAME: str = os.getenv("PANEL_USERNAME") or "admin"
-PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD") or None
+
+_PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD")
+if _PANEL_PASSWORD is None:
+    logger.error("Error: PANEL_PASSWORD environment variable is not set.")
+    exit(1)
+
+PANEL_PASSWORD: str = _PANEL_PASSWORD
 PPPOE_USERNAME: str | None = os.getenv("PPPOE_USERNAME") or None
 PPPOE_PASSWORD: str | None = os.getenv("PPPOE_PASSWORD") or None
 ASN: str | None = os.getenv("ASN") or None

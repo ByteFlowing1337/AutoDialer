@@ -41,20 +41,9 @@ class TPLinkAPI(RouterAPI):
     stok: str | None = None
 
     def __init__(self):
-        router_ip = get_gateway_ip()
-        if router_ip is None:
-            logger.error("Could not determine router IP address.")
-            exit(1)
-
-        if PANEL_PASSWORD is None:
-            logger.error("Missing required environment variable: PANEL_PASSWORD")
-            exit(1)
-
-        panel_password: str = PANEL_PASSWORD
-
-        self.router_ip = router_ip
+        self.router_ip = get_gateway_ip()
         self.session = requests.Session()
-        self.password = tplink_security_encode(panel_password)
+        self.password = tplink_security_encode(PANEL_PASSWORD)
         self.username = PPPOE_USERNAME or ""
         self.pppoe_password = PPPOE_PASSWORD or ""
         self.stok = self.__login_router()

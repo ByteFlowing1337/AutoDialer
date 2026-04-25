@@ -22,11 +22,7 @@ class ZTEApi(RouterAPI):
     )
 
     def __init__(self):
-        router_ip = get_gateway_ip()
-        if router_ip is None:
-            logger.error("Could not determine router IP address.")
-            exit(1)
-        self.router_host = format_ip_for_url_host(router_ip)
+        self.router_host = format_ip_for_url_host(get_gateway_ip())
         self.session = requests.Session()
         self._seed_browser_cookies()
         if not self._authenticate():
