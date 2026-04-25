@@ -14,10 +14,8 @@ class TestTPLinkAPI(unittest.TestCase):
     @patch.object(tplink_module, "PPPOE_PASSWORD", None)
     @patch.object(tplink_module, "get_gateway_ip", return_value="192.168.0.1")
     @patch.object(tplink_module.requests, "Session")
-    @patch("autodialer.routers.tplink.tplink_api.sleep")
     def test_pppoe_reconnect_reuses_saved_credentials_when_override_missing(
         self,
-        _mock_sleep: Any,
         mock_session_cls: Any,
         _mock_gateway_ip: Any,
     ):
@@ -43,10 +41,8 @@ class TestTPLinkAPI(unittest.TestCase):
     @patch.object(tplink_module, "PPPOE_PASSWORD", "campus-pass")
     @patch.object(tplink_module, "get_gateway_ip", return_value="192.168.0.1")
     @patch.object(tplink_module.requests, "Session")
-    @patch("autodialer.routers.tplink.tplink_api.sleep")
     def test_pppoe_reconnect_updates_credentials_when_override_present(
         self,
-        _mock_sleep: Any,
         mock_session_cls: Any,
         _mock_gateway_ip: Any,
     ):
@@ -74,10 +70,8 @@ class TestTPLinkAPI(unittest.TestCase):
     @patch.object(tplink_module, "PPPOE_PASSWORD", "campus-pass")
     @patch.object(tplink_module, "get_gateway_ip", return_value="192.168.0.1")
     @patch.object(tplink_module.requests, "Session")
-    @patch("autodialer.routers.tplink.tplink_api.sleep")
     def test_pppoe_reconnect_stops_when_credential_update_fails(
         self,
-        _mock_sleep: Any,
         mock_session_cls: Any,
         _mock_gateway_ip: Any,
     ):

@@ -47,7 +47,7 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(reconnection._get_wan_proto(), "dhcp")
 
-    @patch("autodialer.reconnection.sleep")
+    @patch("autodialer.network.wait_internet_recovery.sleep")
     def test_apply_reconnection_calls_pppoe_method(self, mock_sleep: Any):
         router = Mock()
         router.make_pppoe_reconnection.return_value = True
@@ -60,7 +60,7 @@ class TestReconnection(unittest.TestCase):
     @patch("builtins.exit")
     @patch.object(reconnection_module, "is_target_asn")
     @patch.object(reconnection_module, "check_isp_with_retries")
-    @patch("autodialer.reconnection.sleep")
+    @patch("autodialer.network.wait_internet_recovery.sleep")
     @patch.object(
         reconnection_module,
         "get_ip_address",
@@ -107,7 +107,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
-    @patch("autodialer.reconnection.sleep")
+    @patch("autodialer.network.wait_internet_recovery.sleep")
     @patch.object(reconnection_module, "get_ip_address", return_value=None)
     def test_change_mode_exits_when_initial_ip_fetch_fails(
         self, mock_get_ip_address: Any, mock_sleep: Any, mock_exit: Any
@@ -124,17 +124,11 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_called_once_with(1)
 
     @patch("builtins.exit")
-    @patch("autodialer.reconnection.sleep")
+    @patch("autodialer.network.wait_internet_recovery.sleep")
     @patch.object(
         reconnection_module,
         "get_ip_address",
-        side_effect=[
-            "203.0.113.10",
-            "203.0.113.10",
-            "203.0.113.10",
-            "203.0.113.10",
-            "198.51.100.25",
-        ],
+        side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
     )
     def test_change_mode_retries_until_ip_changes(
         self,
@@ -148,18 +142,15 @@ class TestReconnection(unittest.TestCase):
         reconnection.run_reconnection(mode="change", asn=None)
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
-        self.assertEqual(mock_get_ip_address.call_count, 5)
+        self.assertEqual(mock_get_ip_address.call_count, 3)
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
-    @patch("autodialer.reconnection.sleep")
+    @patch("autodialer.network.wait_internet_recovery.sleep")
     @patch.object(
         reconnection_module,
         "get_ip_address",
         side_effect=[
-            "203.0.113.10",
-            "203.0.113.10",
-            "203.0.113.10",
             "203.0.113.10",
             "203.0.113.10",
             "203.0.113.10",
@@ -178,7 +169,7 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(context.exception.code, 1)
         self.assertEqual(router.dhcp_renew.call_count, 3)
-        self.assertEqual(mock_get_ip_address.call_count, 7)
+        self.assertEqual(mock_get_ip_address.call_count, 4)
         mock_exit.assert_called_once_with(1)
 
 
