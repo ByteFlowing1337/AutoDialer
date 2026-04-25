@@ -24,5 +24,5 @@ def wait_internet_recovery(delay: int = 5, attempts: int = 5) -> None:
 
 
 if __name__ == "__main__":
-    if wait_internet_recovery():
+    if try_connect():
         print("success")
