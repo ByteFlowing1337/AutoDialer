@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 from sys import argv
 from pathlib import Path
 from typing import Literal
@@ -10,6 +9,7 @@ from autodialer.network.is_target_asn import is_target_asn
 from autodialer.config.config import ASN
 from autodialer.routers.get_vendor_api import get_vendor_api
 from autodialer.network.get_ip_address import get_ip_address
+from autodialer.network.wait_internet_recovery import wait_internet_recovery
 
 
 logger = logging.getLogger(__name__)
@@ -50,9 +50,7 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     exit(1)
 
-                # Wait for internet recovery from reconnection
-                while not (isinstance(_ := get_ip_address(), str)):
-                    sleep(5)
+                wait_internet_recovery()
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
@@ -74,9 +72,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    # Wait for internet recovery from reconnection
-                    while not (isinstance(_ := get_ip_address(), str)):
-                        sleep(5)
+                    wait_internet_recovery()
 
                     if (after_reconnection_ip := get_ip_address()) is None:
                         logger.error(
@@ -104,9 +100,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    # Wait for internet recovery from reconnection
-                    while not (isinstance(_ := get_ip_address(), str)):
-                        sleep(5)
+                    wait_internet_recovery()
 
                     isp = check_isp_with_retries()
                     if isp is None:
