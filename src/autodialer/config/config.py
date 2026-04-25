@@ -2,7 +2,8 @@ import os
 import dotenv  # type: ignore[import-not-found]
 import logging
 
-dotenv.load_dotenv()
+env_file = ".env" if os.path.exists(".env") else ".env.example"
+dotenv.load_dotenv(env_file)
 
 logger = logging.getLogger(__name__)
 
