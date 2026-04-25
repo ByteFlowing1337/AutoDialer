@@ -154,6 +154,7 @@ class TPLinkAPI(RouterAPI):
             action="connect", method="do", proto="pppoe"
         ):
             return True
+
         return False
 
     def get_connected_devices(self) -> list:

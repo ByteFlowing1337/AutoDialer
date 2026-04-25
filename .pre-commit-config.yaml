@@ -28,3 +28,14 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+
+      - id: unittest-check-push
+        name: unittest check (pre-push)
+        entry: python -m unittest discover -s tests -t .
+        language: python
+        additional_dependencies:
+          - .
+          - requests<3
+          - python-dotenv>=1,<2
+        pass_filenames: false
+        stages: [pre-push]
