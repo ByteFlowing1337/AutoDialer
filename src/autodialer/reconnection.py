@@ -54,8 +54,12 @@ class Reconnection:
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
-                if isp is not None:
+                if isp and ip is not None:
                     logger.info("IP info after forced reconnection: %s %s", ip, isp)
+                else:
+                    logger.warning(
+                        "Forced reconnection completed, but unable to fetch IP info."
+                    )
                 return
 
             case "change":

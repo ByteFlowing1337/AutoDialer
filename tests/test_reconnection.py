@@ -1,7 +1,7 @@
 import importlib
 import unittest
 from typing import Any
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 
 reconnection_module = importlib.import_module("autodialer.reconnection")
@@ -60,16 +60,10 @@ class TestReconnection(unittest.TestCase):
     @patch("builtins.exit")
     @patch.object(reconnection_module, "is_target_asn")
     @patch.object(reconnection_module, "check_isp_with_retries")
-    @patch("autodialer.network.wait_internet_recovery.sleep")
-    @patch.object(
-        reconnection_module,
-        "get_ip_address",
-        side_effect=[None, "203.0.113.10", None, "203.0.113.11"],
-    )
+    @patch.object(reconnection_module, "wait_internet_recovery")
     def test_asn_mode_sleeps_before_each_isp_check(
         self,
-        _mock_get_ip_address: Any,
-        mock_sleep: Any,
+        mock_wait_internet_recovery: Any,
         mock_check_isp_with_retries: Any,
         mock_is_target_asn: Any,
         mock_exit: Any,
@@ -80,7 +74,7 @@ class TestReconnection(unittest.TestCase):
         events: list[str] = []
         isp_values = iter(["AS111 Example ISP", "AS222 Target ISP"])
 
-        def sleep_side_effect(_delay: int) -> None:
+        def wait_side_effect() -> None:
             events.append("sleep")
 
         def isp_side_effect() -> str:
@@ -91,14 +85,14 @@ class TestReconnection(unittest.TestCase):
             events.append("is_target")
             return isp.startswith("AS222")
 
-        mock_sleep.side_effect = sleep_side_effect
+        mock_wait_internet_recovery.side_effect = wait_side_effect
         mock_check_isp_with_retries.side_effect = isp_side_effect
         mock_is_target_asn.side_effect = is_target_side_effect
 
         reconnection.run_reconnection(mode="asn", asn="AS222")
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
-        self.assertEqual(mock_sleep.call_args_list, [call(5), call(5)])
+        self.assertEqual(mock_wait_internet_recovery.call_count, 2)
         self.assertEqual(mock_check_isp_with_retries.call_count, 2)
         self.assertEqual(
             events,
