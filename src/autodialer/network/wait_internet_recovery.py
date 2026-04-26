@@ -6,9 +6,12 @@ logger = logging.getLogger(__name__)
 
 
 def try_connect(delay: int = 5, attempts: int = 5) -> bool:
-    sock = socket.socket()
     for _ in range(attempts):
-        if sock.connect_ex(("8.8.8.8", 53)) != 0:
+        # Use a short-lived socket per probe so descriptors are always closed.
+        with socket.socket() as sock:
+            connected = sock.connect_ex(("8.8.8.8", 53)) == 0
+
+        if not connected:
             sleep(delay)
         else:
             return True

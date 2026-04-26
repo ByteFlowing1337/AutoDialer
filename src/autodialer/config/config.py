@@ -7,8 +7,7 @@ logger = logging.getLogger(__name__)
 
 env_file = dotenv.find_dotenv()
 if env_file == "":
-    logger.warning("No .env file found! Please create one at root directory.")
-    env_file = dotenv.find_dotenv(".env.example")
+    raise RuntimeError("No .env file found! Please create one at root directory.")
 dotenv.load_dotenv(env_file)
 
 
@@ -17,7 +16,7 @@ PANEL_USERNAME: str = os.getenv("PANEL_USERNAME") or "admin"
 _PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD")
 if _PANEL_PASSWORD is None:
     logger.error("Error: PANEL_PASSWORD environment variable is not set.")
-    exit(1)
+    raise RuntimeError("Error: PANEL_PASSWORD environment variable is not set.")
 
 PANEL_PASSWORD: str = _PANEL_PASSWORD
 PPPOE_USERNAME: str | None = os.getenv("PPPOE_USERNAME") or None
