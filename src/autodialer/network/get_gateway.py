@@ -57,11 +57,15 @@ def format_ip_for_url_host(value: str) -> str:
     return parsed.compressed
 
 
-def _get_gateway_ip_unsupported() -> str | None:
-    return None
+def _get_gateway_ip_unsupported() -> str:
+    logger.error(
+        "Unsupported platform: %s. Cannot determine default gateway IP address.",
+        platform.system(),
+    )
+    exit(1)
 
 
-def get_gateway_ip_on_windows() -> str | None:
+def get_gateway_ip_on_windows() -> str:
     try:
         result = subprocess.run(
             ["route", "print", "-4"],
@@ -69,8 +73,9 @@ def get_gateway_ip_on_windows() -> str | None:
             text=True,
             check=False,
         )
-    except OSError:
-        return None
+    except OSError as e:
+        logger.error("Failed to execute 'route print -4': %s", e)
+        exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -80,10 +85,11 @@ def get_gateway_ip_on_windows() -> str | None:
             gateway = fields[2]
             if _is_ip_address(gateway):
                 return gateway
-    return None
+    logger.error("Default gateway not found in 'route print -4' output.")
+    exit(1)
 
 
-def get_gateway_ip_on_linux() -> str | None:
+def get_gateway_ip_on_linux() -> str:
     try:
         with open("/proc/net/route", "r", encoding="utf-8") as routes:
             next(routes, None)
@@ -113,8 +119,9 @@ def get_gateway_ip_on_linux() -> str | None:
             text=True,
             check=False,
         )
-    except OSError:
-        return None
+    except OSError as e:
+        logger.error("Failed to execute 'ip -4 route show default': %s", e)
+        exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -131,10 +138,11 @@ def get_gateway_ip_on_linux() -> str | None:
         parsed_gateway = _extract_first_ip(fields[1:])
         if parsed_gateway is not None:
             return parsed_gateway
-    return None
+    logger.error("Default gateway not found in 'ip -4 route show default' output.")
+    exit(1)
 
 
-def get_gateway_ip_on_unix() -> str | None:
+def get_gateway_ip_on_unix() -> str:
     try:
         result = subprocess.run(
             ["route", "-n", "get", "default"],
@@ -142,8 +150,9 @@ def get_gateway_ip_on_unix() -> str | None:
             text=True,
             check=False,
         )
-    except OSError:
-        result = None
+    except OSError as e:
+        logger.error("Failed to execute 'route -n get default': %s", e)
+        exit(1)
 
     if result is not None:
         for line in result.stdout.splitlines():
@@ -161,8 +170,9 @@ def get_gateway_ip_on_unix() -> str | None:
             text=True,
             check=False,
         )
-    except OSError:
-        return None
+    except OSError as e:
+        logger.error("Failed to execute 'netstat -rn': %s", e)
+        exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -176,11 +186,14 @@ def get_gateway_ip_on_unix() -> str | None:
         gateway = _extract_first_ip(fields[1:])
         if gateway is not None:
             return gateway
-    return None
+    logger.error(
+        "Default gateway not found in 'route -n get default' or 'netstat -rn' output."
+    )
+    exit(1)
 
 
 platform_system = platform.system()
-get_gateway_ip: Callable[[], str | None]
+get_gateway_ip: Callable[[], str]
 if platform_system == "Windows":
     get_gateway_ip = get_gateway_ip_on_windows
 elif platform_system == "Linux":
