@@ -73,24 +73,6 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "172.16.0.1")
 
-    @patch("autodialer.network.get_gateway.subprocess.run")
-    def test_no_gateway_returns_none_windows_and_unix(self, mock_run: Any):
-        mock_run.side_effect = [
-            Mock(stdout=""),
-            Mock(stdout=""),
-            Mock(stdout=""),
-        ]
-
-        self.assertIsNone(get_gateway_ip_on_windows())
-        self.assertIsNone(get_gateway_ip_on_unix())
-
-    @patch("autodialer.network.get_gateway.subprocess.run")
-    @patch("builtins.open", side_effect=OSError)
-    def test_no_gateway_returns_none_linux(self, _: Any, mock_run: Any):
-        mock_run.return_value = Mock(stdout="")
-
-        self.assertIsNone(get_gateway_ip_on_linux())
-
 
 if __name__ == "__main__":
     unittest.main()

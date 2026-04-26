@@ -37,17 +37,8 @@ class AsusAPI(RouterAPI):
     verify_ssl: bool
 
     def __init__(self):
-        router_ip = get_gateway_ip()
-        if router_ip is None:
-            logger.error("Could not determine router IP address.")
-            exit(1)
-
-        if PANEL_PASSWORD is None:
-            logger.error("Missing required environment variable: PANEL_PASSWORD")
-            exit(1)
-
-        self.router_ip = router_ip
-        self.panel_username = PANEL_USERNAME or "admin"
+        self.router_ip = get_gateway_ip()
+        self.panel_username = PANEL_USERNAME
         self.panel_password = PANEL_PASSWORD
         self.session = requests.Session()
         self.base_url, self.verify_ssl, self.token = self._login_router()
