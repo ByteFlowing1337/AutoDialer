@@ -2,16 +2,17 @@ import os
 import dotenv  # type: ignore[import-not-found]
 import logging
 
-file_name = ".env.example" if not os.path.exists(".env") else ".env"
-if file_name == ".env.example":
-    logging.warning(
-        "Warning: .env file not found. Using .env.example as fallback."
-        "Please create a .env file with the necessary environment variables."
+logger = logging.getLogger(__name__)
+
+
+env_file = dotenv.find_dotenv()
+if env_file == "":
+    logger.error(
+        ".env file not found. Please create a .env file with appropriate values."
     )
-env_file = dotenv.find_dotenv(filename=file_name)
+    exit(1)
 dotenv.load_dotenv(env_file)
 
-logger = logging.getLogger(__name__)
 
 PANEL_USERNAME: str = os.getenv("PANEL_USERNAME") or "admin"
 
