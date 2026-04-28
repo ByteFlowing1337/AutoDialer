@@ -12,7 +12,7 @@ if str(SRC_PATH) not in sys.path:
 
 # Keep tests independent from local .env files and surrounding shell configuration.
 _DOTENV_PATCHERS = [
-    patch.dict(os.environ, {"PANEL_PASSWORD": "test-panel-password"}, clear=False),
+    patch.dict(os.environ, {"PANEL_PASSWORD": "test-panel-password"}, clear=True),
     patch("dotenv.find_dotenv", return_value=".env.mock"),
     patch("dotenv.load_dotenv", return_value=True),
 ]
