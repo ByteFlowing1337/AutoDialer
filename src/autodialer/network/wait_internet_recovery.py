@@ -5,17 +5,18 @@ from time import sleep
 logger = logging.getLogger(__name__)
 
 
-def try_connect(delay: int = 5, attempts: int = 5) -> bool:
+def try_connect(delay: int = 5, attempts: int = 3) -> bool:
     for _ in range(attempts):
-        try:
-            with socket.create_connection(("8.8.8.8", 53), timeout=delay):
-                return True
-        except OSError:
-            sleep(delay)
+        with socket.socket() as sock:
+            sock.settimeout(delay)
+            connected = sock.connect_ex(("8.8.8.8", 53)) == 0
+        if connected:
+            return True
+        sleep(delay)
     return False
 
 
-def wait_internet_recovery(delay: int = 5, attempts: int = 5) -> None:
+def wait_internet_recovery(delay: int = 5, attempts: int = 3) -> None:
     if try_connect(delay, attempts):
         return
     else:
