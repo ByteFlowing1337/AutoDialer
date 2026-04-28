@@ -9,7 +9,6 @@ def try_connect(delay: int = 5, attempts: int = 5) -> bool:
     for _ in range(attempts):
         # Use a short-lived socket per probe so descriptors are always closed.
         with socket.socket() as sock:
-            sock.settimeout(5)
             connected = sock.connect_ex(("8.8.8.8", 53)) == 0
 
         if not connected:
@@ -27,6 +26,7 @@ def wait_internet_recovery(delay: int = 5, attempts: int = 5) -> None:
         return
 
 
+# For debugging purposes
 if __name__ == "__main__":
     if try_connect():
         print("success")
