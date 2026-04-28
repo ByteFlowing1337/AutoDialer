@@ -19,9 +19,8 @@ def try_connect(delay: int = 5, attempts: int = 3) -> bool:
 def wait_internet_recovery(delay: int = 5, attempts: int = 3) -> None:
     if try_connect(delay, attempts):
         return
-    else:
-        logger.error("Internet did not recover within the expected time.")
-        return
+    logger.error("Internet did not recover within the expected time.")
+    return None
 
 
 # For debugging purposes
