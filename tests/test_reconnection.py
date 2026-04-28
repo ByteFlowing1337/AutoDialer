@@ -47,8 +47,7 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(reconnection._get_wan_proto(), "dhcp")
 
-    @patch("autodialer.network.wait_internet_recovery.sleep")
-    def test_apply_reconnection_calls_pppoe_method(self, mock_sleep: Any):
+    def test_apply_reconnection_calls_pppoe_method(self):
         router = Mock()
         router.make_pppoe_reconnection.return_value = True
 
@@ -101,10 +100,13 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
-    @patch("autodialer.network.wait_internet_recovery.sleep")
+    @patch.object(reconnection_module, "wait_internet_recovery")
     @patch.object(reconnection_module, "get_ip_address", return_value=None)
     def test_change_mode_exits_when_initial_ip_fetch_fails(
-        self, mock_get_ip_address: Any, mock_sleep: Any, mock_exit: Any
+        self,
+        mock_get_ip_address: Any,
+        _mock_wait_internet_recovery: Any,
+        mock_exit: Any,
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
@@ -118,7 +120,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_called_once_with(1)
 
     @patch("builtins.exit")
-    @patch("autodialer.network.wait_internet_recovery.sleep")
+    @patch.object(reconnection_module, "wait_internet_recovery")
     @patch.object(
         reconnection_module,
         "get_ip_address",
@@ -127,7 +129,7 @@ class TestReconnection(unittest.TestCase):
     def test_change_mode_retries_until_ip_changes(
         self,
         mock_get_ip_address: Any,
-        mock_sleep: Any,
+        _mock_wait_internet_recovery: Any,
         mock_exit: Any,
     ):
         router = self._make_router()
@@ -140,7 +142,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))
-    @patch("autodialer.network.wait_internet_recovery.sleep")
+    @patch.object(reconnection_module, "wait_internet_recovery")
     @patch.object(
         reconnection_module,
         "get_ip_address",
@@ -152,7 +154,10 @@ class TestReconnection(unittest.TestCase):
         ],
     )
     def test_change_mode_exits_after_exhausting_attempts(
-        self, mock_get_ip_address: Any, mock_sleep: Any, mock_exit: Any
+        self,
+        mock_get_ip_address: Any,
+        _mock_wait_internet_recovery: Any,
+        mock_exit: Any,
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
