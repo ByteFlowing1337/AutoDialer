@@ -1,7 +1,7 @@
-import unittest
-from unittest.mock import Mock, patch
-from typing import Any
 import importlib
+import unittest
+from typing import Any
+from unittest.mock import Mock, patch
 
 import requests
 
@@ -60,10 +60,11 @@ class TestCheckIspWithRetries(unittest.TestCase):
         self.assertEqual(mock_check_isp.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 2)
 
-    @patch.object(check_isp_module, "check_isp", return_value=None)
-    def test_invalid_retry_parameters_return_none(self, _mock_check_isp: Any):
+    @patch.object(check_isp_module, "check_isp")
+    def test_invalid_retry_parameters_return_none(self, mock_check_isp: Any):
         self.assertIsNone(check_isp_with_retries(retries=-1, delay=1))
         self.assertIsNone(check_isp_with_retries(retries=1, delay=0))
+        mock_check_isp.assert_not_called()
 
 
 if __name__ == "__main__":
