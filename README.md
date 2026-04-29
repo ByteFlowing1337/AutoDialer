@@ -65,8 +65,8 @@ Behavior:
 
 ## Documentation
 
-- Setup and CLI details: [`docs/getting-started.md`](docs/en/docs/getting-started.md)
-- Detection and reconnection flow: [`docs/how-it-works.md`](docs/en/docs/how-it-works.md)
+- Setup and CLI details: [`docs/getting-started.md`](docs/getting-started.md)
+- Detection and reconnection flow: [`docs/how-it-works.md`](docs/how-it-works.md)
 - Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ---
