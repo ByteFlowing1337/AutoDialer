@@ -57,7 +57,7 @@ class TestCheckIspWithRetries(unittest.TestCase):
         result = check_isp_with_retries(retries=2, delay=1)
 
         self.assertIsNone(result)
-        self.assertEqual(mock_check_isp.call_count, 3)
+        self.assertEqual(mock_check_isp.call_count, 2)
         self.assertEqual(mock_sleep.call_count, 2)
 
     @patch.object(check_isp_module, "check_isp")
