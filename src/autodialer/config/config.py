@@ -13,9 +13,10 @@ if env_file == "":
     exit(1)
 dotenv.load_dotenv(env_file)
 
-
+# For some routers, username is not required, so we can default to "admin".
 PANEL_USERNAME: str = os.getenv("PANEL_USERNAME") or "admin"
 
+# Password is required for all routers, so we will exit if it's not set.
 _PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD")
 if _PANEL_PASSWORD is None:
     logger.error("Error: PANEL_PASSWORD environment variable is not set.")
