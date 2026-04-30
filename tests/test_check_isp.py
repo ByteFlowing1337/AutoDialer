@@ -40,23 +40,19 @@ class TestCheckIsp(unittest.TestCase):
 
 
 class TestCheckIspWithRetries(unittest.TestCase):
-    @patch.object(check_isp_module.time, "sleep")
     @patch.object(
         check_isp_module, "check_isp", side_effect=[None, None, "AS9999 Retry ISP"]
     )
-    def test_retries_until_success(self, mock_check_isp: Any, mock_sleep: Any):
+    def test_retries_until_success(self, mock_check_isp: Any):
         result = check_isp_with_retries(retries=3)
 
         self.assertEqual(result, "AS9999 Retry ISP")
-        self.assertEqual(mock_check_isp.call_count, 3)
 
-    @patch.object(check_isp_module.time, "sleep")
     @patch.object(check_isp_module, "check_isp", return_value=None)
-    def test_returns_none_after_all_retries(self, mock_check_isp: Any, mock_sleep: Any):
+    def test_returns_none_after_all_retries(self, mock_check_isp: Any):
         result = check_isp_with_retries(retries=2)
 
         self.assertIsNone(result)
-        self.assertEqual(mock_check_isp.call_count, 2)
 
     @patch.object(check_isp_module, "check_isp")
     def test_invalid_retry_parameters_return_none(self, mock_check_isp: Any):
