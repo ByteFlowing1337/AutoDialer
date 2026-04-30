@@ -120,6 +120,9 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_called_once_with(1)
 
     @patch("builtins.exit")
+    @patch.object(
+        reconnection_module, "check_isp_with_retries", return_value="AS9999 Example ISP"
+    )
     @patch.object(reconnection_module, "wait_internet_recovery")
     @patch.object(
         reconnection_module,
@@ -130,6 +133,7 @@ class TestReconnection(unittest.TestCase):
         self,
         mock_get_ip_address: Any,
         _mock_wait_internet_recovery: Any,
+        mock_check_isp_with_retries: Any,
         mock_exit: Any,
     ):
         router = self._make_router()
@@ -139,6 +143,7 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
+        mock_check_isp_with_retries.assert_called_once_with()
         mock_exit.assert_not_called()
 
     @patch("builtins.exit", side_effect=SystemExit(1))

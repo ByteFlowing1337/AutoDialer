@@ -1,6 +1,5 @@
 import logging
 import requests
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ def check_isp(verbose: bool = False) -> str | None:
     """
     try:
         response = requests.get(
-            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=4
+            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=5
         )
         response.raise_for_status()
         data = response.json()
@@ -45,32 +44,27 @@ def check_isp(verbose: bool = False) -> str | None:
         return None
 
 
-def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
+def check_isp_with_retries(retries: int = 3) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
     Args:
         retries: The number of times to retry checking the ISP if it fails.
-        delay: The delay in seconds between retries.
 
     Returns:
         The ISP string if successful, or None if all retries fail.
     """
+
+    if retries < 0 or retries > 100 or not isinstance(retries, int):
+        logger.error("Invalid retries parameter. Retries must be a positive integer.")
+        return None
+
+    # if retries == 0, we still want to perform one check.
     isp = check_isp()
     if isp is not None:
         return isp
 
-    if retries < 0 or delay <= 0:
-        logger.error(
-            "Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer."
-        )
-        return None
-
-    if retries == 0:
-        logger.warning("ISP check failed. No retries left.")
-        return None
-
+    # Retry logic: if the initial check fails, retry up to `retries` times.
     for _ in range(retries):
-        time.sleep(delay)
         isp = check_isp()
         if isp is not None:
             return isp
