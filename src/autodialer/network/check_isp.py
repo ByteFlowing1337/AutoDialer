@@ -20,7 +20,7 @@ def check_isp(verbose: bool = False) -> str | None:
     """
     try:
         response = requests.get(
-            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=4
+            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=5
         )
         response.raise_for_status()
         data = response.json()
@@ -56,25 +56,17 @@ def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
         The ISP string if successful, or None if all retries fail.
     """
 
-    if retries < 0 or delay <= 0:
+    if retries <= 0 or delay <= 0:
         logger.error(
             "Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer."
         )
         return None
 
-    isp = check_isp()
-    if isp is not None:
-        return isp
-
-    if retries == 0:
-        logger.warning("ISP check failed. No retries left.")
-        return None
-
     for _ in range(retries):
-        time.sleep(delay)
         isp = check_isp()
         if isp is not None:
             return isp
+        time.sleep(delay)
 
     logger.error("Failed to verify ISP after retries. Check your internet connection.")
     return None
