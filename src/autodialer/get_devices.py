@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from sys import argv
 from autodialer.routers.get_vendor_api import get_vendor_api
-from autodialer.routers.base_router_api import RouterAPI
 
 
 logger = logging.getLogger(__name__)
@@ -27,26 +26,26 @@ def print_devices_table(devices: list) -> None:
         )
 
 
-def main() -> None:
+def get_devices() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    if len(argv) == 1:
-        vendor = get_vendor_api()
-        router: RouterAPI | None = vendor() if vendor is not None else None
-        if router is not None:
+    match len(argv):
+        case 1:
+            Vendor = get_vendor_api()
+            router = Vendor() if Vendor is not None else None
+            if router is None:
+                logger.error("No router API available to fetch connected devices.")
+                exit(1)
             devices = router.get_connected_devices()
             print_devices_table(devices)
-        else:
-            logger.error("No router API available to fetch connected devices.")
-    else:
-        match argv[1]:
-            case _:
+        case _:
+            if len(argv) > 1:
                 logger.error("Unknown argument: %s", argv[1])
-                if Path(argv[0]).suffix.lower() == ".py":
-                    logger.error("Usage: python get_devices.py")
-                else:
-                    logger.error("Usage: autodialer-devices")
-                exit(1)
+            if Path(argv[0]).suffix.lower() == ".py":
+                logger.error("Usage: python get_devices.py")
+            else:
+                logger.error("Usage: autodialer-devices")
+            exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    get_devices()

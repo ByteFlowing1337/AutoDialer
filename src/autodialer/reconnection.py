@@ -35,7 +35,7 @@ class Reconnection:
         logger.error("Unsupported WAN protocol: %s", proto)
         return False
 
-    def run_reconnection(
+    def _run_reconnection(
         self, mode: Literal["force", "asn", "change"], *, asn: str | None
     ) -> None:
 
@@ -118,14 +118,14 @@ class Reconnection:
                 )
                 exit(1)
 
-    def main(self) -> None:
+    def run_reconnection(self) -> None:
         match argv[1]:
             case "-f" | "--force":
-                self.run_reconnection(mode="force", asn=None)
+                self._run_reconnection(mode="force", asn=None)
             case "-a" | "--asn":
-                self.run_reconnection(mode="asn", asn=argv[2])
+                self._run_reconnection(mode="asn", asn=argv[2])
             case "-c" | "--change":
-                self.run_reconnection(mode="change", asn=None)
+                self._run_reconnection(mode="change", asn=None)
 
 
 def parse_arguments(asn: str | None) -> None:
@@ -174,13 +174,13 @@ def main():
     parse_arguments(
         asn=argv[2] if len(argv) > 2 else ASN
     )  # Parse arguments before initializing the router
-    vendor = get_vendor_api()
-    if vendor is None:
+    Vendor = get_vendor_api()
+    if Vendor is None:
         logger.error("Unable to determine router vendor. Exiting.")
         exit(1)
-    router = vendor()
+    router = Vendor()
     reconnection = Reconnection(router)
-    reconnection.main()
+    reconnection.run_reconnection()
 
 
 if __name__ == "__main__":
