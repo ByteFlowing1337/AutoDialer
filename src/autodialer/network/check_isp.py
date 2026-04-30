@@ -54,10 +54,16 @@ def check_isp_with_retries(retries: int = 3) -> str | None:
         The ISP string if successful, or None if all retries fail.
     """
 
-    if retries <= 0:
+    if retries < 0 or retries > 100 or not isinstance(retries, int):
         logger.error("Invalid retries parameter. Retries must be a positive integer.")
         return None
 
+    # if retries == 0, we still want to perform one check.
+    isp = check_isp()
+    if isp is not None:
+        return isp
+
+    # Retry logic: if the initial check fails, retry up to `retries` times.
     for _ in range(retries):
         isp = check_isp()
         if isp is not None:
