@@ -88,7 +88,7 @@ class TestReconnection(unittest.TestCase):
         mock_check_isp_with_retries.side_effect = isp_side_effect
         mock_is_target_asn.side_effect = is_target_side_effect
 
-        reconnection.run_reconnection(mode="asn", asn="AS222")
+        reconnection._run_reconnection(mode="asn", asn="AS222")
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_wait_internet_recovery.call_count, 2)
@@ -112,7 +112,7 @@ class TestReconnection(unittest.TestCase):
         reconnection = reconnection_module.Reconnection(router)
 
         with self.assertRaises(SystemExit) as context:
-            reconnection.run_reconnection(mode="change", asn=None)
+            reconnection._run_reconnection(mode="change", asn=None)
 
         self.assertEqual(context.exception.code, 1)
         mock_get_ip_address.assert_called_once_with()
@@ -139,7 +139,7 @@ class TestReconnection(unittest.TestCase):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
 
-        reconnection.run_reconnection(mode="change", asn=None)
+        reconnection._run_reconnection(mode="change", asn=None)
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
@@ -169,7 +169,7 @@ class TestReconnection(unittest.TestCase):
         reconnection.max_attempts = 3
 
         with self.assertRaises(SystemExit) as context:
-            reconnection.run_reconnection(mode="change", asn=None)
+            reconnection._run_reconnection(mode="change", asn=None)
 
         self.assertEqual(context.exception.code, 1)
         self.assertEqual(router.dhcp_renew.call_count, 3)
