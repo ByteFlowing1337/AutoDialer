@@ -60,7 +60,7 @@ class TestCheckIspWithRetries(unittest.TestCase):
     def test_invalid_retry_parameters_return_none(self, mock_check_isp: Any):
         self.assertIsNone(check_isp_with_retries(retries=-1))
         self.assertIsNone(check_isp_with_retries(retries=999))
-        self.assertIsNone(check_isp_with_retries(retries=2.5))  # type:ignore
+        self.assertIsNone(check_isp_with_retries(retries=2.5))  # type: ignore
         mock_check_isp.assert_not_called()
 
 
