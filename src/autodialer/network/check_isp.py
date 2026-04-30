@@ -1,6 +1,5 @@
 import logging
 import requests
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -45,28 +44,24 @@ def check_isp(verbose: bool = False) -> str | None:
         return None
 
 
-def check_isp_with_retries(retries: int = 3, delay: int = 5) -> str | None:
+def check_isp_with_retries(retries: int = 3) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
     Args:
         retries: The number of times to retry checking the ISP if it fails.
-        delay: The delay in seconds between retries.
 
     Returns:
         The ISP string if successful, or None if all retries fail.
     """
 
-    if retries <= 0 or delay <= 0:
-        logger.error(
-            "Invalid retries or delay parameters. Retries must be non-negative and delay must be a positive integer."
-        )
+    if retries <= 0:
+        logger.error("Invalid retries parameter. Retries must be a positive integer.")
         return None
 
     for _ in range(retries):
         isp = check_isp()
         if isp is not None:
             return isp
-        time.sleep(delay)
 
     logger.error("Failed to verify ISP after retries. Check your internet connection.")
     return None
