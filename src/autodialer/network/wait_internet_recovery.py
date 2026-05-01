@@ -17,7 +17,7 @@ def try_connect(delay: int = 5, attempts: int = 10) -> bool:
     """
     for attempt in range(attempts):
         with socket.socket() as sock:
-            sock.settimeout(delay)
+            sock.settimeout(5)
             # Using TUN mode proxy will immediately return success here,
             # but we have no way to detect at that level.
             connected = sock.connect_ex(("8.8.8.8", 53)) == 0

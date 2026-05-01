@@ -36,6 +36,11 @@ class TestIsTargetAsn(unittest.TestCase):
             is_target_asn(current_isp="  AS9929 ISP", target_asn="AS9929  ")
         )
 
+    def test_returns_false_for_non_string_inputs(self):
+        self.assertFalse(is_target_asn(current_isp=1234, target_asn="AS9929"))  # type: ignore
+        self.assertFalse(is_target_asn(current_isp="AS9929 ISP", target_asn=1234))  # type: ignore
+        self.assertFalse(is_target_asn(current_isp=1234, target_asn=5678))  # type: ignore
+
 
 if __name__ == "__main__":
     unittest.main()
