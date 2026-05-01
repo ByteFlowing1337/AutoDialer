@@ -5,25 +5,30 @@ from time import sleep
 logger = logging.getLogger(__name__)
 
 
-def try_connect(delay: int = 5, attempts: int = 3) -> bool:
-    for _ in range(attempts):
+def try_connect(delay: int = 5, attempts: int = 10) -> bool:
+    """Attempts to connect to a well-known public DNS server to verify internet connectivity.
+
+    Args:
+        delay:  Time in seconds to wait between connection attempts.
+        attempts:  Number of connection attempts before giving up.
+
+    Returns:
+        True if a connection was successfully established, False otherwise.
+    """
+    for attempt in range(attempts):
         with socket.socket() as sock:
-            sock.settimeout(delay)
+            sock.settimeout(5)
+            # Using TUN mode proxy will immediately return success here,
+            # but we have no way to detect at that level.
             connected = sock.connect_ex(("8.8.8.8", 53)) == 0
         if connected:
             return True
-        sleep(delay)
+        if attempt < attempts - 1:
+            sleep(delay)
     return False
 
 
-def wait_internet_recovery(delay: int = 5, attempts: int = 3) -> None:
-    if try_connect(delay, attempts):
-        return
-    logger.error("Internet did not recover within the expected time.")
-    return None
-
-
-# For debugging purposes
+# For debugging
 if __name__ == "__main__":
     if try_connect():
         print("success")

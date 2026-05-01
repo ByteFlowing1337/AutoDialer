@@ -64,7 +64,7 @@ def _get_vendor_api_registry() -> dict[str, type[RouterAPI]]:
     return registry
 
 
-def get_vendor_api() -> type[RouterAPI] | None:
+def _get_vendor_api() -> type[RouterAPI] | None:
     """
     Get the vendor-specific router API class.
 
@@ -75,7 +75,7 @@ def get_vendor_api() -> type[RouterAPI] | None:
 
     Example:
     ```
-    api_class = get_vendor_api()
+    api_class = _get_vendor_api()
     if api_class is not None:
         router = api_class()
     ```
@@ -89,3 +89,10 @@ def get_vendor_api() -> type[RouterAPI] | None:
         logger.error("No API implementation for vendor: %s", vendor)
 
     return api_class
+
+
+def get_router() -> RouterAPI | None:
+    api_class = _get_vendor_api()
+    if api_class is not None:
+        return api_class()
+    return None

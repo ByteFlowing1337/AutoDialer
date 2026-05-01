@@ -1,5 +1,6 @@
 import logging
 import re
+from time import sleep
 from typing import Any
 from xml.etree import ElementTree as ET
 
@@ -25,9 +26,9 @@ class ZTEApi(RouterAPI):
         self.router_host = format_ip_for_url_host(get_gateway_ip())
         self.session = requests.Session()
         self._seed_browser_cookies()
-        if not self._authenticate():
-            logger.error("Failed to login to router.")
-            exit(1)
+        self.delay = 30
+        self.sessiontoken = None
+        self.logintoken = None
 
     def _seed_browser_cookies(self) -> None:
         self.session.headers.update(
@@ -73,6 +74,14 @@ class ZTEApi(RouterAPI):
             return False
 
         self.sessiontoken = authenticated_session_token
+        return True
+
+    def _ensure_authenticated(self) -> bool:
+        if self.sessiontoken is not None:
+            return True
+        if not self._authenticate():
+            logger.error("Failed to login to router.")
+            return False
         return True
 
     def _has_sid_cookie(self) -> bool:
@@ -250,6 +259,9 @@ class ZTEApi(RouterAPI):
         return bool(local_mac and mac and local_mac == mac)
 
     def get_wan_proto(self) -> str | None:
+        if not self._ensure_authenticated():
+            return None
+
         url = f"http://{self.router_host}/?_type=vueData&_tag=home_internetreg_lua"
         try:
             response = self.session.get(url, timeout=5)
@@ -286,6 +298,9 @@ class ZTEApi(RouterAPI):
         return self._restart_once() == "success"
 
     def _restart_once(self) -> str:
+        if not self._ensure_authenticated():
+            return "failed"
+
         url = f"http://{self.router_host}"
         parameters = {"_type": "vueData", "_tag": "vue_derestart_data"}
         xsrf_token = self._get_xsrf_token()
@@ -370,6 +385,9 @@ class ZTEApi(RouterAPI):
     def dhcp_renew(self) -> bool:
         first_attempt = self._restart_once()
         if first_attempt == "success":
+            sleep(
+                self.delay
+            )  # ZTE routers often take longer to recover from DHCP renewals
             return True
         if first_attempt != "expired":
             return False
@@ -378,9 +396,15 @@ class ZTEApi(RouterAPI):
             logger.error("Failed to refresh router session.")
             return False
 
+        if not self._ensure_authenticated():
+            return False
+
         return self._restart_once() == "success"
 
     def get_connected_devices(self) -> list[dict[str, Any]]:
+        if not self._ensure_authenticated():
+            return []
+
         url = f"http://{self.router_host}"
         parameters = {"_type": "vueData", "_tag": "localnet_lan_info_lua"}
         try:

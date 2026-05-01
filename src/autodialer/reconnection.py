@@ -5,22 +5,19 @@ from typing import Literal
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.check_isp import check_isp_with_retries
-from autodialer.network.is_target_asn import is_target_asn
-from autodialer.config.config import ASN
-from autodialer.routers.get_vendor_api import get_vendor_api
+from autodialer.network.is_target_asn import is_target_asn, normalize_asn
+from autodialer.routers.get_router import get_router
 from autodialer.network.get_ip_address import get_ip_address
-from autodialer.network.wait_internet_recovery import wait_internet_recovery
+from autodialer.network.wait_internet_recovery import try_connect
 
 
 logger = logging.getLogger(__name__)
 
 
 class Reconnection:
-    def __init__(self, router: RouterAPI, delay: int = 30, max_attempts: int = 5):
+    def __init__(self, router: RouterAPI, delay: int = 10, max_attempts: int = 5):
         self.router = router
         self.max_attempts = max_attempts
-        # Delay in seconds between reconnection attempts,
-        # ensuring public(ISP's) DHCP leases have time to expire and new IPs to be assigned
         self.delay = delay
 
     def _get_wan_proto(self) -> str | None:
@@ -50,7 +47,11 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     exit(1)
 
-                wait_internet_recovery()
+                if not try_connect(self.delay, self.max_attempts):
+                    logger.error(
+                        "Internet did not recover after forced reconnection. Exiting."
+                    )
+                    exit(1)
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
@@ -76,7 +77,11 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    wait_internet_recovery()
+                    if not try_connect(self.delay, self.max_attempts):
+                        logger.error(
+                            "Internet did not recover after reconnection. Exiting.",
+                        )
+                        exit(1)
 
                     if (after_reconnection_ip := get_ip_address()) is None:
                         logger.error(
@@ -104,13 +109,17 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    wait_internet_recovery()
+                    if not try_connect(self.delay, self.max_attempts):
+                        logger.error(
+                            "Internet did not recover after reconnection. Exiting."
+                        )
+                        exit(1)
 
                     isp = check_isp_with_retries()
                     if isp is None:
                         exit(1)
 
-                    if is_target_asn(isp, asn=asn):
+                    if is_target_asn(current_isp=isp, target_asn=asn):
                         return
 
                 logger.error(
@@ -128,57 +137,81 @@ class Reconnection:
                 self.run_reconnection(mode="change", asn=None)
 
 
-def parse_arguments(asn: str | None) -> None:
-    if len(argv) == 1:
-        if Path(argv[0]).suffix.lower() == ".py":
-            logger.error(
-                "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-            )
-        else:
-            logger.error(
-                "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-            )
+def print_usage():
+    if Path(argv[0]).suffix.lower() == ".py":
+        logger.info(
+            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
+        )
+    else:
+        logger.info(
+            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
+        )
+    logger.info(
+        "\nReconnection modes:\n"
+        "  -f, --force       Force a reconnection regardless of current ASN.\n"
+        "  -a, --asn <ASN>   Reconnect until connected to the specified target ASN. Requires an ASN argument, e.g. AS12345.\n"
+        "  -c, --change      Reconnect until the public IP address changes.\n"
+    )
+
+
+def validate_args():
+    if len(argv) < 2:
+        print_usage()
         exit(1)
 
-    match argv[1]:
-        case "-f" | "--force":
-            return
-        case "-a" | "--asn":
-            if len(argv) < 3:
-                logger.error("Please provide an ASN after the -a or --asn flag.")
-                exit(1)
-            isp = check_isp_with_retries()
-            if isp is None:
-                exit(1)
+    if len(argv) > 3:
+        logger.error(
+            "Too many arguments provided. Please check the usage instructions."
+        )
+        print_usage()
+        exit(1)
 
-            if is_target_asn(isp, asn):
-                exit(0)
-            return
-        case "-c" | "--change":
-            return
-        case _:
-            logger.error("Unknown argument: %s", argv[1])
-            if Path(argv[0]).suffix.lower() == ".py":
-                logger.error(
-                    "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-                )
-            else:
-                logger.error(
-                    "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-                )
+    command = argv[1]
+    if command not in (
+        "-f",
+        "--force",
+        "-a",
+        "--asn",
+        "-c",
+        "--change",
+    ):
+        print_usage()
+        exit(0) if command in ("-h", "--help") else exit(1)
+
+    if command in ("-a", "--asn"):
+        if len(argv) < 3:
+            logger.error(
+                "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
+            )
+            exit(1)
+        if not normalize_asn(argv[2]):
+            logger.error(
+                "Invalid ASN format: %s. ASN should be in the format 'AS12345' or '12345'.",
+                argv[2],
+            )
+            exit(1)
+        if is_target_asn(current_isp=check_isp_with_retries(), target_asn=argv[2]):
+            logger.info(
+                "Already connected to the target ASN %s. No reconnection needed.",
+                argv[2],
+            )
+            exit(0)
+    else:
+        if len(argv) > 2:
+            logger.error("Too many arguments provided for the selected mode.\n")
+            print_usage()
             exit(1)
 
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parse_arguments(
-        asn=argv[2] if len(argv) > 2 else ASN
-    )  # Parse arguments before initializing the router
-    vendor = get_vendor_api()
-    if vendor is None:
-        logger.error("Unable to determine router vendor. Exiting.")
+    validate_args()
+    router = get_router()
+    if router is None:
+        logger.error(
+            "Unable to detect router vendor or no API implementation available. Exiting."
+        )
         exit(1)
-    router = vendor()
     reconnection = Reconnection(router)
     reconnection.main()
 

@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 from sys import argv
-from autodialer.routers.get_vendor_api import get_vendor_api
-from autodialer.routers.base_router_api import RouterAPI
+from autodialer.routers.get_router import get_router
 
 
 logger = logging.getLogger(__name__)
@@ -27,25 +26,27 @@ def print_devices_table(devices: list) -> None:
         )
 
 
+def validate_args(args: list[str]) -> bool:
+    if len(args) == 1:
+        return True
+    logger.error("Unknown argument: %s", args[1])
+    if Path(args[0]).suffix.lower() == ".py":
+        logger.error("Usage: python get_devices.py")
+    else:
+        logger.error("Usage: autodialer-devices")
+    return False
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    if len(argv) == 1:
-        vendor = get_vendor_api()
-        router: RouterAPI | None = vendor() if vendor is not None else None
-        if router is not None:
-            devices = router.get_connected_devices()
-            print_devices_table(devices)
-        else:
-            logger.error("No router API available to fetch connected devices.")
-    else:
-        match argv[1]:
-            case _:
-                logger.error("Unknown argument: %s", argv[1])
-                if Path(argv[0]).suffix.lower() == ".py":
-                    logger.error("Usage: python get_devices.py")
-                else:
-                    logger.error("Usage: autodialer-devices")
-                exit(1)
+    if not validate_args(argv):
+        exit(1)
+    router = get_router()
+    if router is None:
+        logger.error("Unsupported or undetected router vendor.")
+        exit(1)
+    devices = router.get_connected_devices()
+    print_devices_table(devices)
 
 
 if __name__ == "__main__":
