@@ -184,10 +184,16 @@ def validate_args():
             exit(1)
         if not normalize_asn(argv[2]):
             logger.error(
-                "Invalid ASN format: %s. ASN should be in the format 'AS12345'.",
+                "Invalid ASN format: %s. ASN should be in the format 'AS12345' or '12345'.",
                 argv[2],
             )
             exit(1)
+        if is_target_asn(current_isp=check_isp_with_retries(), target_asn=argv[2]):
+            logger.info(
+                "Already connected to the target ASN %s. No reconnection needed.",
+                argv[2],
+            )
+            exit(0)
     else:
         if len(argv) > 2:
             logger.error("Too many arguments provided for the selected mode.\n")

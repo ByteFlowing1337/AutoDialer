@@ -162,10 +162,8 @@ class TestReconnection(unittest.TestCase):
         "check_isp_with_retries",
         return_value="AS9929 Example ISP",
     )
-    @patch("builtins.exit", side_effect=SystemExit(0))
     def test_asn_mode_exits_early_when_already_on_target_asn(
         self,
-        _mock_exit: Any,
         _mock_check_isp: Any,
         _mock_is_target_asn: Any,
     ):
