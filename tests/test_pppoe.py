@@ -27,6 +27,8 @@ class TestIsTargetAsn(unittest.TestCase):
         self.assertFalse(is_target_asn(current_isp="AS9929 ISP", target_asn=None))
         self.assertFalse(is_target_asn(current_isp="", target_asn="AS9929"))
         self.assertFalse(is_target_asn(current_isp="AS9929 ISP", target_asn=""))
+        self.assertFalse(is_target_asn(current_isp="AS9929 ISP", target_asn="AS"))
+        self.assertFalse(is_target_asn(current_isp="AS9929 ISP", target_asn="   "))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-def is_target_asn(*, current_isp: str | None, target_asn: str | None) -> bool:
+def is_target_asn(current_isp: str | None, target_asn: str | None) -> bool:
     if not target_asn or not isinstance(current_isp, str):
         return False
 

@@ -157,11 +157,14 @@ def main():
             "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
         )
         exit(1)
-    if argv[1] in ("-a", "--asn") and is_target_asn(
-        current_isp=check_isp_with_retries(), target_asn=argv[2]
-    ):
-        logger.info("Already connected to the target ASN. No reconnection needed.")
-        exit(0)
+    if argv[1] in ("-a", "--asn"):
+        current_isp = check_isp_with_retries()
+        if current_isp is None:
+            logger.error("Unable to determine current ISP/ASN. Exiting.")
+            exit(1)
+        if is_target_asn(current_isp=current_isp, target_asn=argv[2]):
+            logger.info("Already connected to the target ASN. No reconnection needed.")
+            exit(0)
 
     vendor = get_vendor_api()
     if vendor is None:
