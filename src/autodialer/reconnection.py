@@ -147,7 +147,7 @@ def print_usage():
     logger.info(
         "\nReconnection modes:\n"
         "  -f, --force       Force a reconnection regardless of current ASN.\n"
-        "  -a, --asn <ASN>  Reconnect until connected to a different ASN than the current one. Requires an ASN argument, e.g. AS12345.\n"
+        "  -a, --asn <ASN>   Reconnect until connected to the specified target ASN. Requires an ASN argument, e.g. AS12345.\n"
         "  -c, --change      Reconnect until the public IP address changes.\n"
     )
 
