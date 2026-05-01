@@ -1,7 +1,9 @@
-from typing import Protocol
+from typing import Protocol, ClassVar
 
 
 class RouterAPI(Protocol):
+    SUPPORTED_VENDORS: ClassVar[tuple[str, ...]]
+
     def get_wan_proto(self) -> str | None: ...
 
     def make_pppoe_reconnection(self) -> bool: ...
