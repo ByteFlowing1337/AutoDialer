@@ -2,7 +2,7 @@ from typing import Protocol
 
 
 class RouterAPI(Protocol):
-    SUPPORTED_VENDORS = []
+    SUPPORTED_VENDORS: tuple[str, ...] = ()
 
     def get_wan_proto(self) -> str | None: ...
 

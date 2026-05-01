@@ -50,7 +50,7 @@ class TestReconnection(unittest.TestCase):
         events: list[str] = []
         isp_values = iter(["AS111 Example ISP", "AS222 Target ISP"])
 
-        def wait_side_effect():
+        def wait_side_effect(*args, **kwargs):
             events.append("sleep")
             return True
 
@@ -177,6 +177,26 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(context.exception.code, 0)
 
+
+class TestPrintUsage(unittest.TestCase):
+    @patch.object(reconnection_module, "argv", ["reconnection.py"])
+    @patch.object(reconnection_module, "logger")
+    def test_print_usage_for_python_script(self, mock_logger):
+        reconnection_module.print_usage()
+        mock_logger.info.assert_any_call(
+            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+        )
+
+    @patch.object(reconnection_module, "argv", ["autodialer"])
+    @patch.object(reconnection_module, "logger")
+    def test_print_usage_for_executable(self, mock_logger):
+        reconnection_module.print_usage()
+        mock_logger.info.assert_any_call(
+            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+        )
+
+
+class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "argv", ["autodialer", "--help"])
     def test_help_mode_exits_with_zero(self):
         with self.assertRaises(SystemExit) as context:
@@ -217,23 +237,25 @@ class TestReconnection(unittest.TestCase):
         self.assertEqual(context.exception.code, 1)
         self.assertIn("Invalid ASN format", mock_logger.error.call_args[0][0])
 
-
-class TestPrintUsage(unittest.TestCase):
-    @patch.object(reconnection_module, "argv", ["reconnection.py"])
+    @patch.object(reconnection_module, "argv", ["autodialer", "--force", "extra_arg"])
     @patch.object(reconnection_module, "logger")
-    def test_print_usage_for_python_script(self, mock_logger):
-        reconnection_module.print_usage()
-        mock_logger.info.assert_any_call(
-            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-        )
+    def test_too_many_arguments_exits_with_error_1(self, mock_logger):
+        with self.assertRaises(SystemExit) as context:
+            reconnection_module.main()
 
-    @patch.object(reconnection_module, "argv", ["autodialer"])
+        self.assertEqual(context.exception.code, 1)
+        self.assertIn("Too many arguments provided", mock_logger.error.call_args[0][0])
+
+    @patch.object(
+        reconnection_module, "argv", ["autodialer", "--asn", "AS12345", "extra_arg"]
+    )
     @patch.object(reconnection_module, "logger")
-    def test_print_usage_for_executable(self, mock_logger):
-        reconnection_module.print_usage()
-        mock_logger.info.assert_any_call(
-            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-        )
+    def test_too_many_arguments_exits_with_error_2(self, mock_logger):
+        with self.assertRaises(SystemExit) as context:
+            reconnection_module.main()
+
+        self.assertEqual(context.exception.code, 1)
+        self.assertIn("Too many arguments provided", mock_logger.error.call_args[0][0])
 
 
 if __name__ == "__main__":

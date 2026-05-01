@@ -47,7 +47,7 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     exit(1)
 
-                if not try_connect():
+                if not try_connect(self.delay, self.max_attempts):
                     logger.error(
                         "Internet did not recover after forced reconnection. Exiting."
                     )
@@ -77,7 +77,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    if not try_connect():
+                    if not try_connect(self.delay, self.max_attempts):
                         logger.error(
                             "Internet did not recover after reconnection. Exiting.",
                         )
@@ -109,7 +109,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         exit(1)
 
-                    if not try_connect():
+                    if not try_connect(self.delay, self.max_attempts):
                         logger.error(
                             "Internet did not recover after reconnection. Exiting."
                         )
@@ -152,14 +152,20 @@ def print_usage():
     )
 
 
-def main():
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+def validate_arguments():
     if len(argv) < 2:
         print_usage()
         exit(0)
 
-    if argv[1] not in (
+    if len(argv) > 3:
+        logger.error(
+            "Too many arguments provided. Please check the usage instructions."
+        )
+        print_usage()
+        exit(1)
+
+    command = argv[1]
+    if command not in (
         "-f",
         "--force",
         "-a",
@@ -168,9 +174,9 @@ def main():
         "--change",
     ):
         print_usage()
-        exit(0) if argv[1] in ("-h", "--help") else exit(1)
+        exit(0) if command in ("-h", "--help") else exit(1)
 
-    if argv[1] in ("-a", "--asn"):
+    if command in ("-a", "--asn"):
         if len(argv) < 3:
             logger.error(
                 "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
@@ -182,14 +188,17 @@ def main():
                 argv[2],
             )
             exit(1)
-        current_isp = check_isp_with_retries()
-        if current_isp is None:
-            logger.error("Unable to determine current ISP/ASN. Exiting.")
+    else:
+        if len(argv) > 2:
+            logger.error("Too many arguments provided for the selected mode.\n")
+            print_usage()
             exit(1)
-        if is_target_asn(current_isp=current_isp, target_asn=argv[2]):
-            logger.info("Already connected to the target ASN. No reconnection needed.")
-            exit(0)
 
+
+def main():
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    validate_arguments()
+    # TODO: Directly getting router object
     vendor = get_vendor_api()
     if vendor is None:
         logger.error("Unable to determine router vendor. Exiting.")
