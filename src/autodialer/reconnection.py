@@ -204,7 +204,6 @@ def validate_args():
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     validate_args()
-    # TODO: Directly getting router object
     router = get_router()
     if router is None:
         logger.error(
