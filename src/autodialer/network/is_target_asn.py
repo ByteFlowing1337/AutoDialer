@@ -20,6 +20,8 @@ def normalize_asn(asn: str) -> str:
     raw_asn = asn.strip().upper()
     if not raw_asn.startswith("AS"):
         raw_asn = "AS" + raw_asn
-    if len(raw_asn) > 2 and len(raw_asn) < 10 and raw_asn[2:].strip().isdigit():
-        return raw_asn
+
+    digits = raw_asn[2:].strip()
+    if 1 <= len(digits) <= 10 and digits.isdigit():
+        return "AS" + digits
     return ""
