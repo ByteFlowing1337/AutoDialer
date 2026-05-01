@@ -6,7 +6,6 @@ from typing import Literal
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.check_isp import check_isp_with_retries
 from autodialer.network.is_target_asn import is_target_asn
-from autodialer.config.config import ASN
 from autodialer.routers.get_vendor_api import get_vendor_api
 from autodialer.network.get_ip_address import get_ip_address
 from autodialer.network.wait_internet_recovery import wait_internet_recovery
@@ -110,7 +109,7 @@ class Reconnection:
                     if isp is None:
                         exit(1)
 
-                    if is_target_asn(isp, asn=asn):
+                    if is_target_asn(current_isp=isp, target_asn=asn):
                         return
 
                 logger.error(
@@ -126,10 +125,19 @@ class Reconnection:
                 self.run_reconnection(mode="asn", asn=argv[2])
             case "-c" | "--change":
                 self.run_reconnection(mode="change", asn=None)
+            case _:
+                logger.error("Unknown argument: %s", argv[1])
 
 
-def parse_arguments(asn: str | None) -> None:
-    if len(argv) == 1:
+def main():
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    if (
+        len(argv) < 2
+        or argv[1] in ("-h", "--help")
+        or argv[1] not in ("-f", "--force", "-a", "--asn", "-c", "--change")
+    ):
+        logger.error("No reconnection mode specified.")
         if Path(argv[0]).suffix.lower() == ".py":
             logger.error(
                 "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
@@ -138,42 +146,24 @@ def parse_arguments(asn: str | None) -> None:
             logger.error(
                 "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
             )
-        exit(1)
-
-    match argv[1]:
-        case "-f" | "--force":
-            return
-        case "-a" | "--asn":
-            if len(argv) < 3:
-                logger.error("Please provide an ASN after the -a or --asn flag.")
-                exit(1)
-            isp = check_isp_with_retries()
-            if isp is None:
-                exit(1)
-
-            if is_target_asn(isp, asn):
-                exit(0)
-            return
-        case "-c" | "--change":
-            return
-        case _:
-            logger.error("Unknown argument: %s", argv[1])
-            if Path(argv[0]).suffix.lower() == ".py":
-                logger.error(
-                    "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-                )
-            else:
-                logger.error(
-                    "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-                )
             exit(1)
+    if (
+        argv[1] in ("-a", "--asn")
+        and len(argv) < 3
+        or not isinstance(argv[2], str)
+        or not argv[2].startswith("AS")
+        or not argv[2][2:].isdigit()
+    ):
+        logger.error(
+            "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
+        )
+        exit(1)
+    if argv[1] in ("-a", "--asn") and is_target_asn(
+        current_isp=check_isp_with_retries(), target_asn=argv[2]
+    ):
+        logger.info("Already connected to the target ASN. No reconnection needed.")
+        exit(0)
 
-
-def main():
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parse_arguments(
-        asn=argv[2] if len(argv) > 2 else ASN
-    )  # Parse arguments before initializing the router
     vendor = get_vendor_api()
     if vendor is None:
         logger.error("Unable to determine router vendor. Exiting.")

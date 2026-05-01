@@ -25,7 +25,7 @@ class TestParseArguments(unittest.TestCase):
             reconnection_module, "argv", ["autodialer", "--asn", "AS9929"]
         ):
             with self.assertRaises(SystemExit) as context:
-                reconnection_module.parse_arguments("AS9929")
+                reconnection_module.main()
 
         self.assertEqual(context.exception.code, 0)
 
@@ -80,9 +80,11 @@ class TestReconnection(unittest.TestCase):
             events.append("check_isp")
             return next(isp_values)
 
-        def is_target_side_effect(isp: str, asn: str | None = None) -> bool:
+        def is_target_side_effect(
+            *, current_isp: str, target_asn: str | None = None
+        ) -> bool:
             events.append("is_target")
-            return isp.startswith("AS222")
+            return current_isp.startswith("AS222")
 
         mock_wait_internet_recovery.side_effect = wait_side_effect
         mock_check_isp_with_retries.side_effect = isp_side_effect
