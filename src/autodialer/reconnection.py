@@ -146,10 +146,9 @@ def main():
             logger.error(
                 "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
             )
-            exit(1)
-    if (
-        argv[1] in ("-a", "--asn")
-        and len(argv) < 3
+        exit(1)
+    if argv[1] in ("-a", "--asn") and (
+        len(argv) < 3
         or not isinstance(argv[2], str)
         or not argv[2].startswith("AS")
         or not argv[2][2:].isdigit()
