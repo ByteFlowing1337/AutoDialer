@@ -5,7 +5,7 @@ from typing import Literal
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.check_isp import check_isp_with_retries
-from autodialer.network.is_target_asn import is_target_asn
+from autodialer.network.is_target_asn import is_target_asn, normalize_asn
 from autodialer.routers.get_vendor_api import get_vendor_api
 from autodialer.network.get_ip_address import get_ip_address
 from autodialer.network.wait_internet_recovery import wait_internet_recovery
@@ -137,22 +137,16 @@ def main():
         or argv[1] in ("-h", "--help")
         or argv[1] not in ("-f", "--force", "-a", "--asn", "-c", "--change")
     ):
-        logger.error("No reconnection mode specified.")
+        if argv[1] not in ("-h", "--help"):
+            logger.error("No reconnection mode specified.")
         if Path(argv[0]).suffix.lower() == ".py":
-            logger.error(
+            logger.info(
                 "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
             )
         else:
-            logger.error(
-                "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
-            )
+            logger.info("Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]")
         exit(1)
-    if argv[1] in ("-a", "--asn") and (
-        len(argv) < 3
-        or not isinstance(argv[2], str)
-        or not argv[2].startswith("AS")
-        or not argv[2][2:].isdigit()
-    ):
+    if argv[1] in ("-a", "--asn") and (len(argv) < 3 or normalize_asn(argv[2]) == ""):
         logger.error(
             "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
         )
