@@ -127,6 +127,15 @@ class Reconnection:
                 self.run_reconnection(mode="change", asn=None)
             case _:
                 logger.error("Unknown argument: %s", argv[1])
+                if Path(argv[0]).suffix.lower() == ".py":
+                    logger.error(
+                        "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+                    )
+                else:
+                    logger.error(
+                        "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+                    )
+                exit(1)
 
 
 def main():
