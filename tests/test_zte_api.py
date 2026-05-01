@@ -94,8 +94,10 @@ class TestZTEApi(unittest.TestCase):
     @patch.object(zte_module, "get_gateway_ip", return_value="192.168.5.1")
     @patch.object(zte_module, "zte_security_encode", return_value="encoded-password")
     @patch.object(zte_module.requests, "Session")
+    @patch.object(zte_module, "sleep", return_value=None)
     def test_dhcp_renew_uses_authenticated_session_token(
         self,
+        _mock_sleep: Any,
         mock_session_cls: Any,
         _mock_encode: Any,
         _mock_gateway_ip: Any,

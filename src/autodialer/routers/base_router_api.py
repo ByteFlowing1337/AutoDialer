@@ -2,6 +2,8 @@ from typing import Protocol
 
 
 class RouterAPI(Protocol):
+    SUPPORTED_VENDORS = []
+
     def get_wan_proto(self) -> str | None: ...
 
     def make_pppoe_reconnection(self) -> bool: ...

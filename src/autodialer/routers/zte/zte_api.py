@@ -1,5 +1,6 @@
 import logging
 import re
+from time import sleep
 from typing import Any
 from xml.etree import ElementTree as ET
 
@@ -370,6 +371,7 @@ class ZTEApi(RouterAPI):
     def dhcp_renew(self) -> bool:
         first_attempt = self._restart_once()
         if first_attempt == "success":
+            sleep(30)  # ZTE routers often take longer to recover from DHCP renewals
             return True
         if first_attempt != "expired":
             return False
