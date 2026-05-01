@@ -15,7 +15,7 @@ def try_connect(delay: int = 5, attempts: int = 10) -> bool:
     Returns:
         True if a connection was successfully established, False otherwise.
     """
-    for _ in range(attempts):
+    for attempt in range(attempts):
         with socket.socket() as sock:
             sock.settimeout(delay)
             # Using TUN mode proxy will immediately return success here,
@@ -23,7 +23,8 @@ def try_connect(delay: int = 5, attempts: int = 10) -> bool:
             connected = sock.connect_ex(("8.8.8.8", 53)) == 0
         if connected:
             return True
-        sleep(delay) if _ < attempts - 1 else None  # Don't sleep after the last attempt
+        if attempt < attempts - 1:
+            sleep(delay)
     return False
 
 
