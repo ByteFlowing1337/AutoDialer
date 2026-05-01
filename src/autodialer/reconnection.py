@@ -155,7 +155,7 @@ def print_usage():
 def validate_args():
     if len(argv) < 2:
         print_usage()
-        exit(0)
+        exit(1)
 
     if len(argv) > 3:
         logger.error(
