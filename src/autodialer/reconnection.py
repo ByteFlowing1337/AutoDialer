@@ -6,7 +6,7 @@ from typing import Literal
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.check_isp import check_isp_with_retries
 from autodialer.network.is_target_asn import is_target_asn, normalize_asn
-from autodialer.routers.get_vendor_api import get_vendor_api
+from autodialer.routers.get_vendor_api import get_router
 from autodialer.network.get_ip_address import get_ip_address
 from autodialer.network.wait_internet_recovery import try_connect
 
@@ -199,11 +199,12 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     validate_arguments()
     # TODO: Directly getting router object
-    vendor = get_vendor_api()
-    if vendor is None:
-        logger.error("Unable to determine router vendor. Exiting.")
+    router = get_router()
+    if router is None:
+        logger.error(
+            "Unable to detect router vendor or no API implementation available. Exiting."
+        )
         exit(1)
-    router = vendor()
     reconnection = Reconnection(router)
     reconnection.main()
 
