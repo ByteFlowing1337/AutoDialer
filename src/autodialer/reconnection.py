@@ -152,7 +152,7 @@ def print_usage():
     )
 
 
-def validate_arguments():
+def validate_args():
     if len(argv) < 2:
         print_usage()
         exit(0)
@@ -197,7 +197,7 @@ def validate_arguments():
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    validate_arguments()
+    validate_args()
     # TODO: Directly getting router object
     router = get_router()
     if router is None:
