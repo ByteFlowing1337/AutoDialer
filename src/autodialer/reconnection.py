@@ -130,10 +130,23 @@ class Reconnection:
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    if (
-        len(argv) < 2
-        or argv[1] in ("-h", "--help")
-        or argv[1] not in ("-f", "--force", "-a", "--asn", "-c", "--change")
+    if len(argv) < 2:
+        logger.error("No reconnection mode specified.")
+        if Path(argv[0]).suffix.lower() == ".py":
+            logger.info(
+                "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            )
+        else:
+            logger.info("Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]")
+        exit(1)
+
+    if argv[1] in ("-h", "--help") or argv[1] not in (
+        "-f",
+        "--force",
+        "-a",
+        "--asn",
+        "-c",
+        "--change",
     ):
         if argv[1] not in ("-h", "--help"):
             logger.error("No reconnection mode specified.")
