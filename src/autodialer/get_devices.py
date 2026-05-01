@@ -42,7 +42,7 @@ def main() -> None:
     if not validate_args(argv):
         exit(1)
     router = get_router()
-    if not router:
+    if router is None:
         logger.error("Unsupported or undetected router vendor.")
         exit(1)
     devices = router.get_connected_devices()
