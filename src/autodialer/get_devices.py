@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 from sys import argv
-from autodialer.routers.get_vendor_api import get_router
-from autodialer.routers.base_router_api import RouterAPI
+from autodialer.routers.get_router import get_router
 
 
 logger = logging.getLogger(__name__)
@@ -30,8 +29,7 @@ def print_devices_table(devices: list) -> None:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if len(argv) == 1:
-        vendor = get_router()
-        router: RouterAPI | None = vendor() if vendor is not None else None
+        router = get_router()
         if router is not None:
             devices = router.get_connected_devices()
             print_devices_table(devices)
