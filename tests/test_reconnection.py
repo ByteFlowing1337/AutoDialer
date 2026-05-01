@@ -182,7 +182,7 @@ class TestPrintUsage(unittest.TestCase):
     def test_print_usage_for_python_script(self, mock_logger):
         reconnection_module.print_usage()
         mock_logger.info.assert_any_call(
-            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
         )
 
     @patch.object(reconnection_module, "argv", ["autodialer"])
@@ -190,7 +190,7 @@ class TestPrintUsage(unittest.TestCase):
     def test_print_usage_for_executable(self, mock_logger):
         reconnection_module.print_usage()
         mock_logger.info.assert_any_call(
-            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
         )
 
 

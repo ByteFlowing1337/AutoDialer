@@ -140,10 +140,12 @@ class Reconnection:
 def print_usage():
     if Path(argv[0]).suffix.lower() == ".py":
         logger.info(
-            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change]"
+            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
         )
     else:
-        logger.info("Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change]")
+        logger.info(
+            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
+        )
     logger.info(
         "\nReconnection modes:\n"
         "  -f, --force       Force a reconnection regardless of current ASN.\n"
