@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import Mock, call, patch
 
 import requests
-
+import requests.cookies
 
 zte_module = importlib.import_module("autodialer.routers.zte.zte_api")
 ZTEApi = zte_module.ZTEApi
