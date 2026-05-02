@@ -1,4 +1,5 @@
 __version__ = "0.3.0"
+__author__ = "Byteflow"
 
 from .network.check_isp import check_isp, check_isp_with_retries
 from .network.get_gateway import (
