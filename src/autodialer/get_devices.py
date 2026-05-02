@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from sys import argv
-from autodialer.routers.get_router import get_router
+from autodialer.routers import get_router
 
 
 logger = logging.getLogger(__name__)
