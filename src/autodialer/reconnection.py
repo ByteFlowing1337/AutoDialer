@@ -3,12 +3,12 @@ from sys import argv
 from pathlib import Path
 from typing import Literal
 
-from autodialer.routers.base_router_api import RouterAPI
-from autodialer.network.check_isp import check_isp_with_retries
-from autodialer.network.is_target_asn import is_target_asn, normalize_asn
-from autodialer.routers.get_router import get_router
-from autodialer.network.get_ip_address import get_ip_address
-from autodialer.network.wait_internet_recovery import try_connect
+from autodialer.routers import RouterAPI
+from autodialer.routers import get_router
+from autodialer.network import check_isp_with_retries
+from autodialer.network import is_target_asn, normalize_asn
+from autodialer.network import try_connect
+from autodialer.network import get_ip_address
 
 
 logger = logging.getLogger(__name__)
