@@ -214,8 +214,8 @@ def reconnection():
             "Unable to detect router vendor or no API implementation available. Exiting."
         )
         exit(1)
-    reconnection = Reconnection(router)
-    reconnection.main()
+    rec = Reconnection(router)
+    rec.main()
 
 
 if __name__ == "__main__":
