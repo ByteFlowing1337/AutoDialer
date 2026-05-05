@@ -1,5 +1,4 @@
 import logging
-import requests
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +16,9 @@ def check_isp(verbose: bool = False) -> str | None:
             This flag does not affect error reporting; error messages are
             always logged on failure.
     """
+    # Lazy import
+    import requests
+
     try:
         response = requests.get(
             "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=5

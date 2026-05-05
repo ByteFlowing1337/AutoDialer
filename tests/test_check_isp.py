@@ -5,13 +5,13 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from autodialer import check_isp, check_isp_with_retries
+from autodialer.network.check_isp import check_isp, check_isp_with_retries
 
 check_isp_module = importlib.import_module("autodialer.network.check_isp")
 
 
 class TestCheckIsp(unittest.TestCase):
-    @patch.object(check_isp_module.requests, "get")
+    @patch("requests.get")
     def test_check_isp_success_returns_org(self, mock_get: Any):
         response = Mock()
         response.raise_for_status.return_value = None
@@ -22,12 +22,12 @@ class TestCheckIsp(unittest.TestCase):
 
         self.assertEqual(result, "AS1234 Example ISP")
 
-    @patch.object(check_isp_module.requests, "get", side_effect=requests.Timeout)
+    @patch("requests.get", side_effect=requests.Timeout)
     def test_check_isp_timeout_returns_none(self, _mock_get: Any):
         result = check_isp()
         self.assertIsNone(result)
 
-    @patch.object(check_isp_module.requests, "get")
+    @patch("requests.get")
     def test_check_isp_invalid_payload_returns_none(self, mock_get: Any):
         response = Mock()
         response.raise_for_status.return_value = None
