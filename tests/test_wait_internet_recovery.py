@@ -3,7 +3,7 @@ import importlib
 from unittest.mock import patch
 
 try_connect_module = importlib.import_module(
-    "src.autodialer.network.wait_internet_recovery"
+    "autodialer.network.wait_internet_recovery"
 )
 
 
