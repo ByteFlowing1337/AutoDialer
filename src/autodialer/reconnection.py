@@ -205,7 +205,7 @@ def validate_args():
             exit(1)
 
 
-def main():
+def reconnection():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     validate_args()
     router = get_router()
@@ -219,4 +219,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    reconnection()

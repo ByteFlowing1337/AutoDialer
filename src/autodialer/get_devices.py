@@ -37,7 +37,7 @@ def validate_args(args: list[str]) -> bool:
     return False
 
 
-def main() -> None:
+def get_devices() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if not validate_args(argv):
         exit(1)
@@ -50,4 +50,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    get_devices()
