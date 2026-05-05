@@ -205,7 +205,7 @@ def validate_args():
             exit(1)
 
 
-def main():
+def reconnection():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     validate_args()
     router = get_router()
@@ -214,9 +214,9 @@ def main():
             "Unable to detect router vendor or no API implementation available. Exiting."
         )
         exit(1)
-    reconnection = Reconnection(router)
-    reconnection.main()
+    rec = Reconnection(router)
+    rec.main()
 
 
 if __name__ == "__main__":
-    main()
+    reconnection()

@@ -1,6 +1,6 @@
 import unittest
 
-from autodialer import is_target_asn
+from autodialer.network import is_target_asn
 
 
 class TestIsTargetAsn(unittest.TestCase):
