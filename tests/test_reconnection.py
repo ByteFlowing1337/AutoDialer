@@ -171,7 +171,7 @@ class TestReconnection(unittest.TestCase):
             reconnection_module, "argv", ["autodialer", "--asn", "AS9929"]
         ):
             with self.assertRaises(SystemExit) as context:
-                reconnection_module.main()
+                reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 0)
 
@@ -198,21 +198,21 @@ class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "argv", ["autodialer", "--help"])
     def test_help_mode_exits_with_zero(self):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
         self.assertEqual(context.exception.code, 0)
 
     @patch.object(reconnection_module, "argv", ["autodialer", "--help"])
     @patch.object(reconnection_module, "logger")
     def test_help_mode_exits_with_info_message(self, mock_logger):
         with self.assertRaises(SystemExit):
-            reconnection_module.main()
+            reconnection_module.reconnection()
         self.assertIn("Reconnection modes", mock_logger.info.call_args[0][0])
 
     @patch.object(reconnection_module, "argv", ["autodialer", "--invalid"])
     @patch.object(reconnection_module, "logger")
     def test_invalid_argument_exits_with_error(self, mock_logger):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 1)
         self.assertIn("Reconnection modes", mock_logger.info.call_args[0][0])
@@ -221,7 +221,7 @@ class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "logger")
     def test_asn_argument_without_value_exits_with_error(self, mock_logger):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 1)
         self.assertIn("ASN parameter is required", mock_logger.error.call_args[0][0])
@@ -230,7 +230,7 @@ class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "logger")
     def test_asn_argument_with_invalid_value_exits_with_error(self, mock_logger):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 1)
         self.assertIn("Invalid ASN format", mock_logger.error.call_args[0][0])
@@ -239,7 +239,7 @@ class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "logger")
     def test_too_many_arguments_exits_with_error_1(self, mock_logger):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 1)
         self.assertIn("Too many arguments provided", mock_logger.error.call_args[0][0])
@@ -250,7 +250,7 @@ class TestValidateArgs(unittest.TestCase):
     @patch.object(reconnection_module, "logger")
     def test_too_many_arguments_exits_with_error_2(self, mock_logger):
         with self.assertRaises(SystemExit) as context:
-            reconnection_module.main()
+            reconnection_module.reconnection()
 
         self.assertEqual(context.exception.code, 1)
         self.assertIn("Too many arguments provided", mock_logger.error.call_args[0][0])
