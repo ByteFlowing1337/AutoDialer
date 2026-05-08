@@ -1,7 +1,9 @@
 import logging
+import sys
 from pathlib import Path
 from sys import argv
 from autodialer.routers import get_router
+from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -39,12 +41,13 @@ def validate_args(args: list[str]) -> bool:
 
 def get_devices() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    parse_and_save_env_flags()
     if not validate_args(argv):
-        exit(1)
+        sys.exit(1)
     router = get_router()
     if router is None:
         logger.error("Unsupported or undetected router vendor.")
-        exit(1)
+        sys.exit(1)
     devices = router.get_connected_devices()
     print_devices_table(devices)
 

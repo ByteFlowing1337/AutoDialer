@@ -8,10 +8,16 @@ import requests
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.get_gateway import get_gateway_ip, format_ip_for_url_host
-from autodialer.config.config import PANEL_PASSWORD, PANEL_USERNAME
+from autodialer.config import load_env_file
 from autodialer.routers.zte.zte_encode import zte_security_encode
 
 logger = logging.getLogger(__name__)
+env_var = load_env_file()
+PANEL_PASSWORD: str = env_var.PANEL_PASSWORD
+PANEL_USERNAME: str = env_var.PANEL_USERNAME
+PPPOE_USERNAME: str | None = env_var.PPPOE_USERNAME
+PPPOE_PASSWORD: str | None = env_var.PPPOE_PASSWORD
+ASN: str | None = env_var.ASN
 
 
 class ZTEApi(RouterAPI):
