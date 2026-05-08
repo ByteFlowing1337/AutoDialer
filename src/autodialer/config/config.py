@@ -51,7 +51,7 @@ def load_env_file():
         logger.error(
             f".env file not found at {env_file}. Please create it or set values via -e."
         )
-        sys.exit(1)
+        env_file.touch()  # Create an empty .env file to avoid issues with dotenv
     dotenv.load_dotenv(str(env_file))
 
     # For some routers, username is not required, so we can default to "admin".
