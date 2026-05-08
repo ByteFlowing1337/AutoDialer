@@ -11,6 +11,7 @@ from autodialer.network import (
     normalize_asn,
     try_connect,
 )
+from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -153,6 +154,8 @@ def print_usage():
         "  -f, --force       Force a reconnection regardless of current ASN.\n"
         "  -a, --asn <ASN>   Reconnect until connected to the specified target ASN. Requires an ASN argument, e.g. AS12345.\n"
         "  -c, --change      Reconnect until the public IP address changes.\n"
+        "\nEnvironment Overrides:\n"
+        "  -e, --env <KEY=VAL> Temporarily update or configure an environment variable.\n"
     )
 
 
@@ -176,6 +179,8 @@ def validate_args():
         "--asn",
         "-c",
         "--change",
+        "-e",
+        "--env",
     ):
         print_usage()
         exit(0) if command in ("-h", "--help") else exit(1)
@@ -207,6 +212,7 @@ def validate_args():
 
 def reconnection():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    parse_and_save_env_flags()
     validate_args()
     router = get_router()
     if router is None:

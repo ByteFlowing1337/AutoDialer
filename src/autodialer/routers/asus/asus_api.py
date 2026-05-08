@@ -9,7 +9,11 @@ import requests
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
-from autodialer.config.config import PANEL_PASSWORD, PANEL_USERNAME
+from autodialer.config import load_env_file
+
+env_var = load_env_file()
+PANEL_PASSWORD: str = env_var.PANEL_PASSWORD
+PANEL_USERNAME: str = env_var.PANEL_USERNAME
 
 USER_AGENT = "AutoDialer"
 REQUEST_TIMEOUT = 5
@@ -28,20 +32,17 @@ class AsusAPI(RouterAPI):
     """Interact with ASUSWRT routers using the web API."""
 
     SUPPORTED_VENDORS = ("ASUS", "ASUS AiMesh")
-
-    router_ip: str
-    panel_username: str
-    panel_password: str
     base_url: str
-    token: str
-    verify_ssl: bool
 
     def __init__(self):
-        self.router_ip = get_gateway_ip()
-        self.panel_username = PANEL_USERNAME
-        self.panel_password = PANEL_PASSWORD
+        self.router_ip: str = get_gateway_ip()
+        self.panel_username: str = PANEL_USERNAME
+        self.panel_password: str = PANEL_PASSWORD
         self.session = requests.Session()
-        self.base_url, self.verify_ssl, self.token = self._login_router()
+        login_result = self._login_router()
+        self.base_url: str = login_result[0]
+        self.verify_ssl: bool = login_result[1]
+        self.token: str = login_result[2]
 
     def _candidate_base_urls(self) -> list[tuple[str, bool]]:
         router_host = format_ip_for_url_host(self.router_ip)
