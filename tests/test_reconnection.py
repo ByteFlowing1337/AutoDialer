@@ -79,7 +79,7 @@ class TestReconnection(unittest.TestCase):
         )
         mock_exit.assert_not_called()
 
-    @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch("sys.exit", side_effect=SystemExit(1))
     @patch.object(reconnection_module, "try_connect", return_value=False)
     @patch.object(reconnection_module, "get_ip_address", return_value=None)
     def test_change_mode_exits_when_initial_ip_fetch_fails(
@@ -99,7 +99,7 @@ class TestReconnection(unittest.TestCase):
         router.dhcp_renew.assert_not_called()
         mock_exit.assert_called_once_with(1)
 
-    @patch("builtins.exit")
+    @patch("sys.exit")
     @patch.object(
         reconnection_module, "check_isp_with_retries", return_value="AS9999 Example ISP"
     )
@@ -126,7 +126,7 @@ class TestReconnection(unittest.TestCase):
         mock_check_isp_with_retries.assert_called_once_with()
         mock_exit.assert_not_called()
 
-    @patch("builtins.exit", side_effect=SystemExit(1))
+    @patch("sys.exit", side_effect=SystemExit(1))
     @patch.object(reconnection_module, "try_connect", return_value=True)
     @patch.object(
         reconnection_module,
