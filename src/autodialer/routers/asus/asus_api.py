@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import re
+import sys
 from typing import Any
 from urllib.parse import quote
 
@@ -275,7 +276,7 @@ class AsusAPI(RouterAPI):
                 return base_url, verify_ssl, token
 
         logger.error("Login failed.")
-        exit(1)
+        sys.exit(1)
 
     def _auth_headers(self) -> dict[str, str]:
         return {

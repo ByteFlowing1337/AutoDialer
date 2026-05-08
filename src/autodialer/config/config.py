@@ -8,10 +8,14 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 
 
+def get_env_file_path():
+    return Path(__file__).resolve().parent.parent / ".env"
+
+
 def parse_and_save_env_flags():
     """Extracts -e / --env flags, saves them to .env, and removes them from sys.argv"""
 
-    env_file_path = Path(".env")
+    env_file_path = get_env_file_path()
 
     # Create an empty .env file if it doesn't exist so python-dotenv doesn't complain
     if not env_file_path.exists():
@@ -42,13 +46,13 @@ def parse_and_save_env_flags():
 
 
 def load_env_file():
-    env_file = dotenv.find_dotenv()
-    if env_file == "":
+    env_file = get_env_file_path()
+    if not env_file.exists():
         logger.error(
-            ".env file not found. Please create a .env file with appropriate values."
+            f".env file not found at {env_file}. Please create it or set values via -e."
         )
-        exit(1)
-    dotenv.load_dotenv(env_file)
+        sys.exit(1)
+    dotenv.load_dotenv(str(env_file))
 
     # For some routers, username is not required, so we can default to "admin".
     PANEL_USERNAME: str = os.getenv("PANEL_USERNAME") or "admin"
@@ -57,7 +61,7 @@ def load_env_file():
     _PANEL_PASSWORD: str | None = os.getenv("PANEL_PASSWORD")
     if _PANEL_PASSWORD is None:
         logger.error("Error: PANEL_PASSWORD environment variable is not set.")
-        exit(1)
+        sys.exit(1)
 
     PANEL_PASSWORD: str = _PANEL_PASSWORD
     PPPOE_USERNAME: str | None = os.getenv("PPPOE_USERNAME") or None

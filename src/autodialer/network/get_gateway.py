@@ -4,6 +4,7 @@ import platform
 import socket
 import struct
 import subprocess
+import sys
 from collections.abc import Callable, Iterable
 from urllib.parse import quote
 
@@ -62,7 +63,7 @@ def _get_gateway_ip_unsupported() -> str:
         "Unsupported platform: %s. Cannot determine default gateway IP address.",
         platform.system(),
     )
-    exit(1)
+    sys.exit(1)
 
 
 def get_gateway_ip_on_windows() -> str:
@@ -75,7 +76,7 @@ def get_gateway_ip_on_windows() -> str:
         )
     except OSError as e:
         logger.error("Failed to execute 'route print -4': %s", e)
-        exit(1)
+        sys.exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -86,7 +87,7 @@ def get_gateway_ip_on_windows() -> str:
             if _is_ip_address(gateway):
                 return gateway
     logger.error("Default gateway not found in 'route print -4' output.")
-    exit(1)
+    sys.exit(1)
 
 
 def get_gateway_ip_on_linux() -> str:
@@ -121,7 +122,7 @@ def get_gateway_ip_on_linux() -> str:
         )
     except OSError as e:
         logger.error("Failed to execute 'ip -4 route show default': %s", e)
-        exit(1)
+        sys.exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -139,7 +140,7 @@ def get_gateway_ip_on_linux() -> str:
         if parsed_gateway is not None:
             return parsed_gateway
     logger.error("Default gateway not found in 'ip -4 route show default' output.")
-    exit(1)
+    sys.exit(1)
 
 
 def get_gateway_ip_on_unix() -> str:
@@ -152,7 +153,7 @@ def get_gateway_ip_on_unix() -> str:
         )
     except OSError as e:
         logger.error("Failed to execute 'route -n get default': %s", e)
-        exit(1)
+        sys.exit(1)
 
     if result is not None:
         for line in result.stdout.splitlines():
@@ -172,7 +173,7 @@ def get_gateway_ip_on_unix() -> str:
         )
     except OSError as e:
         logger.error("Failed to execute 'netstat -rn': %s", e)
-        exit(1)
+        sys.exit(1)
 
     for line in result.stdout.splitlines():
         fields = line.split()
@@ -189,7 +190,7 @@ def get_gateway_ip_on_unix() -> str:
     logger.error(
         "Default gateway not found in 'route -n get default' or 'netstat -rn' output."
     )
-    exit(1)
+    sys.exit(1)
 
 
 platform_system = platform.system()

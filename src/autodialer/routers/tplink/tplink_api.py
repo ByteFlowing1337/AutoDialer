@@ -73,7 +73,9 @@ class TPLinkAPI(RouterAPI):
         else:
             logger.error("Login failed.")
             logger.debug(response)
-            exit(1)
+            import sys
+
+            sys.exit(1)
         return None
 
     def set_credentials(self) -> bool:
