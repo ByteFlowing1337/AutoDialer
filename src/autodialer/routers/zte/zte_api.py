@@ -8,7 +8,7 @@ import requests
 
 from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.get_gateway import get_gateway_ip, format_ip_for_url_host
-from autodialer.config.config import load_env_file
+from autodialer.config import load_env_file
 from autodialer.routers.zte.zte_encode import zte_security_encode
 
 logger = logging.getLogger(__name__)
