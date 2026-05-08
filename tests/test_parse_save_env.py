@@ -37,7 +37,18 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
 
     @patch("autodialer.config.config.logger")
     @patch.object(sys, "argv", ["script.py", "-e"])
-    def test_parse_and_save_env_flags_no_env(self, mock_logger):
+    def test_parse_and_save_env_flags_no_env_1(self, mock_logger):
+        # Simulate command-line arguments without env flags
+        with self.assertRaises(SystemExit) as context:
+            parse_and_save_env_flags()
+        self.assertTrue(context.exception.code != 0)
+        mock_logger.error.assert_called_with(
+            "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+        )
+
+    @patch("autodialer.config.config.logger")
+    @patch.object(sys, "argv", ["script.py", "-e", "PANEL_PASSWORD="])
+    def test_parse_and_save_env_flags_no_env_2(self, mock_logger):
         # Simulate command-line arguments without env flags
         with self.assertRaises(SystemExit) as context:
             parse_and_save_env_flags()

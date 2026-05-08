@@ -26,6 +26,11 @@ def parse_and_save_env_flags():
         if sys.argv[i] in ("-e", "--env"):
             if i + 1 < len(sys.argv) and "=" in sys.argv[i + 1]:
                 key, value = sys.argv[i + 1].split("=", 1)
+                if not value:
+                    logger.error(
+                        "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+                    )
+                    sys.exit(1)
 
                 # Write the key-value pair to the .env file
                 dotenv.set_key(str(env_file_path), key, value)
