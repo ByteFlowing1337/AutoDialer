@@ -7,9 +7,26 @@ from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
+APP_NAME = "AutoDialer"
 
-def get_env_file_path():
-    return Path(__file__).resolve().parent.parent / ".env"
+
+def _default_config_dir() -> Path:
+    if sys.platform.startswith("win"):
+        base = os.getenv("APPDATA")
+        if base:
+            return Path(base) / APP_NAME
+        return Path.home() / "AppData" / "Roaming" / APP_NAME
+    elif sys.platform == "linux":
+        return Path.home() / ".config" / APP_NAME.lower()
+    elif sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / APP_NAME
+    return Path.home() / ".config" / APP_NAME.lower()
+
+
+def get_env_file_path() -> Path:
+    config_dir = Path(os.getenv("AUTODIALER_CONFIG_DIR") or _default_config_dir())
+    config_dir.mkdir(parents=True, exist_ok=True)
+    return config_dir / ".env"
 
 
 def parse_and_save_env_flags():
