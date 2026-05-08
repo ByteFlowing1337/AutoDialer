@@ -5,7 +5,12 @@ from autodialer.routers.base_router_api import RouterAPI
 from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 from typing import Literal
 from urllib.parse import unquote
-from autodialer.config.config import PANEL_PASSWORD, PPPOE_USERNAME, PPPOE_PASSWORD
+from autodialer.config import load_env_file
+
+env_var = load_env_file()
+PANEL_PASSWORD: str = env_var.PANEL_PASSWORD
+PPPOE_USERNAME: str | None = env_var.PPPOE_USERNAME
+PPPOE_PASSWORD: str | None = env_var.PPPOE_PASSWORD
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +73,9 @@ class TPLinkAPI(RouterAPI):
         else:
             logger.error("Login failed.")
             logger.debug(response)
-            exit(1)
+            import sys
+
+            sys.exit(1)
         return None
 
     def set_credentials(self) -> bool:
