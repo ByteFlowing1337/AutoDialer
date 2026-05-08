@@ -155,7 +155,7 @@ def print_usage():
         "  -a, --asn <ASN>   Reconnect until connected to the specified target ASN. Requires an ASN argument, e.g. AS12345.\n"
         "  -c, --change      Reconnect until the public IP address changes.\n"
         "\nEnvironment Overrides:\n"
-        "  -e, --env <KEY=VAL> Temporarily update or configure an environment variable.\n"
+        "  -e, --env <KEY=VAL> Update or configure an environment variable by writing it to .env.\n"
     )
 
 
