@@ -3,6 +3,7 @@ import sys
 import dotenv
 import logging
 from pathlib import Path
+import tempfile
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
@@ -10,17 +11,30 @@ logger = logging.getLogger(__name__)
 APP_NAME = "AutoDialer"
 
 
+def _safe_home_dir() -> Path:
+    try:
+        return Path.home()
+    except RuntimeError:
+        fallback_dir = (
+            os.getenv("HOME")
+            or os.getenv("USERPROFILE")
+            or os.getenv("TEMP")
+            or tempfile.gettempdir()
+        )
+        return Path(fallback_dir)
+
+
 def _default_config_dir() -> Path:
     if sys.platform.startswith("win"):
         base = os.getenv("APPDATA")
         if base:
             return Path(base) / APP_NAME
-        return Path.home() / "AppData" / "Roaming" / APP_NAME
+        return _safe_home_dir() / "AppData" / "Roaming" / APP_NAME
     elif sys.platform == "linux":
-        return Path.home() / ".config" / APP_NAME.lower()
+        return _safe_home_dir() / ".config" / APP_NAME.lower()
     elif sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / APP_NAME
-    return Path.home() / ".config" / APP_NAME.lower()
+        return _safe_home_dir() / "Library" / "Application Support" / APP_NAME
+    return _safe_home_dir() / ".config" / APP_NAME.lower()
 
 
 def get_env_file_path() -> Path:
