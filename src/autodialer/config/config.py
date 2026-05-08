@@ -48,7 +48,7 @@ def parse_and_save_env_flags():
 def load_env_file():
     env_file = get_env_file_path()
     if not env_file.exists():
-        logger.error(
+        logger.warning(
             f".env file not found at {env_file}. Please create it or set values via -e."
         )
         env_file.touch()  # Create an empty .env file to avoid issues with dotenv
