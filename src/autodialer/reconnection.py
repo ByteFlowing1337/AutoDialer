@@ -198,6 +198,13 @@ def reconnection():
     if args.force:
         rec.main(mode="force")
     elif args.asn:
+        if is_target_asn(
+            current_isp=check_isp_with_retries(), target_asn=normalize_asn(args.asn)
+        ):
+            logger.info(
+                "Already connected to target ASN %s. No reconnection needed.", args.asn
+            )
+            sys.exit(0)
         rec.main(mode="asn", asn=normalize_asn(args.asn))
     elif args.change:
         rec.main(mode="change")

@@ -156,6 +156,8 @@ class TestReconnection(unittest.TestCase):
         self.assertEqual(mock_get_ip_address.call_count, 4)
         mock_exit.assert_called_once_with(1)
 
+    @patch("sys.argv", ["autodialer", "--asn", "AS9929"])
+    @patch.object(reconnection_module, "get_router", return_value=Mock())
     @patch.object(reconnection_module, "is_target_asn", return_value=True)
     @patch.object(
         reconnection_module,
@@ -166,17 +168,16 @@ class TestReconnection(unittest.TestCase):
         self,
         _mock_check_isp: Any,
         _mock_is_target_asn: Any,
+        _mock_get_router: Any,
     ):
-        with patch.object(
-            reconnection_module, "argv", ["autodialer", "--asn", "AS9929"]
-        ):
-            with self.assertRaises(SystemExit) as context:
-                reconnection_module.reconnection()
 
-        self.assertEqual(context.exception.code, 2)
+        with self.assertRaises(SystemExit) as context:
+            reconnection_module.reconnection()
+
+        self.assertEqual(context.exception.code, 0)
 
 
-class TestValidateArgs(unittest.TestCase):
+class TestArgParse(unittest.TestCase):
     @patch("sys.argv", ["autodialer", "--help"])
     def test_help_mode_exits_with_zero(self):
         with self.assertRaises(SystemExit) as context:
