@@ -186,7 +186,7 @@ def reconnection():
 
     args = parser.parse_args()
     if args.env:
-        parse_and_save_env_flags()
+        parse_and_save_env_flags(args.env)
 
     router = get_router()
     if router is None:

@@ -43,8 +43,8 @@ def get_env_file_path() -> Path:
     return config_dir / ".env"
 
 
-def parse_and_save_env_flags():
-    """Extracts -e / --env flags, saves them to .env, and removes them from sys.argv"""
+def parse_and_save_env_flags(env_args: list[str]):
+    """Saves passed KEY=VALUE strings to .env and the current environment."""
 
     env_file_path = get_env_file_path()
 
@@ -52,33 +52,25 @@ def parse_and_save_env_flags():
     if not env_file_path.exists():
         env_file_path.touch()
 
-    i = 1
-    while i < len(sys.argv):
-        if sys.argv[i] in ("-e", "--env"):
-            if i + 1 < len(sys.argv) and "=" in sys.argv[i + 1]:
-                key, value = sys.argv[i + 1].split("=", 1)
-                if not value:
-                    logger.error(
-                        "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
-                    )
-                    sys.exit(1)
+    for item in env_args:
+        if "=" not in item:
+            logger.error(
+                "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+            )
+            sys.exit(1)
 
-                # Write the key-value pair to the .env file
-                dotenv.set_key(str(env_file_path), key, value)
+        key, value = item.split("=", 1)
+        if not value:
+            logger.error(
+                "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+            )
+            sys.exit(1)
 
-                # Update the current environment immediately
-                os.environ[key] = value
+        # Write the key-value pair to the .env file
+        dotenv.set_key(str(env_file_path), key, value)
 
-                # Remove the parsed arguments from sys.argv
-                sys.argv.pop(i)
-                sys.argv.pop(i)
-            else:
-                logger.error(
-                    "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
-                )
-                sys.exit(1)
-        else:
-            i += 1
+        # Update the current environment immediately
+        os.environ[key] = value
 
 
 def load_env_file():
