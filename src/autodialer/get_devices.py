@@ -1,9 +1,7 @@
 import logging
 import sys
-from pathlib import Path
-from sys import argv
+import argparse
 from autodialer.routers import get_router
-from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -28,22 +26,23 @@ def print_devices_table(devices: list) -> None:
         )
 
 
-def validate_args(args: list[str]) -> bool:
-    if len(args) == 1:
-        return True
-    logger.error("Unknown argument: %s", args[1])
-    if Path(args[0]).suffix.lower() == ".py":
-        logger.error("Usage: python get_devices.py")
-    else:
-        logger.error("Usage: autodialer-devices")
-    return False
-
-
 def get_devices() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parse_and_save_env_flags()
-    if not validate_args(argv):
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Get connected devices from the router."
+    )
+    parser.add_argument(
+        "-e",
+        "--env",
+        action="append",
+        help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
+    )
+    args = parser.parse_args()
+    if args.env:
+        from autodialer.config import parse_and_save_env_flags
+
+        parse_and_save_env_flags(args.env)
+
     router = get_router()
     if router is None:
         logger.error("Unsupported or undetected router vendor.")
