@@ -2,7 +2,6 @@ import logging
 import sys
 import argparse
 from autodialer.routers import get_router
-from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -40,6 +39,8 @@ def get_devices() -> None:
     )
     args = parser.parse_args()
     if args.env:
+        from autodialer.config import parse_and_save_env_flags
+
         parse_and_save_env_flags(args.env)
 
     router = get_router()

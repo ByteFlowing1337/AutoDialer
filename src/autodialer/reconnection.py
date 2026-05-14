@@ -10,7 +10,6 @@ from autodialer.network import (
     normalize_asn,
     try_connect,
 )
-from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -184,8 +183,14 @@ def reconnection():
         help="Reconnect until the public IP address changes.",
     )
 
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+
     args = parser.parse_args()
     if args.env:
+        from autodialer.config import parse_and_save_env_flags
+
         parse_and_save_env_flags(args.env)
 
     router = get_router()
