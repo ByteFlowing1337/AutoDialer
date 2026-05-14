@@ -1,7 +1,6 @@
 import logging
 import sys
-from sys import argv
-from pathlib import Path
+import argparse
 from typing import Literal
 from autodialer.routers import RouterAPI, get_router
 from autodialer.network import (
@@ -11,7 +10,6 @@ from autodialer.network import (
     normalize_asn,
     try_connect,
 )
-from autodialer.config import parse_and_save_env_flags
 
 
 logger = logging.getLogger(__name__)
@@ -130,90 +128,71 @@ class Reconnection:
                 )
                 sys.exit(1)
 
-    def main(self) -> None:
-        match argv[1]:
-            case "-f" | "--force":
+    def main(
+        self, mode: Literal["force", "asn", "change"], asn: str | None = None
+    ) -> None:
+        match mode:
+            case "force":
                 self.run_reconnection(mode="force", asn=None)
-            case "-a" | "--asn":
-                self.run_reconnection(mode="asn", asn=argv[2])
-            case "-c" | "--change":
+            case "asn":
+                self.run_reconnection(mode="asn", asn=asn)
+            case "change":
                 self.run_reconnection(mode="change", asn=None)
 
 
-def print_usage():
-    if Path(argv[0]).suffix.lower() == ".py":
-        logger.info(
-            "Usage: python reconnection.py [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
+def validate_asn(value: str) -> str:
+    normalized = normalize_asn(value)
+    if not normalized:
+        raise argparse.ArgumentTypeError(
+            f"Invalid ASN format: '{value}'. Valid range is AS1 to AS4294967295."
         )
-    else:
-        logger.info(
-            "Usage: autodialer [-f|--force] [-a|--asn <ASN>] [-c|--change] [-h|--help]"
-        )
-    logger.info(
-        "\nReconnection modes:\n"
-        "  -f, --force       Force a reconnection regardless of current ASN.\n"
-        "  -a, --asn <ASN>   Reconnect until connected to the specified target ASN. Requires an ASN argument, e.g. AS12345.\n"
-        "  -c, --change      Reconnect until the public IP address changes.\n"
-        "\nEnvironment Overrides:\n"
-        "  -e, --env <KEY=VAL> Update or configure an environment variable by writing it to .env.\n"
-    )
-
-
-def validate_args():
-    if len(argv) < 2:
-        print_usage()
-        sys.exit(1)
-
-    if len(argv) > 3:
-        logger.error(
-            "Too many arguments provided. Please check the usage instructions."
-        )
-        print_usage()
-        sys.exit(1)
-
-    command = argv[1]
-    if command not in (
-        "-f",
-        "--force",
-        "-a",
-        "--asn",
-        "-c",
-        "--change",
-        "-e",
-        "--env",
-    ):
-        print_usage()
-        exit(0) if command in ("-h", "--help") else sys.exit(1)
-
-    if command in ("-a", "--asn"):
-        if len(argv) < 3:
-            logger.error(
-                "ASN parameter is required when using the -a or --asn flag. e.g. AS12345"
-            )
-            sys.exit(1)
-        if not normalize_asn(argv[2]):
-            logger.error(
-                "Invalid ASN format: %s. ASN should be in the format 'AS12345' or '12345'.",
-                argv[2],
-            )
-            sys.exit(1)
-        if is_target_asn(current_isp=check_isp_with_retries(), target_asn=argv[2]):
-            logger.info(
-                "Already connected to the target ASN %s. No reconnection needed.",
-                argv[2],
-            )
-            exit(0)
-    else:
-        if len(argv) > 2:
-            logger.error("Too many arguments provided for the selected mode.\n")
-            print_usage()
-            sys.exit(1)
+    return normalized
 
 
 def reconnection():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parse_and_save_env_flags()
-    validate_args()
+    parser = argparse.ArgumentParser(
+        description="Restart router WAN connection to obtain a new IP address or switch ASNs."
+    )
+    parser.add_argument(
+        "-e",
+        "--env",
+        metavar="<KEY=VAL>",
+        action="append",
+        help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
+    )
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force a reconnection regardless of current ASN.",
+    )
+    group.add_argument(
+        "-a",
+        "--asn",
+        metavar="<ASN>",
+        type=validate_asn,
+        help="Reconnect until connected to the specified target ASN.",
+    )
+    group.add_argument(
+        "-c",
+        "--change",
+        action="store_true",
+        help="Reconnect until the public IP address changes.",
+    )
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+
+    args = parser.parse_args()
+    if args.env:
+        from autodialer.config import parse_and_save_env_flags
+
+        parse_and_save_env_flags(args.env)
+
     router = get_router()
     if router is None:
         logger.error(
@@ -221,7 +200,19 @@ def reconnection():
         )
         sys.exit(1)
     rec = Reconnection(router)
-    rec.main()
+    if args.force:
+        rec.main(mode="force")
+    elif args.asn:
+        if is_target_asn(
+            current_isp=check_isp_with_retries(), target_asn=normalize_asn(args.asn)
+        ):
+            logger.info(
+                "Already connected to target ASN %s. No reconnection needed.", args.asn
+            )
+            sys.exit(0)
+        rec.main(mode="asn", asn=normalize_asn(args.asn))
+    elif args.change:
+        rec.main(mode="change")
 
 
 if __name__ == "__main__":
