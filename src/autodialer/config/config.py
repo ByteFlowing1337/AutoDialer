@@ -60,7 +60,7 @@ def parse_and_save_env_flags(env_args: list[str]):
             sys.exit(1)
 
         key, value = item.split("=", 1)
-        if not value:
+        if not value or not key:
             logger.error(
                 "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
             )
