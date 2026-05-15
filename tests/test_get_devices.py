@@ -15,10 +15,10 @@ class TestGetDevices(unittest.TestCase):
                 "is_current": True,
             },
         ]
+        from autodialer.get_devices import print_devices_table
+
         with patch("sys.stdout.isatty", return_value=True):
             with patch("builtins.print") as mock_print:
-                from autodialer.get_devices import print_devices_table
-
                 print_devices_table(devices)
                 has_ansi = any(
                     "\033" in str(arg)
