@@ -20,9 +20,12 @@ class TestGetDevices(unittest.TestCase):
                 from autodialer.get_devices import print_devices_table
 
                 print_devices_table(devices)
-                self.assertIn(
-                    "\033", mock_print.call_args[0][0]
-                )  # Check for ANSI color codes
+                has_ansi = any(
+                    "\033" in str(arg)
+                    for call in mock_print.call_args_list
+                    for arg in call[0]
+                )
+                self.assertTrue(has_ansi)  # Check for ANSI color codes
 
     def test_print_devices_table_without_color_on_non_tty(self):
         devices = [
@@ -41,6 +44,9 @@ class TestGetDevices(unittest.TestCase):
                 from autodialer.get_devices import print_devices_table
 
                 print_devices_table(devices)
-                self.assertFalse(
-                    any("\033" in arg for arg in mock_print.call_args[0])
-                )  # Check that no ANSI color codes are present
+                has_ansi = any(
+                    "\033" in str(arg)
+                    for call in mock_print.call_args_list
+                    for arg in call[0]
+                )
+                self.assertFalse(has_ansi)  # Check that no ANSI color codes are present
