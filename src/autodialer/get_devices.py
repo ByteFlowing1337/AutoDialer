@@ -28,8 +28,8 @@ def print_devices_table(devices: list) -> None:
             is_me = d["is_current"]
 
             # Determine the color and the 'ME' marker based on 'is_current'
-            is_me_color = GREEN if is_me else RESET
-            me_marker = f"{GREEN}  Y{RESET}" if is_me else f"{RED}  N{RESET}"
+            is_me_color = GREEN if is_me else RED
+            me_marker = "Y" if is_me else "N"
 
             print(
                 f"{is_me_color}{d['hostname'][:25]:25}{RESET} "
@@ -38,7 +38,7 @@ def print_devices_table(devices: list) -> None:
                 f"{d['type'][:9]:9} "
                 f"{d['up_kbps']:>6} "
                 f"{d['down_kbps']:>6} "
-                f"{me_marker}"
+                f"{is_me_color}{me_marker:>2}{RESET}"
             )
     else:
         print(header)
@@ -53,7 +53,7 @@ def print_devices_table(devices: list) -> None:
                 f"{d['type'][:9]:9} "
                 f"{d['up_kbps']:>6} "
                 f"{d['down_kbps']:>6} "
-                f"{me_marker}"
+                f"{me_marker:>2}"
             )
 
 
