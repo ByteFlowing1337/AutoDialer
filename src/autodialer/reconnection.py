@@ -10,6 +10,7 @@ from autodialer.network import (
     normalize_asn,
     try_connect,
 )
+from autodialer.utils import RED, GREEN, YELLOW, RESET
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class Reconnection:
         if proto == "dhcp":
             return self.router.dhcp_renew()
 
-        logger.error("Unsupported WAN protocol: %s", proto)
+        logger.error(f"{RED}Unsupported WAN protocol: {proto}{RESET}")
         return False
 
     def run_reconnection(
@@ -40,7 +41,7 @@ class Reconnection:
         proto = self._get_wan_proto()
 
         if proto is None:
-            logger.error("Unable to determine current WAN protocol.")
+            logger.error(f"{RED}Unable to determine current WAN protocol.{RESET}")
             sys.exit(1)
 
         match mode:
@@ -50,23 +51,27 @@ class Reconnection:
 
                 if not try_connect(self.delay, self.max_attempts):
                     logger.error(
-                        "Internet did not recover after forced reconnection. Exiting."
+                        f"{RED}Internet did not recover after forced reconnection. Exiting.{RESET}"
                     )
                     sys.exit(1)
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
                 if isp and ip is not None:
-                    logger.info("IP info after forced reconnection: %s %s", ip, isp)
+                    logger.info(
+                        f"{GREEN}Forced reconnection completed. New IP: {ip}, ISP: {isp}{RESET}"
+                    )
                 else:
                     logger.warning(
-                        "Forced reconnection completed, but unable to fetch IP info."
+                        f"{YELLOW}Forced reconnection completed, but unable to fetch IP info.{RESET}"
                     )
                 return
 
             case "change":
                 if (current_ip := get_ip_address()) is None:
-                    logger.error("Unable to fetch current IP address. Exiting.")
+                    logger.error(
+                        f"{RED}Unable to fetch current IP address. Exiting.{RESET}"
+                    )
                     sys.exit(1)
 
                 after_reconnection_ip: str | None = current_ip
@@ -80,13 +85,13 @@ class Reconnection:
 
                     if not try_connect(self.delay, self.max_attempts):
                         logger.error(
-                            "Internet did not recover after reconnection. Exiting.",
+                            f"{RED}Internet did not recover after reconnection. Exiting.{RESET}"
                         )
                         sys.exit(1)
 
                     if (after_reconnection_ip := get_ip_address()) is None:
                         logger.error(
-                            "Unable to fetch IP address after reconnection. Exiting."
+                            f"{RED}Unable to fetch IP address after reconnection. Exiting.{RESET}"
                         )
                         sys.exit(1)
                     attempts += 1
@@ -94,14 +99,11 @@ class Reconnection:
                 if current_ip != after_reconnection_ip:
                     isp = check_isp_with_retries()
                     logger.info(
-                        "IP info after reconnection: %s -> %s %s",
-                        current_ip,
-                        after_reconnection_ip,
-                        isp,
+                        f"{GREEN}IP address changed successfully from {current_ip} to {after_reconnection_ip}. ISP: {GREEN}{isp}{RESET}",
                     )
                     return
                 logger.error(
-                    "Failed to change IP address after %d attempts.", self.max_attempts
+                    f"{RED}Failed to change IP address after {self.max_attempts} attempts.{RESET}"
                 )
                 sys.exit(1)
 
@@ -112,7 +114,7 @@ class Reconnection:
 
                     if not try_connect(self.delay, self.max_attempts):
                         logger.error(
-                            "Internet did not recover after reconnection. Exiting."
+                            f"{RED}Internet did not recover after reconnection. Exiting.{RESET}"
                         )
                         sys.exit(1)
 
@@ -124,7 +126,7 @@ class Reconnection:
                         return
 
                 logger.error(
-                    "Reached maximum reconnection attempts without switching to the desired ASN."
+                    f"{RED}Reached maximum reconnection attempts without switching to the desired ASN.{RESET}"
                 )
                 sys.exit(1)
 
@@ -144,7 +146,7 @@ def validate_asn(value: str) -> str:
     normalized = normalize_asn(value)
     if not normalized:
         raise argparse.ArgumentTypeError(
-            f"Invalid ASN format: '{value}'. Valid range is AS1 to AS4294967295."
+            f"{RED}Invalid ASN format: '{value}'. Valid range is AS1 to AS4294967295.{RESET}"
         )
     return normalized
 
@@ -196,7 +198,7 @@ def reconnection():
     router = get_router()
     if router is None:
         logger.error(
-            "Unable to detect router vendor or no API implementation available. Exiting."
+            f"{RED}Unable to detect router vendor or no API implementation available. Exiting.{RESET}"
         )
         sys.exit(1)
     rec = Reconnection(router)
@@ -207,7 +209,7 @@ def reconnection():
             current_isp=check_isp_with_retries(), target_asn=normalize_asn(args.asn)
         ):
             logger.info(
-                "Already connected to target ASN %s. No reconnection needed.", args.asn
+                f"{GREEN}Already connected to {args.asn}. No reconnection needed.{RESET}"
             )
             sys.exit(0)
         rec.main(mode="asn", asn=normalize_asn(args.asn))
