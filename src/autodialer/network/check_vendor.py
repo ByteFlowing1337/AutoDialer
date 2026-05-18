@@ -3,8 +3,8 @@ import re
 from collections.abc import Iterator
 
 import requests
-from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 
+from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 
 logger = logging.getLogger(__name__)
 TITLE_PATTERN = re.compile(r"<title\b[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
@@ -67,12 +67,14 @@ def _iter_response_chain(response: requests.Response) -> Iterator[requests.Respo
 
 def check_router_vendor() -> str | None:
     """
-    Check the router vendor by parsing the title, headers, and location of the response from the router's web interface.
+    Check the router vendor by parsing the title, headers,
+    and location of the response from the router's web interface.
 
     Used in `get_vendor_api()` to determine which router API to use.
 
     Returns:
-        str | None: The detected router vendor, or None if the vendor could not be determined.
+        str | None: The detected router vendor,
+        or None if the vendor could not be determined.
     """
     gateway = get_gateway_ip()
     if gateway is None:

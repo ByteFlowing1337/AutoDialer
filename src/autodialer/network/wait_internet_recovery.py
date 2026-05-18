@@ -1,12 +1,13 @@
-import socket
 import logging
+import socket
 from time import sleep
 
 logger = logging.getLogger(__name__)
 
 
 def try_connect(delay: int = 5, attempts: int = 10) -> bool:
-    """Attempts to connect to a well-known public DNS server to verify internet connectivity.
+    """Attempts to connect to a well-known public DNS server
+    to verify internet connectivity.
 
     Args:
         delay:  Time in seconds to wait between connection attempts.

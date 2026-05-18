@@ -17,15 +17,17 @@ class TestGetDevices(unittest.TestCase):
         ]
         from autodialer.get_devices import print_devices_table
 
-        with patch("sys.stdout.isatty", return_value=True):
-            with patch("builtins.print") as mock_print:
-                print_devices_table(devices)
-                has_ansi = any(
-                    "\033" in str(arg)
-                    for call in mock_print.call_args_list
-                    for arg in call[0]
-                )
-                self.assertTrue(has_ansi)  # Check for ANSI color codes
+        with (
+            patch("sys.stdout.isatty", return_value=True),
+            patch("builtins.print") as mock_print,
+        ):
+            print_devices_table(devices)
+            has_ansi = any(
+                "\033" in str(arg)
+                for call in mock_print.call_args_list
+                for arg in call[0]
+            )
+            self.assertTrue(has_ansi)  # Check for ANSI color codes
 
     def test_print_devices_table_without_color_on_non_tty(self):
         devices = [
@@ -41,12 +43,14 @@ class TestGetDevices(unittest.TestCase):
         ]
         from autodialer.get_devices import print_devices_table
 
-        with patch("sys.stdout.isatty", return_value=False):
-            with patch("builtins.print") as mock_print:
-                print_devices_table(devices)
-                has_ansi = any(
-                    "\033" in str(arg)
-                    for call in mock_print.call_args_list
-                    for arg in call[0]
-                )
-                self.assertFalse(has_ansi)  # Check that no ANSI color codes are present
+        with (
+            patch("sys.stdout.isatty", return_value=False),
+            patch("builtins.print") as mock_print,
+        ):
+            print_devices_table(devices)
+            has_ansi = any(
+                "\033" in str(arg)
+                for call in mock_print.call_args_list
+                for arg in call[0]
+            )
+            self.assertFalse(has_ansi)  # Check that no ANSI color codes are present

@@ -3,7 +3,6 @@ import unittest
 from typing import Any
 from unittest.mock import Mock, patch
 
-
 reconnection_module = importlib.import_module("autodialer.reconnection")
 
 
@@ -235,18 +234,20 @@ class TestArgParse(unittest.TestCase):
         ]
 
         for invalid_asn in invalid_asns:
-            with self.subTest(asn=invalid_asn):
-                with patch("sys.argv", ["autodialer", "--asn", invalid_asn]):
-                    with patch("sys.stderr.write") as mock_stderr:
-                        with self.assertRaises(SystemExit) as context:
-                            reconnection_module.reconnection()
-                        self.assertEqual(context.exception.code, 2)
-                        self.assertTrue(
-                            any(
-                                "Invalid ASN format" in call[0][0]
-                                for call in mock_stderr.call_args_list
-                            )
-                        )
+            with (
+                self.subTest(asn=invalid_asn),
+                patch("sys.argv", ["autodialer", "--asn", invalid_asn]),
+                patch("sys.stderr.write") as mock_stderr,
+                self.assertRaises(SystemExit) as context,
+            ):
+                reconnection_module.reconnection()
+                self.assertEqual(context.exception.code, 2)
+                self.assertTrue(
+                    any(
+                        "Invalid ASN format" in call[0][0]
+                        for call in mock_stderr.call_args_list
+                    )
+                )
 
 
 if __name__ == "__main__":

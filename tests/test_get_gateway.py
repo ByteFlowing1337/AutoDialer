@@ -1,13 +1,13 @@
 import unittest
-from unittest.mock import Mock, mock_open, patch
 from typing import Any
+from unittest.mock import Mock, mock_open, patch
 
 from autodialer.network.get_gateway import (
+    format_ip_for_url_host,
     get_gateway_ip_on_linux,
     get_gateway_ip_on_unix,
     get_gateway_ip_on_windows,
 )
-from autodialer.network.get_gateway import format_ip_for_url_host
 
 
 class TestGetGatewayIp(unittest.TestCase):
@@ -26,7 +26,8 @@ class TestGetGatewayIp(unittest.TestCase):
             stdout=(
                 "IPv4 Route Table\n"
                 "Active Routes:\n"
-                "          0.0.0.0          0.0.0.0       192.168.0.1    192.168.0.100     25\n"
+                "          0.0.0.0          0.0.0.0       192.168.0.1    "
+                "192.168.0.100     25\n"
             )
         )
 
