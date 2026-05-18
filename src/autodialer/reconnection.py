@@ -55,7 +55,7 @@ class Reconnection:
                 if isp and ip is not None:
                     logger.info("IP info after forced reconnection: %s %s", ip, isp)
                 else:
-                    print("Forced reconnection completed, but unable to fetch IP info.")
+                    logger.warning("Forced reconnection completed, but unable to fetch IP info.")
                 return
 
             case "change":
