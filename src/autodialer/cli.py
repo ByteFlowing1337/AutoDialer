@@ -5,6 +5,7 @@ import sys
 from autodialer.network import validate_asn
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def main():

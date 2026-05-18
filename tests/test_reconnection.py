@@ -108,8 +108,12 @@ class TestReconnection(unittest.TestCase):
         "get_ip_address",
         side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
     )
+    @patch(
+        "builtins.print",
+    )
     def test_change_mode_retries_until_ip_changes(
         self,
+        mock_print: Any,
         mock_get_ip_address: Any,
         _mock_get_internet_connectivity: Any,
         mock_check_isp_with_retries: Any,
@@ -122,6 +126,10 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
+        mock_print.assert_called_with(
+            "IP info after reconnection: 203.0.113.10 -> 198.51.100.25 "
+            "AS9999 Example ISP"
+        )
         mock_check_isp_with_retries.assert_called_once_with()
         mock_exit.assert_not_called()
 
@@ -157,7 +165,6 @@ class TestReconnection(unittest.TestCase):
         self.assertEqual(mock_get_ip_address.call_count, 4)
         mock_exit.assert_not_called()
 
-    @patch("sys.argv", ["autodialer", "--asn", "AS9929"])
     @patch.object(reconnection_module, "get_router")
     @patch.object(reconnection_module, "is_target_asn", return_value=True)
     @patch.object(
@@ -177,6 +184,17 @@ class TestReconnection(unittest.TestCase):
         reconnection_module.reconnect(mode="asn", asn="AS9929")
 
         router.get_wan_proto.assert_called_once()
+
+    @patch.object(reconnection_module, "get_router", return_value=None)
+    @patch.object(reconnection_module, "logger")
+    def test_reconnect_exits_when_no_router(self, mock_logger, mock_get_router):
+        with self.assertRaises(RuntimeError) as context:
+            reconnection_module.reconnect(mode="force")
+        self.assertEqual(
+            str(context.exception),
+            "Unable to detect router vendor or no API available.",
+        )
+        mock_get_router.assert_called_once_with()
 
 
 if __name__ == "__main__":

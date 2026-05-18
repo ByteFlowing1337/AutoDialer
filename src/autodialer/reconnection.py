@@ -1,5 +1,4 @@
 import logging
-import sys
 from typing import Literal
 
 from autodialer.network import (
@@ -54,7 +53,7 @@ class Reconnection:
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
                 if isp and ip is not None:
-                    print("IP info after forced reconnection: %s %s", ip, isp)
+                    print(f"IP info after forced reconnection:{ip} {isp}")
                 else:
                     print("Forced reconnection completed, but unable to fetch IP info.")
                 return
@@ -70,7 +69,7 @@ class Reconnection:
                     current_ip == after_reconnection_ip
                 ) and attempts < self.max_attempts:
                     if not self._apply_reconnection(proto):
-                        sys.exit(1)
+                        raise RuntimeError("Failed to apply reconnection.")
 
                     if not get_internet_connectivity(self.delay, self.max_attempts):
                         raise RuntimeError(
@@ -86,10 +85,8 @@ class Reconnection:
                 if current_ip != after_reconnection_ip:
                     isp = check_isp_with_retries()
                     print(
-                        "IP info after reconnection: %s -> %s %s",
-                        current_ip,
-                        after_reconnection_ip,
-                        isp,
+                        f"IP info after reconnection: {current_ip} "
+                        f"-> {after_reconnection_ip} {isp}"
                     )
                     return
                 raise RuntimeError(
