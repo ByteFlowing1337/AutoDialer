@@ -39,34 +39,29 @@ class Reconnection:
         proto = self._get_wan_proto()
 
         if proto is None:
-            logger.error("Unable to determine current WAN protocol.")
-            sys.exit(1)
+            raise RuntimeError("Unable to determine current WAN protocol.")
 
         match mode:
             case "force":
                 if not self._apply_reconnection(proto):
-                    sys.exit(1)
+                    raise RuntimeError("Failed to apply forced reconnection.")
 
                 if not get_internet_connectivity(self.delay, self.max_attempts):
-                    logger.error(
-                        "Internet did not recover after forced reconnection. Exiting."
+                    raise RuntimeError(
+                        "Internet did not recover after forced reconnection."
                     )
-                    sys.exit(1)
 
                 isp = check_isp_with_retries()
                 ip = get_ip_address()
                 if isp and ip is not None:
-                    logger.info("IP info after forced reconnection: %s %s", ip, isp)
+                    print("IP info after forced reconnection: %s %s", ip, isp)
                 else:
-                    logger.warning(
-                        "Forced reconnection completed, but unable to fetch IP info."
-                    )
+                    print("Forced reconnection completed, but unable to fetch IP info.")
                 return
 
             case "change":
                 if (current_ip := get_ip_address()) is None:
-                    logger.error("Unable to fetch current IP address. Exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Unable to fetch current IP address.")
 
                 after_reconnection_ip: str | None = current_ip
                 attempts = 0
@@ -78,55 +73,50 @@ class Reconnection:
                         sys.exit(1)
 
                     if not get_internet_connectivity(self.delay, self.max_attempts):
-                        logger.error(
-                            "Internet did not recover after reconnection. Exiting.",
+                        raise RuntimeError(
+                            "Internet did not recover after reconnection. Exiting."
                         )
-                        sys.exit(1)
 
                     if (after_reconnection_ip := get_ip_address()) is None:
-                        logger.error(
+                        raise RuntimeError(
                             "Unable to fetch IP address after reconnection. Exiting."
                         )
-                        sys.exit(1)
                     attempts += 1
 
                 if current_ip != after_reconnection_ip:
                     isp = check_isp_with_retries()
-                    logger.info(
+                    print(
                         "IP info after reconnection: %s -> %s %s",
                         current_ip,
                         after_reconnection_ip,
                         isp,
                     )
                     return
-                logger.error(
-                    "Failed to change IP address after %d attempts.", self.max_attempts
+                raise RuntimeError(
+                    f"Failed to change IP address after {self.max_attempts} attempts."
                 )
-                sys.exit(1)
 
             case "asn":
                 for _ in range(self.max_attempts):
                     if not self._apply_reconnection(proto):
-                        sys.exit(1)
+                        raise RuntimeError("Failed to apply reconnection.")
 
                     if not get_internet_connectivity(self.delay, self.max_attempts):
-                        logger.error(
+                        raise RuntimeError(
                             "Internet did not recover after reconnection. Exiting."
                         )
-                        sys.exit(1)
 
                     isp = check_isp_with_retries()
                     if isp is None:
-                        sys.exit(1)
+                        raise RuntimeError("Unable to fetch ISP information.")
 
                     if is_target_asn(current_isp=isp, target_asn=asn):
                         return
 
-                logger.error(
+                raise RuntimeError(
                     "Reached maximum reconnection attempts without "
                     "switching to the desired ASN."
                 )
-                sys.exit(1)
 
     def main(
         self, mode: Literal["force", "asn", "change"], asn: str | None = None
@@ -143,11 +133,9 @@ class Reconnection:
 def reconnect(
     *, mode: Literal["force", "asn", "change"], asn: str | None = None
 ) -> None:
-    import sys
 
     router = get_router()
     if router is None:
-        logger.error("Unable to detect router vendor or no API available.")
-        sys.exit(1)
+        raise RuntimeError("Unable to detect router vendor or no API available.")
     reconnection = Reconnection(router)
     reconnection.main(mode, asn)

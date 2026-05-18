@@ -61,7 +61,11 @@ def main():
     if args.devices:
         from autodialer.get_devices import print_devices_table
 
-        print_devices_table()
+        try:
+            print_devices_table()
+        except RuntimeError as e:
+            logger.error(str(e))
+            sys.exit(1)
         return
 
     if args.force or args.asn or args.change:
@@ -72,7 +76,11 @@ def main():
         elif args.asn:
             reconnect(mode="asn", asn=args.asn)
         elif args.change:
-            reconnect(mode="change")
+            try:
+                reconnect(mode="change")
+            except RuntimeError as e:
+                logger.error(str(e))
+                sys.exit(1)
         return
 
 

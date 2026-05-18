@@ -90,13 +90,13 @@ class TestReconnection(unittest.TestCase):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
 
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None)
 
-        self.assertEqual(context.exception.code, 1)
+        self.assertEqual(str(context.exception), "Unable to fetch current IP address.")
         mock_get_ip_address.assert_called_once_with()
         router.dhcp_renew.assert_not_called()
-        mock_exit.assert_called_once_with(1)
+        mock_exit.assert_not_called()
 
     @patch("sys.exit")
     @patch.object(
@@ -147,13 +147,15 @@ class TestReconnection(unittest.TestCase):
         reconnection = reconnection_module.Reconnection(router)
         reconnection.max_attempts = 3
 
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None)
 
-        self.assertEqual(context.exception.code, 1)
+        self.assertEqual(
+            str(context.exception), "Failed to change IP address after 3 attempts."
+        )
         self.assertEqual(router.dhcp_renew.call_count, 3)
         self.assertEqual(mock_get_ip_address.call_count, 4)
-        mock_exit.assert_called_once_with(1)
+        mock_exit.assert_not_called()
 
     @patch("sys.argv", ["autodialer", "--asn", "AS9929"])
     @patch.object(reconnection_module, "get_router")

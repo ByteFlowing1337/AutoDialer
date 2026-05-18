@@ -44,12 +44,13 @@ class TestArgParse(unittest.TestCase):
     def test_force_mode_without_router_exits_with_error(
         self, mock_logger, mock_get_router
     ):
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RuntimeError) as context:
             cli_module.main()
-        self.assertEqual(context.exception.code, 1)
-        self.assertIn(
-            "Unable to detect router vendor", mock_logger.error.call_args[0][0]
+        self.assertEqual(
+            str(context.exception),
+            "Unable to detect router vendor or no API available.",
         )
+        mock_get_router.assert_called_once_with()
 
     def test_asn_mode_with_invalid_asn_value_exits_with_error(self):
         invalid_asns = [

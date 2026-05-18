@@ -8,7 +8,6 @@ __all__ = [
     "check_isp_with_retries",
     "get_ip_address",
     "get_internet_connectivity",
-    "get_asn",
     "normalize_asn",
     "validate_asn",
     "is_target_asn",
