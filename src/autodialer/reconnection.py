@@ -1,4 +1,3 @@
-import argparse
 import logging
 import sys
 from typing import Literal
@@ -7,10 +6,9 @@ from autodialer.network import (
     check_isp_with_retries,
     get_ip_address,
     is_target_asn,
-    normalize_asn,
     try_connect,
 )
-from autodialer.routers import RouterAPI, get_router
+from autodialer.routers import RouterAPI
 
 logger = logging.getLogger(__name__)
 
@@ -139,84 +137,3 @@ class Reconnection:
                 self.run_reconnection(mode="asn", asn=asn)
             case "change":
                 self.run_reconnection(mode="change", asn=None)
-
-
-def validate_asn(value: str) -> str:
-    normalized = normalize_asn(value)
-    if not normalized:
-        raise argparse.ArgumentTypeError(
-            f"Invalid ASN format: '{value}'. Valid range is AS1 to AS4294967295."
-        )
-    return normalized
-
-
-def reconnection():
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(
-        description="Restart router WAN connection to obtain a new IP address "
-        "or switch ASNs."
-    )
-    parser.add_argument(
-        "-e",
-        "--env",
-        metavar="<KEY=VAL>",
-        action="append",
-        help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
-    )
-
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="Force a reconnection regardless of current ASN.",
-    )
-    group.add_argument(
-        "-a",
-        "--asn",
-        metavar="<ASN>",
-        type=validate_asn,
-        help="Reconnect until connected to the specified target ASN.",
-    )
-    group.add_argument(
-        "-c",
-        "--change",
-        action="store_true",
-        help="Reconnect until the public IP address changes.",
-    )
-
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(0)
-
-    args = parser.parse_args()
-    if args.env:
-        from autodialer.config import parse_and_save_env_flags
-
-        parse_and_save_env_flags(args.env)
-
-    router = get_router()
-    if router is None:
-        logger.error(
-            "Unable to detect router vendor or no API implementation available. "
-            "Exiting."
-        )
-        sys.exit(1)
-    rec = Reconnection(router)
-    if args.force:
-        rec.main(mode="force")
-    elif args.asn:
-        if is_target_asn(
-            current_isp=check_isp_with_retries(), target_asn=normalize_asn(args.asn)
-        ):
-            logger.info(
-                "Already connected to target ASN %s. No reconnection needed.", args.asn
-            )
-            sys.exit(0)
-        rec.main(mode="asn", asn=normalize_asn(args.asn))
-    elif args.change:
-        rec.main(mode="change")
-
-
-if __name__ == "__main__":
-    reconnection()
