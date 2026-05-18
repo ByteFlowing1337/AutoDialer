@@ -1,66 +1,34 @@
 import logging
 from functools import lru_cache
 from importlib import import_module
-from inspect import getmembers, isclass
-from pathlib import Path
 
 from autodialer.network.check_vendor import check_router_vendor
 from autodialer.routers.base_router_api import RouterAPI
 
 logger = logging.getLogger(__name__)
 
-
-def _read_supported_vendors(candidate: type) -> tuple[str, ...]:
-    supported_vendors = getattr(candidate, "SUPPORTED_VENDORS", ())
-    if isinstance(supported_vendors, str):
-        return (supported_vendors,)
-    if isinstance(supported_vendors, (list, set, tuple)):
-        return tuple(
-            vendor for vendor in supported_vendors if isinstance(vendor, str) and vendor
-        )
-    return ()
-
-
-def _iter_router_api_module_names() -> list[str]:
-    routers_dir = Path(__file__).resolve().parent.parent / "routers"
-    module_names: list[str] = []
-
-    for api_file in routers_dir.rglob("*_api.py"):
-        if api_file.name == "base_api.py":
-            continue
-
-        relative_path = api_file.relative_to(routers_dir).with_suffix("")
-        module_suffix = ".".join(relative_path.parts)
-        module_names.append(f"autodialer.routers.{module_suffix}")
-
-    return sorted(module_names)
+VENDOR_API_MAP: dict[str, tuple[str, str]] = {
+    "asus": ("autodialer.routers.asus.asus_api", "AsusAPI"),
+    "asus aimesh": ("autodialer.routers.asus.asus_api", "AsusAPI"),
+    "tp-link": ("autodialer.routers.tplink.tplink_api", "TPLinkAPI"),
+    "zte": ("autodialer.routers.zte.zte_api", "ZTEApi"),
+}
 
 
 @lru_cache(maxsize=1)
-def _get_vendor_api_registry() -> dict[str, type[RouterAPI]]:
-    registry: dict[str, type[RouterAPI]] = {}
+def _get_vendor_api_registry(vendor: str) -> type[RouterAPI] | None:
+    mapping = VENDOR_API_MAP.get(vendor.casefold())
+    if mapping is None:
+        return None
 
-    for module_name in _iter_router_api_module_names():
-        module = import_module(module_name)
+    module_name, class_name = mapping
+    module = import_module(module_name)
+    api_class = getattr(module, class_name, None)
 
-        for _, candidate in getmembers(module, isclass):
-            if candidate.__module__ != module.__name__:
-                continue
+    if api_class is None:
+        return None
 
-            supported_vendors = _read_supported_vendors(candidate)
-            if not supported_vendors:
-                continue
-
-            for supported_vendor in supported_vendors:
-                vendor_key = supported_vendor.casefold()
-                existing_candidate = registry.get(vendor_key)
-                if existing_candidate not in (None, candidate):
-                    raise ValueError(
-                        f"Duplicate router API mapping for vendor '{supported_vendor}'."
-                    )
-                registry[vendor_key] = candidate
-
-    return registry
+    return api_class if issubclass(api_class, RouterAPI) else None
 
 
 def _get_vendor_api() -> type[RouterAPI] | None:
@@ -83,7 +51,7 @@ def _get_vendor_api() -> type[RouterAPI] | None:
     if vendor is None:
         return None
 
-    api_class = _get_vendor_api_registry().get(vendor.casefold())
+    api_class = _get_vendor_api_registry(vendor.casefold())
     if api_class is None:
         logger.error("No API implementation for vendor: %s", vendor)
 
