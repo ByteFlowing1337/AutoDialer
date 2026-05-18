@@ -241,13 +241,13 @@ class TestArgParse(unittest.TestCase):
                 self.assertRaises(SystemExit) as context,
             ):
                 reconnection_module.reconnection()
-                self.assertEqual(context.exception.code, 2)
-                self.assertTrue(
-                    any(
-                        "Invalid ASN format" in call[0][0]
-                        for call in mock_stderr.call_args_list
-                    )
+            self.assertEqual(context.exception.code, 2)
+            self.assertTrue(
+                any(
+                    "Invalid ASN format" in call[0][0]
+                    for call in mock_stderr.call_args_list
                 )
+            )
 
 
 if __name__ == "__main__":
