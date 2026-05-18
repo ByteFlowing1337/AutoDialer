@@ -18,7 +18,7 @@ VENDOR_API_MAP: dict[str, tuple[str, str]] = {
 
 @lru_cache(maxsize=1)
 def _get_vendor_api_class(vendor: str) -> type[RouterAPI] | None:
-    mapping = VENDOR_API_MAP.get(vendor.casefold())
+    mapping = VENDOR_API_MAP.get(vendor)
     if mapping is None:
         return None
 
