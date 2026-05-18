@@ -8,7 +8,7 @@ vendor_api_module = importlib.import_module("autodialer.routers.get_router")
 
 class TestGetVendorApi(unittest.TestCase):
     def setUp(self) -> None:
-        vendor_api_module._get_vendor_api_registry.cache_clear()
+        vendor_api_module._get_vendor_api_class.cache_clear()
 
     @patch.object(vendor_api_module, "check_router_vendor", return_value="ASUS")
     def test_returns_asus_api_for_asus_vendor(self, _mock_vendor: Any):
