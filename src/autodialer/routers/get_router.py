@@ -1,6 +1,7 @@
 import logging
 from functools import lru_cache
 from importlib import import_module
+from inspect import isabstract
 
 from autodialer.network.check_vendor import check_router_vendor
 from autodialer.routers.base_router_api import RouterAPI
@@ -16,7 +17,7 @@ VENDOR_API_MAP: dict[str, tuple[str, str]] = {
 
 
 @lru_cache(maxsize=1)
-def _get_vendor_api_registry(vendor: str) -> type[RouterAPI] | None:
+def _get_vendor_api_class(vendor: str) -> type[RouterAPI] | None:
     mapping = VENDOR_API_MAP.get(vendor.casefold())
     if mapping is None:
         return None
@@ -25,10 +26,14 @@ def _get_vendor_api_registry(vendor: str) -> type[RouterAPI] | None:
     module = import_module(module_name)
     api_class = getattr(module, class_name, None)
 
-    if api_class is None:
+    if api_class is None or not isinstance(api_class, type):
         return None
 
-    return api_class if issubclass(api_class, RouterAPI) else None
+    return (
+        api_class
+        if issubclass(api_class, RouterAPI) and not isabstract(api_class)
+        else None
+    )
 
 
 def _get_vendor_api() -> type[RouterAPI] | None:
@@ -51,7 +56,7 @@ def _get_vendor_api() -> type[RouterAPI] | None:
     if vendor is None:
         return None
 
-    api_class = _get_vendor_api_registry(vendor.casefold())
+    api_class = _get_vendor_api_class(vendor.casefold())
     if api_class is None:
         logger.error("No API implementation for vendor: %s", vendor)
 
