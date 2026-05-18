@@ -1,11 +1,25 @@
+import logging
 import sys
 
-from autodialer.routers import RouterAPI
+from autodialer.routers import get_router
+
+logger = logging.getLogger(__name__)
 
 
-def print_devices_table(devices: list) -> None:
+def get_devices() -> list:
+    router = get_router()
+    if router is None:
+        logger.error("Unable to detect router vendor or no API available.")
+        sys.exit(1)
+
+    devices = router.get_connected_devices()
+    return devices
+
+
+def print_devices_table() -> None:
+    devices = get_devices()
     if not devices:
-        print("No devices connected.")
+        logger.info("No devices connected.")
         return
 
     header = (
@@ -54,9 +68,3 @@ def print_devices_table(devices: list) -> None:
                 f"{d['down_kbps']:>6} "
                 f"{me_marker:>2}"
             )
-
-
-def get_devices(router: RouterAPI) -> None:
-
-    devices = router.get_connected_devices()
-    print_devices_table(devices)

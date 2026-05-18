@@ -20,8 +20,9 @@ class TestGetDevices(unittest.TestCase):
         with (
             patch("sys.stdout.isatty", return_value=True),
             patch("builtins.print") as mock_print,
+            patch("autodialer.get_devices.get_devices", return_value=devices),
         ):
-            print_devices_table(devices)
+            print_devices_table()
             has_ansi = any(
                 "\033" in str(arg)
                 for call in mock_print.call_args_list
@@ -46,8 +47,9 @@ class TestGetDevices(unittest.TestCase):
         with (
             patch("sys.stdout.isatty", return_value=False),
             patch("builtins.print") as mock_print,
+            patch("autodialer.get_devices.get_devices", return_value=devices),
         ):
-            print_devices_table(devices)
+            print_devices_table()
             has_ansi = any(
                 "\033" in str(arg)
                 for call in mock_print.call_args_list

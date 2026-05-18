@@ -3,7 +3,6 @@ import logging
 import sys
 
 from autodialer.network import validate_asn
-from autodialer.routers import get_router
 
 logger = logging.getLogger(__name__)
 
@@ -59,27 +58,21 @@ def main():
 
         parse_and_save_env_flags(args.env)
 
-    router = get_router()
-    if router is None:
-        logger.error("Unsupported or undetected router vendor.")
-        sys.exit(1)
-
     if args.devices:
-        from autodialer.get_devices import get_devices
+        from autodialer.get_devices import print_devices_table
 
-        get_devices(router)
+        print_devices_table()
         return
 
     if args.force or args.asn or args.change:
-        from autodialer.reconnection import Reconnection
+        from autodialer.reconnection import reconnect
 
-        rec = Reconnection(router)
         if args.force:
-            rec.main(mode="force")
+            reconnect(mode="force")
         elif args.asn:
-            rec.main(mode="asn", asn=args.asn)
+            reconnect(mode="asn", asn=args.asn)
         elif args.change:
-            rec.main(mode="change")
+            reconnect(mode="change")
         return
 
 

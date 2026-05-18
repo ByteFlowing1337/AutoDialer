@@ -4,9 +4,10 @@ from typing import Literal
 
 from autodialer.network import (
     check_isp_with_retries,
+    get_internet_connectivity,
     get_ip_address,
+    get_router,
     is_target_asn,
-    try_connect,
 )
 from autodialer.routers import RouterAPI
 
@@ -46,7 +47,7 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     sys.exit(1)
 
-                if not try_connect(self.delay, self.max_attempts):
+                if not get_internet_connectivity(self.delay, self.max_attempts):
                     logger.error(
                         "Internet did not recover after forced reconnection. Exiting."
                     )
@@ -76,7 +77,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         sys.exit(1)
 
-                    if not try_connect(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, self.max_attempts):
                         logger.error(
                             "Internet did not recover after reconnection. Exiting.",
                         )
@@ -108,7 +109,7 @@ class Reconnection:
                     if not self._apply_reconnection(proto):
                         sys.exit(1)
 
-                    if not try_connect(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, self.max_attempts):
                         logger.error(
                             "Internet did not recover after reconnection. Exiting."
                         )
@@ -137,3 +138,16 @@ class Reconnection:
                 self.run_reconnection(mode="asn", asn=asn)
             case "change":
                 self.run_reconnection(mode="change", asn=None)
+
+
+def reconnect(
+    *, mode: Literal["force", "asn", "change"], asn: str | None = None
+) -> None:
+    import sys
+
+    router = get_router()
+    if router is None:
+        logger.error("Unable to detect router vendor or no API available.")
+        sys.exit(1)
+    reconnection = Reconnection(router)
+    reconnection.main(mode, asn)

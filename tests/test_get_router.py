@@ -3,7 +3,7 @@ import unittest
 from typing import Any
 from unittest.mock import patch
 
-get_router_module = importlib.import_module("autodialer.routers.get_router")
+get_router_module = importlib.import_module("autodialer.network.get_router")
 AsusAPI = importlib.import_module("autodialer.routers.asus.asus_api").AsusAPI
 
 
