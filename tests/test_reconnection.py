@@ -125,8 +125,10 @@ class TestReconnection(unittest.TestCase):
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
         mock_logger_info.assert_called_with(
-            "IP info after reconnection: 203.0.113.10 -> 198.51.100.25 "
-            "AS9999 Example ISP"
+            "IP info after reconnection: %s -> %s %s",
+            "203.0.113.10",
+            "198.51.100.25",
+            "AS9999 Example ISP",
         )
         mock_check_isp_with_retries.assert_called_once_with()
         mock_exit.assert_not_called()
