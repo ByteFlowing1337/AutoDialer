@@ -19,10 +19,7 @@ def is_target_asn(current_isp: str | None, target_asn: str | None) -> bool:
 
 def normalize_asn(asn: str) -> str:
     raw_asn = asn.strip().upper()
-    if raw_asn.startswith("AS"):
-        digits = raw_asn[2:].strip()
-    else:
-        digits = raw_asn.strip()
+    digits = raw_asn[2:].strip() if raw_asn.startswith("AS") else raw_asn.strip()
 
     if digits.isdigit():
         asn_num = int(digits)

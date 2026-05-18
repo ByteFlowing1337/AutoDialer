@@ -1,8 +1,8 @@
+import argparse
 import logging
 import sys
-import argparse
-from autodialer.routers import get_router
 
+from autodialer.routers import get_router
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,10 @@ def print_devices_table(devices: list) -> None:
         print("No devices connected.")
         return
 
-    header = f"{'HOSTNAME':25} {'IP':15} {'MAC':18} {'TYPE':9} {'UP':>6} {'DOWN':>6} {'ME':>3}"
+    header = (
+        f"{'HOSTNAME':25} {'IP':15} {'MAC':18} {'TYPE':9} "
+        f"{'UP':>6} {'DOWN':>6} {'ME':>3}"
+    )
 
     if sys.stdout.isatty():
         # Standard terminal ANSI color codes

@@ -43,3 +43,21 @@ version = {attr = "autodialer.__version__"}
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["autodialer*"]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # flake8-logging-format
+    "G",
+]

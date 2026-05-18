@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
-from autodialer.config import parse_and_save_env_flags, get_env_file_path
+
+from autodialer.config import get_env_file_path, parse_and_save_env_flags
 
 
 class TestParseAndSaveEnvFlags(unittest.TestCase):
@@ -29,7 +30,8 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
             parse_and_save_env_flags(["PANEL_PASSWORD="])
         self.assertTrue(context.exception.code != 0)
         mock_logger.error.assert_called_with(
-            "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+            "Error: -e/--env requires a KEY=VALUE argument "
+            "(e.g., -e PANEL_PASSWORD=secret)."
         )
 
     @patch("autodialer.config.config.logger")
@@ -38,5 +40,6 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
             parse_and_save_env_flags(["INVALID_FORMAT"])
         self.assertTrue(context.exception.code != 0)
         mock_logger.error.assert_called_with(
-            "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+            "Error: -e/--env requires a KEY=VALUE argument "
+            "(e.g., -e PANEL_PASSWORD=secret)."
         )

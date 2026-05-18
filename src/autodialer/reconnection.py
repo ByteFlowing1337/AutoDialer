@@ -1,8 +1,8 @@
+import argparse
 import logging
 import sys
-import argparse
 from typing import Literal
-from autodialer.routers import RouterAPI, get_router
+
 from autodialer.network import (
     check_isp_with_retries,
     get_ip_address,
@@ -10,7 +10,7 @@ from autodialer.network import (
     normalize_asn,
     try_connect,
 )
-
+from autodialer.routers import RouterAPI, get_router
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +124,8 @@ class Reconnection:
                         return
 
                 logger.error(
-                    "Reached maximum reconnection attempts without switching to the desired ASN."
+                    "Reached maximum reconnection attempts without "
+                    "switching to the desired ASN."
                 )
                 sys.exit(1)
 
@@ -152,7 +153,8 @@ def validate_asn(value: str) -> str:
 def reconnection():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(
-        description="Restart router WAN connection to obtain a new IP address or switch ASNs."
+        description="Restart router WAN connection to obtain a new IP address "
+        "or switch ASNs."
     )
     parser.add_argument(
         "-e",
@@ -196,7 +198,8 @@ def reconnection():
     router = get_router()
     if router is None:
         logger.error(
-            "Unable to detect router vendor or no API implementation available. Exiting."
+            "Unable to detect router vendor or no API implementation available. "
+            "Exiting."
         )
         sys.exit(1)
     rec = Reconnection(router)

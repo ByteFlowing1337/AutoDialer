@@ -3,7 +3,6 @@ import unittest
 from typing import Any
 from unittest.mock import Mock, patch
 
-
 tplink_module = importlib.import_module("autodialer.routers.tplink.tplink_api")
 TPLinkAPI = tplink_module.TPLinkAPI
 

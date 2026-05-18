@@ -1,11 +1,13 @@
 import logging
-import requests
-from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
-from autodialer.routers.base_router_api import RouterAPI
-from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 from typing import Literal
 from urllib.parse import unquote
+
+import requests
+
 from autodialer.config import load_env_file
+from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.routers.base_router_api import RouterAPI
+from autodialer.routers.tplink.tplink_security_encode import tplink_security_encode
 
 env_var = load_env_file()
 PANEL_PASSWORD: str = env_var.PANEL_PASSWORD
@@ -34,7 +36,8 @@ class TPLinkAPI(RouterAPI):
 
         pppoe_password: The PPPoE password for authentication.
 
-        stok: The session token obtained after logging into the router, used for authenticated requests.
+        stok: The session token obtained after logging into the router,
+              used for authenticated requests.
     """
 
     SUPPORTED_VENDORS = ("TP-Link",)
@@ -81,7 +84,8 @@ class TPLinkAPI(RouterAPI):
     def set_credentials(self) -> bool:
         if not self.username or not self.pppoe_password:
             logger.warning(
-                "Missing PPPoE credentials override. Will reuse the credentials already saved on the router."
+                "Missing PPPoE credentials override. "
+                "Will reuse the credentials already saved on the router."
             )
             return False
 
@@ -146,12 +150,9 @@ class TPLinkAPI(RouterAPI):
         ):
             return False
 
-        if self.tplink_change_wan_status_request(
+        return self.tplink_change_wan_status_request(
             action="connect", method="do", proto="pppoe"
-        ):
-            return True
-
-        return False
+        )
 
     def get_connected_devices(self) -> list:
         payload = {
