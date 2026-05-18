@@ -71,16 +71,16 @@ def main():
     if args.force or args.asn or args.change:
         from autodialer.reconnection import reconnect
 
-        if args.force:
-            reconnect(mode="force")
-        elif args.asn:
-            reconnect(mode="asn", asn=args.asn)
-        elif args.change:
-            try:
+        try:
+            if args.force:
+                reconnect(mode="force")
+            elif args.asn:
+                reconnect(mode="asn", asn=args.asn)
+            elif args.change:
                 reconnect(mode="change")
-            except RuntimeError as e:
-                logger.error(str(e))
-                sys.exit(1)
+        except RuntimeError as e:
+            logger.error(str(e))
+            sys.exit(1)
         return
 
 
