@@ -8,9 +8,9 @@ from urllib.parse import quote
 
 import requests
 
-from autodialer.routers.base_router_api import RouterAPI
-from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 from autodialer.config import load_env_file
+from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.routers.base_router_api import RouterAPI
 
 env_var = load_env_file()
 PANEL_PASSWORD: str = env_var.PANEL_PASSWORD
@@ -374,11 +374,7 @@ class AsusAPI(RouterAPI):
             services_to_try.append(f"restart_wan{unit}")
         services_to_try.append("restart_wan")
 
-        for service in services_to_try:
-            if self._run_service(service):
-                return True
-
-        return False
+        return any(self._run_service(service) for service in services_to_try)
 
     def make_pppoe_reconnection(self) -> bool:
         if self._restart_wan():

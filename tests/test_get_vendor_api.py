@@ -3,7 +3,6 @@ import unittest
 from typing import Any
 from unittest.mock import patch
 
-
 vendor_api_module = importlib.import_module("autodialer.routers.get_router")
 
 

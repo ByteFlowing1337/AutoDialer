@@ -3,9 +3,9 @@ from functools import lru_cache
 from importlib import import_module
 from inspect import getmembers, isclass
 from pathlib import Path
-from autodialer.routers.base_router_api import RouterAPI
-from autodialer.network.check_vendor import check_router_vendor
 
+from autodialer.network.check_vendor import check_router_vendor
+from autodialer.routers.base_router_api import RouterAPI
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +68,9 @@ def _get_vendor_api() -> type[RouterAPI] | None:
     Get the vendor-specific router API class.
 
     Returns:
-        type[RouterAPI] | None: A concrete implementation of the router API (for example,
-        ``AsusAPI``), or ``None`` if the router vendor cannot be detected or
-        no API implementation is registered for that vendor.
+        type[RouterAPI] | None: A concrete implementation of the router API
+        (for example, ``AsusAPI``), or ``None`` if the router vendor cannot
+        be detected or no API implementation is registered for that vendor.
 
     Example:
     ```

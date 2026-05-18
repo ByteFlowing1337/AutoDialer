@@ -6,9 +6,9 @@ from xml.etree import ElementTree as ET
 
 import requests
 
-from autodialer.routers.base_router_api import RouterAPI
-from autodialer.network.get_gateway import get_gateway_ip, format_ip_for_url_host
 from autodialer.config import load_env_file
+from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
+from autodialer.routers.base_router_api import RouterAPI
 from autodialer.routers.zte.zte_encode import zte_security_encode
 
 logger = logging.getLogger(__name__)
@@ -108,10 +108,10 @@ class ZTEApi(RouterAPI):
                 return None
             return data
         except requests.RequestException as e:
-            logger.error(f"Failed to get session token: {e}")
+            logger.error("Failed to get session token: %s", e)
             return None
         except ValueError as e:
-            logger.error(f"Failed to decode session token response: {e}")
+            logger.error("Failed to decode session token response: %s", e)
             return None
 
     def _login_router(self) -> str | None:
@@ -140,7 +140,7 @@ class ZTEApi(RouterAPI):
 
             login_error = data.get("loginErrMsg")
             if login_error:
-                logger.error(f"Login failed: {login_error}")
+                logger.error("Login failed: %s", login_error)
                 return None
 
             if not self._has_sid_cookie():
@@ -149,10 +149,10 @@ class ZTEApi(RouterAPI):
 
             return data.get("sess_token")
         except requests.RequestException as e:
-            logger.error(f"Failed to login: {e}")
+            logger.error("Failed to login: %s", e)
             return None
         except ValueError as e:
-            logger.error(f"Failed to decode login response: {e}")
+            logger.error("Failed to decode login response: %s", e)
             return None
 
     def _get_xsrf_token(self) -> str | None:
@@ -179,7 +179,7 @@ class ZTEApi(RouterAPI):
             logger.error("Router did not return x_xsrf_token for vue_userif_data.")
             return None
         except requests.RequestException as e:
-            logger.error(f"Failed to get x_xsrf_token: {e}")
+            logger.error("Failed to get x_xsrf_token: %s", e)
             return None
 
     def _parse_router_xml_response(self, body: str) -> dict[str, str] | None:
@@ -288,7 +288,7 @@ class ZTEApi(RouterAPI):
             logger.error("WAN_PROTO not found in response.")
             return None
         except requests.RequestException as e:
-            logger.error(f"Failed to get WAN protocol: {e}")
+            logger.error("Failed to get WAN protocol: %s", e)
             return None
 
     def make_pppoe_reconnection(self) -> bool:
@@ -385,7 +385,7 @@ class ZTEApi(RouterAPI):
 
             return "success"
         except requests.RequestException as e:
-            logger.error(f"Failed to restart: {e}")
+            logger.error("Failed to restart: %s", e)
             return "failed"
 
     def dhcp_renew(self) -> bool:
@@ -417,7 +417,7 @@ class ZTEApi(RouterAPI):
             response = self.session.get(url, params=parameters, timeout=5)
             response.raise_for_status()
         except requests.RequestException as e:
-            logger.error(f"Failed to get connected devices: {e}")
+            logger.error("Failed to get connected devices: %s", e)
             return []
 
         try:

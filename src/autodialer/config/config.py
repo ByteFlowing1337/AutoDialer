@@ -1,10 +1,11 @@
+import logging
 import os
 import sys
-import dotenv
-import logging
-from pathlib import Path
 import tempfile
 from collections import namedtuple
+from pathlib import Path
+
+import dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -55,14 +56,16 @@ def parse_and_save_env_flags(env_args: list[str]):
     for item in env_args:
         if "=" not in item:
             logger.error(
-                "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+                "Error: -e/--env requires a KEY=VALUE argument "
+                "(e.g., -e PANEL_PASSWORD=secret)."
             )
             sys.exit(1)
 
         key, value = item.split("=", 1)
         if not value or not key:
             logger.error(
-                "Error: -e/--env requires a KEY=VALUE argument (e.g., -e PANEL_PASSWORD=secret)."
+                "Error: -e/--env requires a KEY=VALUE argument "
+                "(e.g., -e PANEL_PASSWORD=secret)."
             )
             sys.exit(1)
 
@@ -77,7 +80,8 @@ def load_env_file():
     env_file = get_env_file_path()
     if not env_file.exists():
         logger.warning(
-            f".env file not found at {env_file}. Please create it or set values via -e."
+            ".env file not found at %s. Please create it or set values via -e.",
+            str(env_file),
         )
         env_file.touch()  # Create an empty .env file to avoid issues with dotenv
     dotenv.load_dotenv(str(env_file))

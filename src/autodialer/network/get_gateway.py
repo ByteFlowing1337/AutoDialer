@@ -8,7 +8,6 @@ import sys
 from collections.abc import Callable, Iterable
 from urllib.parse import quote
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -92,7 +91,7 @@ def get_gateway_ip_on_windows() -> str:
 
 def get_gateway_ip_on_linux() -> str:
     try:
-        with open("/proc/net/route", "r", encoding="utf-8") as routes:
+        with open("/proc/net/route", encoding="utf-8") as routes:
             next(routes, None)
             for line in routes:
                 fields = line.strip().split()

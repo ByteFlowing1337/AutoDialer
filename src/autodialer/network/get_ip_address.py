@@ -1,7 +1,7 @@
 import ipaddress
+import logging
 
 import requests
-import logging
 
 logger = logging.getLogger(__name__)
 
