@@ -108,12 +108,10 @@ class TestReconnection(unittest.TestCase):
         "get_ip_address",
         side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
     )
-    @patch(
-        "builtins.print",
-    )
+    @patch("logging.Logger.info")
     def test_change_mode_retries_until_ip_changes(
         self,
-        mock_print: Any,
+        mock_logger_info: Any,
         mock_get_ip_address: Any,
         _mock_get_internet_connectivity: Any,
         mock_check_isp_with_retries: Any,
@@ -126,7 +124,7 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
-        mock_print.assert_called_with(
+        mock_logger_info.assert_called_with(
             "IP info after reconnection: 203.0.113.10 -> 198.51.100.25 "
             "AS9999 Example ISP"
         )
