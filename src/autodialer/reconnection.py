@@ -75,12 +75,12 @@ class Reconnection:
 
                     if not get_internet_connectivity(self.delay, self.max_attempts):
                         raise RuntimeError(
-                            "Internet did not recover after reconnection. Exiting."
+                            "Internet did not recover after reconnection."
                         )
 
                     if (after_reconnection_ip := get_ip_address()) is None:
                         raise RuntimeError(
-                            "Unable to fetch IP address after reconnection. Exiting."
+                            "Unable to fetch IP address after reconnection."
                         )
                     attempts += 1
 
@@ -104,7 +104,7 @@ class Reconnection:
 
                     if not get_internet_connectivity(self.delay, self.max_attempts):
                         raise RuntimeError(
-                            "Internet did not recover after reconnection. Exiting."
+                            "Internet did not recover after reconnection."
                         )
 
                     isp = check_isp_with_retries()
