@@ -1,13 +1,18 @@
-import argparse
-import logging
 import sys
 
 from autodialer.routers import get_router
 
-logger = logging.getLogger(__name__)
+
+def get_devices() -> list:
+    router = get_router()
+    if router is None:
+        raise RuntimeError("Unable to detect router vendor or no API available.")
+    devices = router.get_connected_devices()
+    return devices
 
 
-def print_devices_table(devices: list) -> None:
+def print_devices_table() -> None:
+    devices = get_devices()
     if not devices:
         print("No devices connected.")
         return
@@ -58,32 +63,3 @@ def print_devices_table(devices: list) -> None:
                 f"{d['down_kbps']:>6} "
                 f"{me_marker:>2}"
             )
-
-
-def get_devices() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(
-        description="Get connected devices from the router."
-    )
-    parser.add_argument(
-        "-e",
-        "--env",
-        action="append",
-        help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
-    )
-    args = parser.parse_args()
-    if args.env:
-        from autodialer.config import parse_and_save_env_flags
-
-        parse_and_save_env_flags(args.env)
-
-    router = get_router()
-    if router is None:
-        logger.error("Unsupported or undetected router vendor.")
-        sys.exit(1)
-    devices = router.get_connected_devices()
-    print_devices_table(devices)
-
-
-if __name__ == "__main__":
-    get_devices()
