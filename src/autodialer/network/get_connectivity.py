@@ -5,7 +5,7 @@ from time import sleep
 logger = logging.getLogger(__name__)
 
 
-def try_connect(delay: int = 5, attempts: int = 10) -> bool:
+def get_internet_connectivity(delay: int = 5, attempts: int = 10) -> bool:
     """Attempts to connect to a well-known public DNS server
     to verify internet connectivity.
 
@@ -27,9 +27,3 @@ def try_connect(delay: int = 5, attempts: int = 10) -> bool:
         if attempt < attempts - 1:
             sleep(delay)
     return False
-
-
-# For debugging
-if __name__ == "__main__":
-    if try_connect():
-        print("success")

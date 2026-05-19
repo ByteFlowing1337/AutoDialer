@@ -27,8 +27,7 @@ dependencies = [
 Homepage = "https://github.com/ByteFlowing1337/AutoDialer"
 
 [project.scripts]
-autodialer = "autodialer.reconnection:reconnection"
-autodialer-devices = "autodialer.get_devices:get_devices"
+autodialer = "autodialer.cli:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

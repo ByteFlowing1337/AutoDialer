@@ -29,3 +29,14 @@ def normalize_asn(asn: str) -> str:
             return f"AS{asn_num}"
 
     return ""
+
+
+def validate_asn(value: str) -> str:
+    normalized = normalize_asn(value)
+    if not normalized:
+        import argparse
+
+        raise argparse.ArgumentTypeError(
+            f"Invalid ASN format: '{value}'. Valid range is AS1 to AS4294967295."
+        )
+    return normalized

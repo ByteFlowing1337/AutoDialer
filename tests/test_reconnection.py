@@ -35,10 +35,10 @@ class TestReconnection(unittest.TestCase):
     @patch("builtins.exit")
     @patch.object(reconnection_module, "is_target_asn")
     @patch.object(reconnection_module, "check_isp_with_retries")
-    @patch.object(reconnection_module, "try_connect")
+    @patch.object(reconnection_module, "get_internet_connectivity")
     def test_asn_mode_sleeps_before_each_isp_check(
         self,
-        mock_try_connect: Any,
+        mock_get_internet_connectivity: Any,
         mock_check_isp_with_retries: Any,
         mock_is_target_asn: Any,
         mock_exit: Any,
@@ -63,14 +63,14 @@ class TestReconnection(unittest.TestCase):
             events.append("is_target")
             return current_isp.startswith("AS222")
 
-        mock_try_connect.side_effect = wait_side_effect
+        mock_get_internet_connectivity.side_effect = wait_side_effect
         mock_check_isp_with_retries.side_effect = isp_side_effect
         mock_is_target_asn.side_effect = is_target_side_effect
 
         reconnection.run_reconnection(mode="asn", asn="AS222")
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
-        self.assertEqual(mock_try_connect.call_count, 2)
+        self.assertEqual(mock_get_internet_connectivity.call_count, 2)
         self.assertEqual(mock_check_isp_with_retries.call_count, 2)
         self.assertEqual(
             events,
@@ -79,39 +79,41 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch("sys.exit", side_effect=SystemExit(1))
-    @patch.object(reconnection_module, "try_connect", return_value=False)
+    @patch.object(reconnection_module, "get_internet_connectivity", return_value=False)
     @patch.object(reconnection_module, "get_ip_address", return_value=None)
     def test_change_mode_exits_when_initial_ip_fetch_fails(
         self,
         mock_get_ip_address: Any,
-        _mock_try_connect: Any,
+        _mock_get_internet_connectivity: Any,
         mock_exit: Any,
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
 
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None)
 
-        self.assertEqual(context.exception.code, 1)
+        self.assertEqual(str(context.exception), "Unable to fetch current IP address.")
         mock_get_ip_address.assert_called_once_with()
         router.dhcp_renew.assert_not_called()
-        mock_exit.assert_called_once_with(1)
+        mock_exit.assert_not_called()
 
     @patch("sys.exit")
     @patch.object(
         reconnection_module, "check_isp_with_retries", return_value="AS9999 Example ISP"
     )
-    @patch.object(reconnection_module, "try_connect", return_value=True)
+    @patch.object(reconnection_module, "get_internet_connectivity", return_value=True)
     @patch.object(
         reconnection_module,
         "get_ip_address",
         side_effect=["203.0.113.10", "203.0.113.10", "198.51.100.25"],
     )
+    @patch("logging.Logger.info")
     def test_change_mode_retries_until_ip_changes(
         self,
+        mock_logger_info: Any,
         mock_get_ip_address: Any,
-        _mock_try_connect: Any,
+        _mock_get_internet_connectivity: Any,
         mock_check_isp_with_retries: Any,
         mock_exit: Any,
     ):
@@ -122,11 +124,17 @@ class TestReconnection(unittest.TestCase):
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
+        mock_logger_info.assert_called_with(
+            "IP info after reconnection: %s -> %s %s",
+            "203.0.113.10",
+            "198.51.100.25",
+            "AS9999 Example ISP",
+        )
         mock_check_isp_with_retries.assert_called_once_with()
         mock_exit.assert_not_called()
 
     @patch("sys.exit", side_effect=SystemExit(1))
-    @patch.object(reconnection_module, "try_connect", return_value=True)
+    @patch.object(reconnection_module, "get_internet_connectivity", return_value=True)
     @patch.object(
         reconnection_module,
         "get_ip_address",
@@ -140,23 +148,24 @@ class TestReconnection(unittest.TestCase):
     def test_change_mode_exits_after_exhausting_attempts(
         self,
         mock_get_ip_address: Any,
-        _mock_try_connect: Any,
+        _mock_get_internet_connectivity: Any,
         mock_exit: Any,
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
         reconnection.max_attempts = 3
 
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None)
 
-        self.assertEqual(context.exception.code, 1)
+        self.assertEqual(
+            str(context.exception), "Failed to change IP address after 3 attempts."
+        )
         self.assertEqual(router.dhcp_renew.call_count, 3)
         self.assertEqual(mock_get_ip_address.call_count, 4)
-        mock_exit.assert_called_once_with(1)
+        mock_exit.assert_not_called()
 
-    @patch("sys.argv", ["autodialer", "--asn", "AS9929"])
-    @patch.object(reconnection_module, "get_router", return_value=Mock())
+    @patch.object(reconnection_module, "get_router")
     @patch.object(reconnection_module, "is_target_asn", return_value=True)
     @patch.object(
         reconnection_module,
@@ -167,87 +176,25 @@ class TestReconnection(unittest.TestCase):
         self,
         _mock_check_isp: Any,
         _mock_is_target_asn: Any,
-        _mock_get_router: Any,
+        mock_get_router: Any,
     ):
+        router = self._make_router()
+        mock_get_router.return_value = router
 
-        with self.assertRaises(SystemExit) as context:
-            reconnection_module.reconnection()
+        reconnection_module.reconnect(mode="asn", asn="AS9929")
 
-        self.assertEqual(context.exception.code, 0)
+        router.get_wan_proto.assert_called_once()
 
-
-class TestArgParse(unittest.TestCase):
-    @patch("sys.argv", ["autodialer", "--help"])
-    def test_help_mode_exits_with_zero(self):
-        with self.assertRaises(SystemExit) as context:
-            reconnection_module.reconnection()
-        self.assertEqual(context.exception.code, 0)
-
-    @patch("sys.argv", ["autodialer", "-f", "--invalid"])
-    def test_invalid_argument_exits_with_error(self):
-        with patch("sys.stderr.write") as mock_stderr:
-            with self.assertRaises(SystemExit) as context:
-                reconnection_module.reconnection()
-            self.assertEqual(context.exception.code, 2)
-            self.assertTrue(
-                any(
-                    "unrecognized arguments" in call[0][0]
-                    for call in mock_stderr.call_args_list
-                )
-            )
-
-    @patch("sys.argv", ["autodialer", "--asn"])
-    def test_asn_argument_without_value_exits_with_error(self):
-        with patch("sys.stderr.write") as mock_stderr:
-            with self.assertRaises(SystemExit) as context:
-                reconnection_module.reconnection()
-            self.assertEqual(context.exception.code, 2)
-            self.assertTrue(
-                any(
-                    "expected one argument" in call[0][0]
-                    for call in mock_stderr.call_args_list
-                )
-            )
-
-    @patch("sys.argv", ["autodialer", "--force"])
     @patch.object(reconnection_module, "get_router", return_value=None)
     @patch.object(reconnection_module, "logger")
-    def test_force_mode_without_router_exits_with_error(
-        self, mock_logger, mock_get_router
-    ):
-        with self.assertRaises(SystemExit) as context:
-            reconnection_module.reconnection()
-        self.assertEqual(context.exception.code, 1)
-        self.assertIn(
-            "Unable to detect router vendor", mock_logger.error.call_args[0][0]
+    def test_reconnect_exits_when_no_router(self, mock_logger, mock_get_router):
+        with self.assertRaises(RuntimeError) as context:
+            reconnection_module.reconnect(mode="force")
+        self.assertEqual(
+            str(context.exception),
+            "Unable to detect router vendor or no API available.",
         )
-
-    def test_asn_mode_with_invalid_asn_value_exits_with_error(self):
-        invalid_asns = [
-            "-1",
-            "f",
-            "9999999999999999999",
-            "AS0",
-            "AS-123",
-            "ASABC",
-            "trash",
-        ]
-
-        for invalid_asn in invalid_asns:
-            with (
-                self.subTest(asn=invalid_asn),
-                patch("sys.argv", ["autodialer", "--asn", invalid_asn]),
-                patch("sys.stderr.write") as mock_stderr,
-                self.assertRaises(SystemExit) as context,
-            ):
-                reconnection_module.reconnection()
-            self.assertEqual(context.exception.code, 2)
-            self.assertTrue(
-                any(
-                    "Invalid ASN format" in call[0][0]
-                    for call in mock_stderr.call_args_list
-                )
-            )
+        mock_get_router.assert_called_once_with()
 
 
 if __name__ == "__main__":

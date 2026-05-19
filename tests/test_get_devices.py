@@ -1,5 +1,8 @@
+import importlib
 import unittest
 from unittest.mock import patch
+
+get_devices_module = importlib.import_module("autodialer.get_devices")
 
 
 class TestGetDevices(unittest.TestCase):
@@ -20,8 +23,9 @@ class TestGetDevices(unittest.TestCase):
         with (
             patch("sys.stdout.isatty", return_value=True),
             patch("builtins.print") as mock_print,
+            patch.object(get_devices_module, "get_devices", return_value=devices),
         ):
-            print_devices_table(devices)
+            print_devices_table()
             has_ansi = any(
                 "\033" in str(arg)
                 for call in mock_print.call_args_list
@@ -46,8 +50,9 @@ class TestGetDevices(unittest.TestCase):
         with (
             patch("sys.stdout.isatty", return_value=False),
             patch("builtins.print") as mock_print,
+            patch.object(get_devices_module, "get_devices", return_value=devices),
         ):
-            print_devices_table(devices)
+            print_devices_table()
             has_ansi = any(
                 "\033" in str(arg)
                 for call in mock_print.call_args_list

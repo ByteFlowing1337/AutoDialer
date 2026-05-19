@@ -5,9 +5,9 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from autodialer.network.check_isp import check_isp, check_isp_with_retries
+from autodialer.network.get_isp import check_isp, check_isp_with_retries
 
-check_isp_module = importlib.import_module("autodialer.network.check_isp")
+check_isp_module = importlib.import_module("autodialer.network.get_isp")
 
 
 class TestCheckIsp(unittest.TestCase):

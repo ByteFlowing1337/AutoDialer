@@ -90,11 +90,10 @@ jobs:
           console_scripts = {
               e.name: e.value
               for e in m.entry_points(group="console_scripts")
-              if e.name in {"autodialer", "autodialer-devices"}
+              if e.name in {"autodialer"}
           }
 
           assert "autodialer" in console_scripts, "missing autodialer entry point"
-          assert "autodialer-devices" in console_scripts, "missing autodialer-devices entry point"
           print("version:", version)
           print("entry points:", console_scripts)
           PY

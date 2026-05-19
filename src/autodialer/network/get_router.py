@@ -3,7 +3,7 @@ from functools import lru_cache
 from importlib import import_module
 from inspect import isabstract
 
-from autodialer.network.check_vendor import check_router_vendor
+from autodialer.network.get_vendor import check_router_vendor
 from autodialer.routers.base_router_api import RouterAPI
 
 logger = logging.getLogger(__name__)
