@@ -1,12 +1,8 @@
 import ipaddress
 import logging
-import platform
 import socket
 import struct
-import subprocess
 import sys
-from collections.abc import Callable, Iterable
-from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +15,7 @@ def _is_ip_address(value: str) -> bool:
         return False
 
 
-def _extract_first_ip(tokens: Iterable[str]) -> str | None:
+def _extract_first_ip(tokens) -> str | None:
     for token in tokens:
         candidate = token.strip()
         if _is_ip_address(candidate):
@@ -51,6 +47,8 @@ def format_ip_for_url_host(value: str) -> str:
 
     if isinstance(parsed, ipaddress.IPv6Address):
         if zone_id is not None:
+            from urllib.parse import quote
+
             encoded_zone = zone_id if zone_is_encoded else quote(zone_id, safe="")
             return f"[{parsed.compressed}%25{encoded_zone}]"
         return f"[{parsed.compressed}]"
@@ -59,14 +57,15 @@ def format_ip_for_url_host(value: str) -> str:
 
 def _get_gateway_ip_unsupported() -> str:
     logger.error(
-        "Unsupported platform: %s. Cannot determine default gateway IP address.",
-        platform.system(),
+        "Unsupported platform. Cannot determine default gateway IP address.",
     )
     sys.exit(1)
 
 
 def get_gateway_ip_on_windows() -> str:
     try:
+        import subprocess
+
         result = subprocess.run(
             ["route", "print", "-4"],
             capture_output=True,
@@ -113,6 +112,8 @@ def get_gateway_ip_on_linux() -> str:
         pass
 
     try:
+        import subprocess
+
         result = subprocess.run(
             ["ip", "-4", "route", "show", "default"],
             capture_output=True,
@@ -144,6 +145,8 @@ def get_gateway_ip_on_linux() -> str:
 
 def get_gateway_ip_on_unix() -> str:
     try:
+        import subprocess
+
         result = subprocess.run(
             ["route", "-n", "get", "default"],
             capture_output=True,
@@ -186,22 +189,26 @@ def get_gateway_ip_on_unix() -> str:
         gateway = _extract_first_ip(fields[1:])
         if gateway is not None:
             return gateway
-    logger.error(
+    raise OSError(
         "Default gateway not found in 'route -n get default' or 'netstat -rn' output."
     )
-    sys.exit(1)
 
 
-platform_system = platform.system()
-get_gateway_ip: Callable[[], str]
-if platform_system == "Windows":
-    get_gateway_ip = get_gateway_ip_on_windows
-elif platform_system == "Linux":
-    get_gateway_ip = get_gateway_ip_on_linux
-elif platform_system in {"Darwin", "FreeBSD", "OpenBSD", "NetBSD", "Unix"}:
-    get_gateway_ip = get_gateway_ip_on_unix
-else:
-    get_gateway_ip = _get_gateway_ip_unsupported
+def get_gateway_ip():
+    import platform
+
+    platform_system = platform.system()
+    if platform_system == "Windows":
+        gateway_ip = get_gateway_ip_on_windows()
+    elif platform_system == "Linux":
+        gateway_ip = get_gateway_ip_on_linux()
+    elif platform_system in {"Darwin", "FreeBSD", "OpenBSD", "NetBSD", "Unix"}:
+        gateway_ip = get_gateway_ip_on_unix()
+    else:
+        gateway_ip = _get_gateway_ip_unsupported()
+
+    return gateway_ip
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")

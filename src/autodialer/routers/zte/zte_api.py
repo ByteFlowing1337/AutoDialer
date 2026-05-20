@@ -1,5 +1,4 @@
 import logging
-import re
 from time import sleep
 from typing import Any
 from xml.etree import ElementTree as ET
@@ -275,6 +274,8 @@ class ZTEApi(RouterAPI):
             pattern = (
                 r"<ParaName>Addressingtype</ParaName>\s*<ParaValue>(.*?)</ParaValue>"
             )
+            import re
+
             match = re.search(pattern, response.text)
 
             wan_proto = match.group(1) if match else None

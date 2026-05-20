@@ -11,7 +11,7 @@ get_ip_address_module = importlib.import_module("autodialer.network.get_ip_addre
 
 
 class TestGetIpAddress(unittest.TestCase):
-    @patch.object(get_ip_address_module.requests, "get")
+    @patch("requests.get")
     def test_success_returns_sanitized_ip(self, mock_get: Any):
         response = Mock()
         response.raise_for_status.return_value = None
@@ -27,9 +27,8 @@ class TestGetIpAddress(unittest.TestCase):
             timeout=5,
         )
 
-    @patch.object(
-        get_ip_address_module.requests,
-        "get",
+    @patch(
+        "requests.get",
         side_effect=requests.RequestException("Network error"),
     )
     def test_request_exception_returns_none(self, _mock_get: Any):

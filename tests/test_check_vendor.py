@@ -26,7 +26,7 @@ class TestCheckRouterVendor(unittest.TestCase):
         return response
 
     @patch.object(check_vendor_module, "get_gateway_ip", return_value="192.168.0.1")
-    @patch.object(check_vendor_module.requests, "get")
+    @patch("requests.get")
     def test_detects_vendor_from_uppercase_html_title(
         self,
         mock_get: Any,
@@ -42,7 +42,7 @@ class TestCheckRouterVendor(unittest.TestCase):
         mock_get.assert_called_once_with("http://192.168.0.1", timeout=5)
 
     @patch.object(check_vendor_module, "get_gateway_ip", return_value="192.168.0.1")
-    @patch.object(check_vendor_module.requests, "get")
+    @patch("requests.get")
     def test_detects_vendor_from_body_when_title_missing(
         self,
         mock_get: Any,
@@ -57,7 +57,7 @@ class TestCheckRouterVendor(unittest.TestCase):
         self.assertEqual(vendor, "ZTE")
 
     @patch.object(check_vendor_module, "get_gateway_ip", return_value="192.168.0.1")
-    @patch.object(check_vendor_module.requests, "get")
+    @patch("requests.get")
     def test_detects_vendor_from_redirect_location_header(
         self,
         mock_get: Any,
@@ -77,7 +77,7 @@ class TestCheckRouterVendor(unittest.TestCase):
         self.assertEqual(vendor, "TP-Link")
 
     @patch.object(check_vendor_module, "get_gateway_ip", return_value="192.168.0.1")
-    @patch.object(check_vendor_module.requests, "get")
+    @patch("requests.get")
     def test_detects_vendor_from_response_headers(
         self,
         mock_get: Any,
@@ -92,7 +92,7 @@ class TestCheckRouterVendor(unittest.TestCase):
 
         self.assertEqual(vendor, "MikroTik")
 
-    @patch.object(check_vendor_module.requests, "get")
+    @patch("requests.get")
     @patch.object(check_vendor_module, "get_gateway_ip", return_value=None)
     def test_returns_none_when_gateway_is_unavailable(
         self,
@@ -105,9 +105,8 @@ class TestCheckRouterVendor(unittest.TestCase):
         mock_get.assert_not_called()
 
     @patch.object(check_vendor_module, "get_gateway_ip", return_value="192.168.0.1")
-    @patch.object(
-        check_vendor_module.requests,
-        "get",
+    @patch(
+        "requests.get",
         side_effect=requests.RequestException("boom"),
     )
     def test_returns_none_when_router_request_fails(
