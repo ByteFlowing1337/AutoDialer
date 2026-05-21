@@ -58,7 +58,6 @@ def check_isp_with_retries(retries: int = 3) -> str | None:
         logger.error("Invalid retries parameter. Retries must be a positive integer.")
         return None
 
-    # if retries == 0, we still want to perform one check.
     isp = check_isp()
     if isp is not None:
         return isp

@@ -1,12 +1,12 @@
 import ipaddress
 import logging
 
-import requests
-
 logger = logging.getLogger(__name__)
 
 
 def get_ip_address() -> str | None:
+    import requests
+
     api_sources = [
         "https://ipinfo.io/ip",
         "https://ifconfig.me/ip",

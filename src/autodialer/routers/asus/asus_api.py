@@ -19,11 +19,11 @@ PANEL_USERNAME: str = env_var.PANEL_USERNAME
 USER_AGENT = "AutoDialer"
 REQUEST_TIMEOUT = 5
 WAN_STATUS_HOOK = "get_wan_unit();nvram_get(wan0_proto);nvram_get(wan1_proto);"
+MAC_ADDRESS_PATTERN = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 UPDATE_CLIENTS_PATTERN = re.compile(
     r"originData = (.*)networkmap_fullscan = ",
     re.DOTALL,
 )
-MAC_ADDRESS_PATTERN = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 
 
 logger = logging.getLogger(__name__)
@@ -183,6 +183,7 @@ class AsusAPI(RouterAPI):
 
     @classmethod
     def _is_mac_address(cls, value: Any) -> bool:
+
         return (
             isinstance(value, str) and MAC_ADDRESS_PATTERN.fullmatch(value) is not None
         )

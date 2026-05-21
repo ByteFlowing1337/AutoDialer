@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-from autodialer.network import validate_asn
+from autodialer.utils import validate_asn
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -51,7 +51,7 @@ def main():
 
     if len(sys.argv) == 1:
         parser.print_help()
-        sys.exit(0)
+        return
 
     args = parser.parse_args()
     if args.env:
