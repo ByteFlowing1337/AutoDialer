@@ -1,10 +1,11 @@
 import logging
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
 
 from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 
 logger = logging.getLogger(__name__)
+
+TYPE_CHECKING = False
 
 if TYPE_CHECKING:
     import requests
@@ -58,10 +59,7 @@ def _match_vendor_marker(text: str) -> str | None:
 def _extract_title(text: str) -> str:
     import re
 
-    TITLE_PATTERN = re.compile(
-        r"<title\b[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL
-    )
-    match = TITLE_PATTERN.search(text)
+    match = re.search(r"<title\b[^>]*>(.*?)</title>", text, re.IGNORECASE | re.DOTALL)
     return match.group(1) if match else ""
 
 
