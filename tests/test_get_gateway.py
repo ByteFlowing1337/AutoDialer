@@ -20,7 +20,7 @@ class TestGetGatewayIp(unittest.TestCase):
     def test_format_ip_for_url_host_scoped_ipv6(self):
         self.assertEqual(format_ip_for_url_host("fe80::1%en0"), "[fe80::1%25en0]")
 
-    @patch("autodialer.network.get_gateway.subprocess.run")
+    @patch("subprocess.run")
     def test_windows_gateway_parsed(self, mock_run: Any):
         mock_run.return_value = Mock(
             stdout=(
@@ -48,7 +48,7 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "10.0.0.1")
 
-    @patch("autodialer.network.get_gateway.subprocess.run")
+    @patch("subprocess.run")
     @patch("builtins.open", side_effect=OSError)
     def test_linux_gateway_fallback_parsed(self, _: Any, mock_run: Any):
         mock_run.return_value = Mock(
@@ -59,7 +59,7 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "10.0.0.1")
 
-    @patch("autodialer.network.get_gateway.subprocess.run")
+    @patch("subprocess.run")
     def test_unix_gateway_parsed(self, mock_run: Any):
         mock_run.return_value = Mock(
             stdout=(

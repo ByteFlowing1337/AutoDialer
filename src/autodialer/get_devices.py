@@ -1,6 +1,6 @@
 import sys
 
-from autodialer.routers import get_router
+from autodialer.network.get_router import get_router
 
 
 def get_devices() -> list:
