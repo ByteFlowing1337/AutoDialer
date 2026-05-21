@@ -65,7 +65,9 @@ def _extract_title(text: str) -> str:
     return match.group(1) if match else ""
 
 
-def _iter_response_chain(response: requests.Response) -> Iterator[requests.Response]:
+def _iter_response_chain(
+    response: "requests.Response",
+) -> Iterator["requests.Response"]:
     yield from getattr(response, "history", [])
     yield response
 
