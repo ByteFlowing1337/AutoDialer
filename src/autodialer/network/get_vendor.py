@@ -60,7 +60,7 @@ def _extract_title(text: str) -> str:
     return match.group(1) if match else ""
 
 
-def _iter_response_chain(response):
+def _iter_response_chain(response):  # -> Generator[Any, Any, None]:
     yield from getattr(response, "history", [])
     yield response
 
@@ -76,14 +76,14 @@ def check_router_vendor() -> str | None:
         str | None: The detected router vendor,
         or None if the vendor could not be determined.
     """
+    import requests
+
     gateway = get_gateway_ip()
     if gateway is None:
         logger.error("Unable to determine router IP address.")
         return None
 
     try:
-        import requests
-
         gateway_host = format_ip_for_url_host(gateway)
         response = requests.get(f"http://{gateway_host}", timeout=5)
         response.raise_for_status()
@@ -121,7 +121,7 @@ def check_router_vendor() -> str | None:
 
         logger.error("Unknown router vendor.")
         return None
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error("Error connecting to router: %s", e)
         return None
 
