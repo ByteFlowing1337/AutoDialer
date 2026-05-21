@@ -56,8 +56,11 @@ def format_ip_for_url_host(value: str) -> str:
 
 
 def _get_gateway_ip_unsupported() -> str:
+    import platform
+
     logger.error(
-        "Unsupported platform. Cannot determine default gateway IP address.",
+        "Unsupported platform %s. Cannot determine default gateway IP address.",
+        platform.system(),
     )
     sys.exit(1)
 

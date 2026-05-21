@@ -1,8 +1,13 @@
 import logging
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 from autodialer.network.get_gateway import format_ip_for_url_host, get_gateway_ip
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    import requests
 
 VENDOR_SIGNATURES: dict[str, tuple[str, ...]] = {
     "TP-Link": ("tp-link", "tplink", "tl-", "archer", "deco", "tplinkwifi.net"),
@@ -60,7 +65,7 @@ def _extract_title(text: str) -> str:
     return match.group(1) if match else ""
 
 
-def _iter_response_chain(response):  # -> Generator[Any, Any, None]:
+def _iter_response_chain(response: requests.Response) -> Iterator[requests.Response]:
     yield from getattr(response, "history", [])
     yield response
 
