@@ -15,7 +15,7 @@ def _is_ip_address(value: str) -> bool:
         return False
 
 
-def _extract_first_ip(tokens) -> str | None:
+def _extract_first_ip(tokens: list[str]) -> str | None:
     for token in tokens:
         candidate = token.strip()
         if _is_ip_address(candidate):
@@ -189,12 +189,13 @@ def get_gateway_ip_on_unix() -> str:
         gateway = _extract_first_ip(fields[1:])
         if gateway is not None:
             return gateway
-    raise OSError(
+    logger.error(
         "Default gateway not found in 'route -n get default' or 'netstat -rn' output."
     )
+    sys.exit(1)
 
 
-def get_gateway_ip():
+def get_gateway_ip() -> str:
     import platform
 
     platform_system = platform.system()

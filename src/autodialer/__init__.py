@@ -1,10 +1,22 @@
+from typing import TYPE_CHECKING
+
 __version__ = "0.4.0"
 __author__ = "Byteflow"
+
+if TYPE_CHECKING:
+    from autodialer.get_devices import get_devices, print_devices_table
+    from autodialer.reconnection import reconnect
+
+__all__ = [
+    "get_devices",
+    "print_devices_table",
+    "reconnect",
+]
 
 
 def __getattr__(name):
     if name == "get_devices":
-        from .get_devices import get_devices
+        from autodialer.get_devices import get_devices
 
         return get_devices
     elif name == "print_devices_table":
@@ -15,11 +27,8 @@ def __getattr__(name):
         from .reconnection import reconnect
 
         return reconnect
-    raise AttributeError(f"module {__name__} has no attribute {name}")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = [
-    "get_devices",
-    "print_devices_table",
-    "reconnect",
-]
+def __dir__():
+    return sorted(set(globals().keys()) | set(__all__))

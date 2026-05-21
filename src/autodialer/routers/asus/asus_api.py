@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import re
 import sys
 from typing import Any
 from urllib.parse import quote
@@ -18,6 +19,11 @@ PANEL_USERNAME: str = env_var.PANEL_USERNAME
 USER_AGENT = "AutoDialer"
 REQUEST_TIMEOUT = 5
 WAN_STATUS_HOOK = "get_wan_unit();nvram_get(wan0_proto);nvram_get(wan1_proto);"
+MAC_ADDRESS_PATTERN = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
+UPDATE_CLIENTS_PATTERN = re.compile(
+    r"originData = (.*)networkmap_fullscan = ",
+    re.DOTALL,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -156,12 +162,6 @@ class AsusAPI(RouterAPI):
 
     @classmethod
     def _read_update_clients_data(cls, content: str) -> dict[str, Any]:
-        import re
-
-        UPDATE_CLIENTS_PATTERN = re.compile(
-            r"originData = (.*)networkmap_fullscan = ",
-            re.DOTALL,
-        )
         match = UPDATE_CLIENTS_PATTERN.search(content.replace("\n", ""))
         if not match:
             return {}
@@ -183,9 +183,7 @@ class AsusAPI(RouterAPI):
 
     @classmethod
     def _is_mac_address(cls, value: Any) -> bool:
-        import re
 
-        MAC_ADDRESS_PATTERN = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
         return (
             isinstance(value, str) and MAC_ADDRESS_PATTERN.fullmatch(value) is not None
         )
