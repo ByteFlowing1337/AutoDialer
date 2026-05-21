@@ -203,15 +203,13 @@ def get_gateway_ip() -> str:
 
     platform_system = platform.system()
     if platform_system == "Windows":
-        gateway_ip = get_gateway_ip_on_windows()
+        return get_gateway_ip_on_windows()
     elif platform_system == "Linux":
-        gateway_ip = get_gateway_ip_on_linux()
+        return get_gateway_ip_on_linux()
     elif platform_system in {"Darwin", "FreeBSD", "OpenBSD", "NetBSD", "Unix"}:
-        gateway_ip = get_gateway_ip_on_unix()
+        return get_gateway_ip_on_unix()
     else:
-        gateway_ip = _get_gateway_ip_unsupported()
-
-    return gateway_ip
+        return _get_gateway_ip_unsupported()
 
 
 if __name__ == "__main__":
