@@ -14,7 +14,6 @@ def main():
         "-e",
         "--env",
         action="append",
-        nargs="?",
         metavar="<KEY=VAL>",
         help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
     )
@@ -23,7 +22,6 @@ def main():
         "-n",
         "--attempts",
         action="store",
-        nargs="?",
         default=5,
         metavar="<N>",
         type=int,
