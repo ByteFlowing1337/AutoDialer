@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class Reconnection:
+    DEFAULT_MAX_ATTEMPTS = 5
+
     def __init__(self, router: RouterAPI, delay: int = 10):
         self.router = router
         self.delay = delay
@@ -37,7 +39,7 @@ class Reconnection:
         asn: str | None,
         attempts: int | None = None,
     ) -> None:
-        self.max_attempts = attempts if attempts is not None else 5
+        self.max_attempts = attempts if attempts else self.DEFAULT_MAX_ATTEMPTS
         proto = self._get_wan_proto()
 
         if proto is None:
