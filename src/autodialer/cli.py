@@ -72,6 +72,9 @@ def main():
         try:
             print_devices_table()
         except RuntimeError as e:
+            # Lazy import logging as it has a not low overhead, and
+            # should never be used when the user just wants
+            # to see the help message or print devices
             import logging
 
             logger = logging.getLogger(__name__)
