@@ -153,7 +153,6 @@ class TestReconnection(unittest.TestCase):
     ):
         router = self._make_router()
         reconnection = reconnection_module.Reconnection(router)
-        reconnection.max_attempts = 3
 
         with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None, attempts=3)
