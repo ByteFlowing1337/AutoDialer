@@ -1,7 +1,7 @@
 import importlib
 import unittest
 from typing import Any
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import requests
 
