@@ -1,7 +1,6 @@
 import logging
 from functools import lru_cache
 from importlib import import_module
-from inspect import isabstract
 
 from autodialer.network.get_vendor import check_router_vendor
 from autodialer.routers.base_router_api import RouterAPI
@@ -28,6 +27,8 @@ def _get_vendor_api_class(vendor: str) -> type[RouterAPI] | None:
 
     if api_class is None or not isinstance(api_class, type):
         return None
+
+    from inspect import isabstract
 
     return (
         api_class

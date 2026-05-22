@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING
-
 __version__ = "0.4.0"
 __author__ = "Byteflow"
+
+
+TYPE_CHECKING = False
 
 if TYPE_CHECKING:
     from autodialer.get_devices import get_devices, print_devices_table
