@@ -39,7 +39,7 @@ class Reconnection:
         asn: str | None,
         attempts: int | None = None,
     ) -> None:
-        self.max_attempts = attempts if attempts else self.DEFAULT_MAX_ATTEMPTS
+        self.max_attempts = attempts if attempts is not None else self.DEFAULT_MAX_ATTEMPTS
         proto = self._get_wan_proto()
 
         if proto is None:
