@@ -22,7 +22,6 @@ def main():
         "-n",
         "--attempts",
         action="store",
-        nargs="?",
         default=5,
         metavar="<N>",
         type=int,
