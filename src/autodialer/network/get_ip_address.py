@@ -8,6 +8,7 @@ def get_ip_address() -> str | None:
     import requests
 
     api_sources = [
+        "https://icanhazip.com",
         "https://ipinfo.io/ip",
         "https://ifconfig.me/ip",
         "https://api.ipify.org",

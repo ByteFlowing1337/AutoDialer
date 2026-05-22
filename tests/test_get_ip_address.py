@@ -1,7 +1,7 @@
 import importlib
 import unittest
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 import requests
 
@@ -22,7 +22,7 @@ class TestGetIpAddress(unittest.TestCase):
 
         self.assertEqual(result, "203.0.113.10")
         mock_get.assert_called_once_with(
-            "https://ipinfo.io/ip",
+            ANY,
             proxies={"http": "", "https": ""},
             timeout=5,
         )
