@@ -75,6 +75,7 @@ def main():
             # Lazy import logging as it has a not low overhead, and
             # should never be used when the user just wants
             # to see the help message or print devices
+            # See https://github.com/python/cpython/pull/150073
             import logging
 
             logger = logging.getLogger(__name__)
