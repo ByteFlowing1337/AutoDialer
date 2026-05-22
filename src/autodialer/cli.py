@@ -14,7 +14,6 @@ def main():
         "-e",
         "--env",
         action="append",
-        nargs="?",
         metavar="<KEY=VAL>",
         help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
     )
