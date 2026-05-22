@@ -22,7 +22,7 @@ class TestGetIpAddress(unittest.TestCase):
 
         self.assertEqual(result, "203.0.113.10")
         mock_get.assert_called_once_with(
-            "https://ipinfo.io/ip",
+            "https://icanhazip.com",
             proxies={"http": "", "https": ""},
             timeout=5,
         )
