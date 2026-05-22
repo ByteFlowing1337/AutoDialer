@@ -90,7 +90,7 @@ def main():
             elif args.asn:
                 reconnect(mode="asn", asn=args.asn, attempts=args.attempts)
             elif args.change:
-                reconnect(mode="change")
+                reconnect(mode="change", attempts=args.attempts)
         except RuntimeError as e:
             import logging
 
