@@ -37,12 +37,10 @@ class Reconnection:
         mode: Literal["force", "asn", "change"],
         *,
         asn: str | None,
-        attempts: int | None = None,
+        max_attempts: int | None = None,
     ) -> None:
-        if attempts is None:
-            self.max_attempts = self.DEFAULT_MAX_ATTEMPTS
-        else:
-            self.max_attempts = attempts
+        if max_attempts is None:
+            max_attempts = self.DEFAULT_MAX_ATTEMPTS
 
         proto = self._get_wan_proto()
 
@@ -54,7 +52,7 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     raise RuntimeError("Failed to apply forced reconnection.")
 
-                if not get_internet_connectivity(self.delay, self.max_attempts):
+                if not get_internet_connectivity(self.delay, max_attempts):
                     raise RuntimeError(
                         "Cannot detect internet connectivity after forced reconnection."
                     )
@@ -76,13 +74,11 @@ class Reconnection:
                 after_reconnection_ip: str | None = current_ip
                 attempts = 0
 
-                while (
-                    current_ip == after_reconnection_ip
-                ) and attempts < self.max_attempts:
+                while (current_ip == after_reconnection_ip) and attempts < max_attempts:
                     if not self._apply_reconnection(proto):
                         raise RuntimeError("Failed to apply reconnection.")
 
-                    if not get_internet_connectivity(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, max_attempts):
                         raise RuntimeError(
                             "Cannot detect internet connectivity after reconnection."
                         )
@@ -103,15 +99,15 @@ class Reconnection:
                     )
                     return
                 raise RuntimeError(
-                    f"Failed to change IP address after {self.max_attempts} attempts."
+                    f"Failed to change IP address after {max_attempts} attempts."
                 )
 
             case "asn":
-                for _ in range(self.max_attempts):
+                for _ in range(max_attempts):
                     if not self._apply_reconnection(proto):
                         raise RuntimeError("Failed to apply reconnection.")
 
-                    if not get_internet_connectivity(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, max_attempts):
                         raise RuntimeError(
                             "Cannot detect internet connectivity after reconnection."
                         )
@@ -132,26 +128,28 @@ class Reconnection:
         self,
         mode: Literal["force", "asn", "change"],
         asn: str | None = None,
-        attempts: int | None = None,
+        max_attempts: int | None = None,
     ) -> None:
         match mode:
             case "force":
-                self.run_reconnection(mode="force", asn=None, attempts=attempts)
+                self.run_reconnection(mode="force", asn=None, max_attempts=max_attempts)
             case "asn":
-                self.run_reconnection(mode="asn", asn=asn, attempts=attempts)
+                self.run_reconnection(mode="asn", asn=asn, max_attempts=max_attempts)
             case "change":
-                self.run_reconnection(mode="change", asn=None, attempts=attempts)
+                self.run_reconnection(
+                    mode="change", asn=None, max_attempts=max_attempts
+                )
 
 
 def reconnect(
     *,
     mode: Literal["force", "asn", "change"],
     asn: str | None = None,
-    attempts: int | None = None,
+    max_attempts: int | None = None,
 ) -> None:
 
     router = get_router()
     if router is None:
         raise RuntimeError("Unable to detect router vendor or no API available.")
     reconnection = Reconnection(router)
-    reconnection.main(mode, asn, attempts)
+    reconnection.main(mode, asn, max_attempts)

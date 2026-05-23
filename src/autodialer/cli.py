@@ -88,11 +88,11 @@ def main():
 
         try:
             if args.force:
-                reconnect(mode="force", attempts=args.attempts)
+                reconnect(mode="force", max_attempts=args.attempts)
             elif args.asn:
-                reconnect(mode="asn", asn=args.asn, attempts=args.attempts)
+                reconnect(mode="asn", asn=args.asn, max_attempts=args.attempts)
             elif args.change:
-                reconnect(mode="change", attempts=args.attempts)
+                reconnect(mode="change", max_attempts=args.attempts)
         except RuntimeError as e:
             import logging
 

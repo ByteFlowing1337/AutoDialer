@@ -67,7 +67,7 @@ class TestReconnection(unittest.TestCase):
         mock_check_isp_with_retries.side_effect = isp_side_effect
         mock_is_target_asn.side_effect = is_target_side_effect
 
-        reconnection.run_reconnection(mode="asn", asn="AS222", attempts=3)
+        reconnection.run_reconnection(mode="asn", asn="AS222", max_attempts=3)
 
         self.assertEqual(router.dhcp_renew.call_count, 2)
         self.assertEqual(mock_get_internet_connectivity.call_count, 2)
@@ -155,7 +155,7 @@ class TestReconnection(unittest.TestCase):
         reconnection = reconnection_module.Reconnection(router)
 
         with self.assertRaises(RuntimeError) as context:
-            reconnection.run_reconnection(mode="change", asn=None, attempts=3)
+            reconnection.run_reconnection(mode="change", asn=None, max_attempts=3)
 
         self.assertEqual(
             str(context.exception), "Failed to change IP address after 3 attempts."
