@@ -74,6 +74,35 @@ class TestGetGatewayIp(unittest.TestCase):
 
         self.assertEqual(result, "172.16.0.1")
 
+    @patch("subprocess.run")
+    def test_exit_with_error_code_when_gateway_not_found_on_unix(self, mock_run: Any):
+        mock_run.return_value = Mock(stdout="")
+        with self.assertRaises(SystemExit) as cm:
+            get_gateway_ip_on_unix()
+        self.assertEqual(cm.exception.code, 1)
+        self.assertEqual(mock_run.call_count, 2)
+
+    @patch("subprocess.run")
+    def test_exit_with_error_code_when_gateway_not_found_on_windows(
+        self, mock_run: Any
+    ):
+        mock_run.return_value = Mock(stdout="")
+        with self.assertRaises(SystemExit) as cm:
+            get_gateway_ip_on_windows()
+        self.assertEqual(cm.exception.code, 1)
+        mock_run.assert_called_once()
+
+    @patch("subprocess.run")
+    @patch("builtins.open", side_effect=OSError)
+    def test_exit_with_error_code_when_gateway_not_found_on_linux(
+        self, _: Any, mock_run: Any
+    ):
+        mock_run.return_value = Mock(stdout="")
+        with self.assertRaises(SystemExit) as cm:
+            get_gateway_ip_on_linux()
+        self.assertEqual(cm.exception.code, 1)
+        mock_run.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
