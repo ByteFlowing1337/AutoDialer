@@ -1,11 +1,7 @@
 import argparse
-import logging
 import sys
 
 from autodialer.utils import validate_asn
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def main():
@@ -17,9 +13,19 @@ def main():
     parser.add_argument(
         "-e",
         "--env",
-        metavar="<KEY=VAL>",
         action="append",
+        metavar="<KEY=VAL>",
         help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
+    )
+
+    parser.add_argument(
+        "-n",
+        "--attempts",
+        action="store",
+        default=5,
+        metavar="<N>",
+        type=int,
+        help="Number of reconnection attempts before giving up (default: 5)",
     )
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -32,6 +38,7 @@ def main():
     group.add_argument(
         "-a",
         "--asn",
+        action="store",
         metavar="<ASN>",
         type=validate_asn,
         help="Reconnect until connected to the specified target ASN.",
@@ -65,6 +72,13 @@ def main():
         try:
             print_devices_table()
         except RuntimeError as e:
+            # Lazy import logging as it has a not low overhead, and
+            # should never be used when the user just wants
+            # to see the help message or print devices
+            # See https://github.com/python/cpython/pull/150073
+            import logging
+
+            logger = logging.getLogger(__name__)
             logger.error(str(e))
             sys.exit(1)
         return
@@ -74,12 +88,15 @@ def main():
 
         try:
             if args.force:
-                reconnect(mode="force")
+                reconnect(mode="force", max_attempts=args.attempts)
             elif args.asn:
-                reconnect(mode="asn", asn=args.asn)
+                reconnect(mode="asn", asn=args.asn, max_attempts=args.attempts)
             elif args.change:
-                reconnect(mode="change")
+                reconnect(mode="change", max_attempts=args.attempts)
         except RuntimeError as e:
+            import logging
+
+            logger = logging.getLogger(__name__)
             logger.error(str(e))
             sys.exit(1)
         return

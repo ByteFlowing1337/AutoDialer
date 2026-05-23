@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 class Reconnection:
-    def __init__(self, router: RouterAPI, delay: int = 10, max_attempts: int = 5):
+    DEFAULT_MAX_ATTEMPTS = 5
+
+    def __init__(self, router: RouterAPI, delay: int = 10):
         self.router = router
-        self.max_attempts = max_attempts
         self.delay = delay
 
     def _get_wan_proto(self) -> str | None:
@@ -32,8 +33,14 @@ class Reconnection:
         return False
 
     def run_reconnection(
-        self, mode: Literal["force", "asn", "change"], *, asn: str | None
+        self,
+        mode: Literal["force", "asn", "change"],
+        *,
+        asn: str | None,
+        max_attempts: int | None = None,
     ) -> None:
+        if max_attempts is None:
+            max_attempts = self.DEFAULT_MAX_ATTEMPTS
 
         proto = self._get_wan_proto()
 
@@ -45,9 +52,9 @@ class Reconnection:
                 if not self._apply_reconnection(proto):
                     raise RuntimeError("Failed to apply forced reconnection.")
 
-                if not get_internet_connectivity(self.delay, self.max_attempts):
+                if not get_internet_connectivity(self.delay, max_attempts):
                     raise RuntimeError(
-                        "Internet did not recover after forced reconnection."
+                        "Cannot detect internet connectivity after forced reconnection."
                     )
 
                 isp = check_isp_with_retries()
@@ -67,15 +74,13 @@ class Reconnection:
                 after_reconnection_ip: str | None = current_ip
                 attempts = 0
 
-                while (
-                    current_ip == after_reconnection_ip
-                ) and attempts < self.max_attempts:
+                while (current_ip == after_reconnection_ip) and attempts < max_attempts:
                     if not self._apply_reconnection(proto):
                         raise RuntimeError("Failed to apply reconnection.")
 
-                    if not get_internet_connectivity(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, max_attempts):
                         raise RuntimeError(
-                            "Internet did not recover after reconnection."
+                            "Cannot detect internet connectivity after reconnection."
                         )
 
                     if (after_reconnection_ip := get_ip_address()) is None:
@@ -94,17 +99,17 @@ class Reconnection:
                     )
                     return
                 raise RuntimeError(
-                    f"Failed to change IP address after {self.max_attempts} attempts."
+                    f"Failed to change IP address after {max_attempts} attempts."
                 )
 
             case "asn":
-                for _ in range(self.max_attempts):
+                for _ in range(max_attempts):
                     if not self._apply_reconnection(proto):
                         raise RuntimeError("Failed to apply reconnection.")
 
-                    if not get_internet_connectivity(self.delay, self.max_attempts):
+                    if not get_internet_connectivity(self.delay, max_attempts):
                         raise RuntimeError(
-                            "Internet did not recover after reconnection."
+                            "Cannot detect internet connectivity after reconnection."
                         )
 
                     isp = check_isp_with_retries()
@@ -120,23 +125,31 @@ class Reconnection:
                 )
 
     def main(
-        self, mode: Literal["force", "asn", "change"], asn: str | None = None
+        self,
+        mode: Literal["force", "asn", "change"],
+        asn: str | None = None,
+        max_attempts: int | None = None,
     ) -> None:
         match mode:
             case "force":
-                self.run_reconnection(mode="force", asn=None)
+                self.run_reconnection(mode="force", asn=None, max_attempts=max_attempts)
             case "asn":
-                self.run_reconnection(mode="asn", asn=asn)
+                self.run_reconnection(mode="asn", asn=asn, max_attempts=max_attempts)
             case "change":
-                self.run_reconnection(mode="change", asn=None)
+                self.run_reconnection(
+                    mode="change", asn=None, max_attempts=max_attempts
+                )
 
 
 def reconnect(
-    *, mode: Literal["force", "asn", "change"], asn: str | None = None
+    *,
+    mode: Literal["force", "asn", "change"],
+    asn: str | None = None,
+    max_attempts: int | None = None,
 ) -> None:
 
     router = get_router()
     if router is None:
         raise RuntimeError("Unable to detect router vendor or no API available.")
     reconnection = Reconnection(router)
-    reconnection.main(mode, asn)
+    reconnection.main(mode, asn, max_attempts)
