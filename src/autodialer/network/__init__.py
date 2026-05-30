@@ -1,7 +1,6 @@
 from autodialer.network.get_ip_address import get_ip_address
 from autodialer.network.get_router import get_router
 
-from .get_asn import is_target_asn, normalize_asn
 from .get_connectivity import get_internet_connectivity
 from .get_isp import check_isp_with_retries
 
@@ -9,7 +8,5 @@ __all__ = [
     "check_isp_with_retries",
     "get_ip_address",
     "get_internet_connectivity",
-    "normalize_asn",
-    "is_target_asn",
     "get_router",
 ]
