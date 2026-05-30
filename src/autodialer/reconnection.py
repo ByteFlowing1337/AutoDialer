@@ -6,9 +6,9 @@ from autodialer.network import (
     get_internet_connectivity,
     get_ip_address,
     get_router,
-    is_target_asn,
 )
 from autodialer.routers import RouterAPI
+from autodialer.utils import is_target_asn
 
 logger = logging.getLogger(__name__)
 

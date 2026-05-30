@@ -30,10 +30,10 @@ class ZTEApi(RouterAPI):
     def __init__(self):
         self.router_host = format_ip_for_url_host(get_gateway_ip())
         self.session = requests.Session()
-        self._seed_browser_cookies()
         self.delay = 30
         self.sessiontoken = None
         self.logintoken = None
+        self._seed_browser_cookies()
 
     def _seed_browser_cookies(self) -> None:
         self.session.headers.update(
