@@ -14,7 +14,7 @@ def get_devices() -> list:
 def print_devices_table() -> None:
     devices = get_devices()
     if not devices:
-        print("No devices connected.")
+        print("No connected devices found.")
         return
 
     header = (
