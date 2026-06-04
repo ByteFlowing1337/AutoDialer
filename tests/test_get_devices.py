@@ -122,4 +122,4 @@ class TestGetDevices(unittest.TestCase):
                 last = idx + len(part)
             col_starts.append(indices)
         for col in zip(*col_starts, strict=False):
-            assert len(set(col)) == 1, f"Column not aligned: {col}"
+            self.assertEqual(len(set(col)), 1, f"Column not aligned: {col}")
