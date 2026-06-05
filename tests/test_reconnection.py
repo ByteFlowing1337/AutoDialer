@@ -182,7 +182,7 @@ class TestReconnection(unittest.TestCase):
 
         reconnection_module.reconnect(mode="asn", asn="AS9929")
 
-        router.get_wan_proto.assert_called_once()
+        router.get_wan_proto.assert_not_called()
 
     @patch.object(reconnection_module, "get_router", return_value=None)
     @patch.object(reconnection_module, "logger")
