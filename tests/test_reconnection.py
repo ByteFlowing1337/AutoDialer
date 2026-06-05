@@ -165,7 +165,6 @@ class TestReconnection(unittest.TestCase):
         mock_exit.assert_not_called()
 
     @patch.object(reconnection_module, "get_router")
-    @patch.object(reconnection_module, "is_target_asn", return_value=True)
     @patch.object(
         reconnection_module,
         "check_isp_with_retries",
@@ -174,7 +173,6 @@ class TestReconnection(unittest.TestCase):
     def test_asn_mode_exits_early_when_already_on_target_asn(
         self,
         _mock_check_isp: Any,
-        _mock_is_target_asn: Any,
         mock_get_router: Any,
     ):
         router = self._make_router()
@@ -182,7 +180,7 @@ class TestReconnection(unittest.TestCase):
 
         reconnection_module.reconnect(mode="asn", asn="AS9929")
 
-        router.get_wan_proto.assert_called_once()
+        router.get_wan_proto.assert_not_called()
 
     @patch.object(reconnection_module, "get_router", return_value=None)
     @patch.object(reconnection_module, "logger")

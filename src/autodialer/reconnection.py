@@ -134,6 +134,12 @@ class Reconnection:
             case "force":
                 self.run_reconnection(mode="force", asn=None, max_attempts=max_attempts)
             case "asn":
+                if is_target_asn(current_isp=check_isp_with_retries(), target_asn=asn):
+                    logger.info(
+                        "Already connected to target ASN %s. No reconnection needed.",
+                        asn,
+                    )
+                    return
                 self.run_reconnection(mode="asn", asn=asn, max_attempts=max_attempts)
             case "change":
                 self.run_reconnection(
