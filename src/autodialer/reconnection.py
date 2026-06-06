@@ -13,7 +13,7 @@ from autodialer.utils import is_target_asn
 logger = logging.getLogger(__name__)
 
 
-class Reconnection:
+class Reconnector:
     DEFAULT_MAX_ATTEMPTS = 5
 
     def __init__(self, router: RouterAPI, delay: int = 10):
@@ -157,5 +157,5 @@ def reconnect(
     router = get_router()
     if router is None:
         raise RuntimeError("Unable to detect router vendor or no API available.")
-    reconnection = Reconnection(router)
-    reconnection.main(mode, asn, max_attempts)
+    reconnector = Reconnector(router)
+    reconnector.main(mode, asn, max_attempts)

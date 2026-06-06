@@ -19,7 +19,7 @@ class TestReconnection(unittest.TestCase):
         router = Mock()
         router.get_wan_proto.return_value = "dhcp"
 
-        reconnection = reconnection_module.Reconnection(router)
+        reconnection = reconnection_module.Reconnector(router)
 
         self.assertEqual(reconnection._get_wan_proto(), "dhcp")
 
@@ -27,7 +27,7 @@ class TestReconnection(unittest.TestCase):
         router = Mock()
         router.make_pppoe_reconnection.return_value = True
 
-        reconnection = reconnection_module.Reconnection(router)
+        reconnection = reconnection_module.Reconnector(router)
 
         self.assertTrue(reconnection._apply_reconnection("pppoe"))
         router.make_pppoe_reconnection.assert_called_once_with()
@@ -44,7 +44,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router(proto="dhcp")
-        reconnection = reconnection_module.Reconnection(router, delay=7)
+        reconnection = reconnection_module.Reconnector(router, delay=7)
 
         events: list[str] = []
         isp_values = iter(["AS111 Example ISP", "AS222 Target ISP"])
@@ -88,7 +88,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnection(router)
+        reconnection = reconnection_module.Reconnector(router)
 
         with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None)
@@ -118,7 +118,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnection(router)
+        reconnection = reconnection_module.Reconnector(router)
 
         reconnection.run_reconnection(mode="change", asn=None)
 
@@ -152,7 +152,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnection(router)
+        reconnection = reconnection_module.Reconnector(router)
 
         with self.assertRaises(RuntimeError) as context:
             reconnection.run_reconnection(mode="change", asn=None, max_attempts=3)
