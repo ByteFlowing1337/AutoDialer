@@ -23,7 +23,7 @@ def main():
         "-v",
         "--version",
         action="version",
-        version=__version__,
+        version=f"AutoDialer {__version__}",
         help="Show the current version of AutoDialer",
     )
 
