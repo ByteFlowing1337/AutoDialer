@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from autodialer import __version__
 from autodialer.utils import validate_asn
 
 
@@ -16,6 +17,14 @@ def main():
         action="append",
         metavar="<KEY=VAL>",
         help="Set environment variables (e.g., -e PANEL_PASSWORD=secret)",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"AutoDialer {__version__}",
+        help="Show the current version of AutoDialer",
     )
 
     parser.add_argument(
