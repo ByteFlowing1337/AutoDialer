@@ -67,6 +67,20 @@ class TestCheckIspWithRetries(unittest.TestCase):
         self.assertIsNone(check_isp_with_retries(retries=2.5))  # type: ignore
         mock_check_isp.assert_not_called()
 
+    @patch.object(check_isp_module, "check_isp")
+    def test_invalid_delay_parameter_return_none(self, mock_check_isp: Any):
+        self.assertIsNone(check_isp_with_retries(delay=-1))
+        self.assertIsNone(check_isp_with_retries(delay=2.5))  # type: ignore
+        self.assertIsNone(check_isp_with_retries(retries=2, delay=-5))
+        mock_check_isp.assert_not_called()
+
+    @patch.object(check_isp_module, "check_isp", return_value=None)
+    @patch("time.sleep", return_value=None)
+    def test_delay_between_retries(self, mock_sleep: Any, mock_check_isp: Any):
+        check_isp_with_retries(retries=2, delay=10)
+        self.assertEqual(mock_check_isp.call_count, 3)
+        mock_sleep.assert_called_with(10)
+
 
 if __name__ == "__main__":
     unittest.main()

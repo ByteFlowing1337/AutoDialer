@@ -64,11 +64,13 @@ def check_isp_with_retries(
     """
 
     if retries < 0 or retries > MAX_ISP_RETRIES or not isinstance(retries, int):
-        logger.error("Invalid retries parameter. Retries must be a positive integer.")
+        logger.error(
+            "Invalid retries parameter. Retries must be a non-negative integer."
+        )
         return None
 
     if delay < 0 or not isinstance(delay, int):
-        logger.error("Invalid delay parameter. Delay must be a positive integer.")
+        logger.error("Invalid delay parameter. Delay must be a non-negative integer.")
         return None
 
     isp = check_isp()
