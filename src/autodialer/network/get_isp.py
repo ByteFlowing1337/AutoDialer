@@ -1,6 +1,12 @@
 import logging
+import time
 
 logger = logging.getLogger(__name__)
+
+GET_ISP_SOURCE_URL = "https://ipinfo.io/json"
+ISP_RETRIES = 3
+ISP_RETRY_DELAY = 5  # seconds
+MAX_ISP_RETRIES = 100
 
 
 def check_isp(verbose: bool = False) -> str | None:
@@ -19,7 +25,7 @@ def check_isp(verbose: bool = False) -> str | None:
 
     try:
         response = requests.get(
-            "https://ipinfo.io/json", proxies={"http": "", "https": ""}, timeout=5
+            GET_ISP_SOURCE_URL, proxies={"http": "", "https": ""}, timeout=5
         )
         response.raise_for_status()
         data = response.json()
@@ -44,18 +50,25 @@ def check_isp(verbose: bool = False) -> str | None:
         return None
 
 
-def check_isp_with_retries(retries: int = 3) -> str | None:
+def check_isp_with_retries(
+    retries: int = MAX_ISP_RETRIES, delay: int = ISP_RETRY_DELAY
+) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
     Args:
         retries: The number of times to retry checking the ISP if it fails.
+        delay: The delay in seconds between retries.
 
     Returns:
         The ISP string if successful, or None if all retries fail.
     """
 
-    if retries < 0 or retries > 100 or not isinstance(retries, int):
+    if retries < 0 or retries > MAX_ISP_RETRIES or not isinstance(retries, int):
         logger.error("Invalid retries parameter. Retries must be a positive integer.")
+        return None
+
+    if delay < 0 or not isinstance(delay, int):
+        logger.error("Invalid delay parameter. Delay must be a positive integer.")
         return None
 
     isp = check_isp()
@@ -67,6 +80,7 @@ def check_isp_with_retries(retries: int = 3) -> str | None:
         isp = check_isp()
         if isp is not None:
             return isp
+        time.sleep(delay)
 
     logger.error("Failed to verify ISP after retries. Check your internet connection.")
     return None
