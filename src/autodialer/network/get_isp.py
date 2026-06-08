@@ -51,7 +51,7 @@ def check_isp(verbose: bool = False) -> str | None:
 
 
 def check_isp_with_retries(
-    retries: int = ISP_RETRIES, delay: int = ISP_RETRY_DELAY
+    retries: int = ISP_RETRIES, delay: int | float = ISP_RETRY_DELAY
 ) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
@@ -65,12 +65,12 @@ def check_isp_with_retries(
 
     if not isinstance(retries, int) or retries < 0 or retries > MAX_ISP_RETRIES:
         logger.error(
-            "Invalid retries parameter. Retries must be a non-negative integer."
+            "Invalid retries parameter. Retries must be a non-negative number."
         )
         return None
 
-    if not isinstance(delay, int) or delay < 0:
-        logger.error("Invalid delay parameter. Delay must be a non-negative integer.")
+    if not isinstance(delay, (int, float)) or delay < 0:
+        logger.error("Invalid delay parameter. Delay must be a non-negative number.")
         return None
 
     for i in range(retries + 1):

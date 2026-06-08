@@ -70,16 +70,16 @@ class TestCheckIspWithRetries(unittest.TestCase):
     @patch.object(check_isp_module, "check_isp")
     def test_invalid_delay_parameter_return_none(self, mock_check_isp: Any):
         self.assertIsNone(check_isp_with_retries(delay=-1))
-        self.assertIsNone(check_isp_with_retries(delay=2.5))  # type: ignore
+        self.assertIsNone(check_isp_with_retries(delay="invalid"))  # type: ignore
         self.assertIsNone(check_isp_with_retries(retries=2, delay=-5))
         mock_check_isp.assert_not_called()
 
     @patch.object(check_isp_module, "check_isp", return_value=None)
     @patch("time.sleep", return_value=None)
     def test_delay_between_retries(self, mock_sleep: Any, mock_check_isp: Any):
-        check_isp_with_retries(retries=2, delay=10)
+        check_isp_with_retries(retries=2, delay=10.5)
         self.assertEqual(mock_sleep.call_count, 2)
-        mock_sleep.assert_called_with(10)
+        mock_sleep.assert_called_with(10.5)
 
     @patch.object(check_isp_module, "check_isp", return_value="AS5678 Success ISP")
     @patch("time.sleep", return_value=None)
