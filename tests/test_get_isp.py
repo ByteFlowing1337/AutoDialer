@@ -1,0 +1,116 @@
+import importlib
+import unittest
+from typing import Any
+from unittest.mock import Mock, patch
+
+import requests
+
+from autodialer.network.get_isp import check_isp, check_isp_with_retries
+
+check_isp_module = importlib.import_module("autodialer.network.get_isp")
+
+
+class TestCheckIsp(unittest.TestCase):
+    @patch("requests.get")
+    def test_check_isp_success_returns_org(self, mock_get: Any):
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.json.return_value = {"org": "AS1234 Example ISP"}
+        mock_get.return_value = response
+
+        result = check_isp()
+
+        self.assertEqual(result, "AS1234 Example ISP")
+
+    @patch("requests.get", side_effect=requests.Timeout)
+    def test_check_isp_timeout_returns_none(self, _mock_get: Any):
+        result = check_isp()
+        self.assertIsNone(result)
+
+    @patch("requests.get")
+    def test_check_isp_invalid_payload_returns_none(self, mock_get: Any):
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.json.return_value = {"unexpected": "value"}
+        mock_get.return_value = response
+
+        result = check_isp()
+
+        self.assertIsNone(result)
+
+
+class TestCheckIspWithRetries(unittest.TestCase):
+    @patch.object(
+        check_isp_module, "check_isp", side_effect=[None, None, "AS9999 Retry ISP"]
+    )
+    @patch("time.sleep", return_value=None)
+    def test_retries_until_success(self, mock_sleep: Any, mock_check_isp: Any):
+        result = check_isp_with_retries(retries=3)
+
+        self.assertEqual(result, "AS9999 Retry ISP")
+        self.assertEqual(mock_check_isp.call_count, 3)
+        mock_sleep.assert_called()
+
+    @patch.object(check_isp_module, "check_isp", return_value=None)
+    @patch("time.sleep", return_value=None)
+    def test_returns_none_after_all_retries(self, mock_sleep: Any, mock_check_isp: Any):
+        result = check_isp_with_retries(retries=2)
+
+        self.assertIsNone(result)
+        self.assertEqual(mock_check_isp.call_count, 3)
+        mock_sleep.assert_called()
+
+    @patch.object(check_isp_module, "check_isp")
+    def test_invalid_retry_parameters_return_none(self, mock_check_isp: Any):
+        self.assertIsNone(check_isp_with_retries(retries=-1))
+        self.assertIsNone(check_isp_with_retries(retries=999))
+        self.assertIsNone(check_isp_with_retries(retries=2.5))  # type: ignore
+        mock_check_isp.assert_not_called()
+
+    @patch.object(check_isp_module, "check_isp")
+    def test_invalid_delay_parameter_return_none(self, mock_check_isp: Any):
+        self.assertIsNone(check_isp_with_retries(delay=-1))
+        self.assertIsNone(check_isp_with_retries(delay="invalid"))  # type: ignore
+        self.assertIsNone(check_isp_with_retries(retries=2, delay=-5))
+        mock_check_isp.assert_not_called()
+
+    @patch.object(check_isp_module, "check_isp", return_value=None)
+    @patch("time.sleep", return_value=None)
+    def test_delay_between_retries(self, mock_sleep: Any, mock_check_isp: Any):
+        check_isp_with_retries(retries=2, delay=10.5)
+        self.assertEqual(mock_sleep.call_count, 2)
+        mock_sleep.assert_called_with(10.5)
+
+    @patch.object(check_isp_module, "check_isp", return_value="AS5678 Success ISP")
+    @patch("time.sleep", return_value=None)
+    def test_no_delay_after_success(self, mock_sleep: Any, mock_check_isp: Any):
+        result = check_isp_with_retries(retries=3, delay=10)
+        self.assertEqual(result, "AS5678 Success ISP")
+        self.assertEqual(mock_sleep.call_count, 0)
+
+    @patch.object(
+        check_isp_module, "check_isp", side_effect=[None, "AS5678 Success ISP"]
+    )
+    @patch("time.sleep", return_value=None)
+    def test_no_delay_after_success_on_retry(
+        self, mock_sleep: Any, mock_check_isp: Any
+    ):
+        result = check_isp_with_retries(retries=3, delay=10)
+        self.assertEqual(result, "AS5678 Success ISP")
+        self.assertEqual(mock_sleep.call_count, 1)
+
+    @patch.object(check_isp_module, "check_isp", return_value=None)
+    @patch("time.sleep", return_value=None)
+    def test_no_delay_on_initial_retry(self, mock_sleep: Any, mock_check_isp: Any):
+        check_isp_with_retries(retries=0, delay=10)
+        mock_sleep.assert_not_called()
+
+    @patch.object(check_isp_module, "check_isp", return_value=None)
+    @patch("time.sleep", return_value=None)
+    def test_no_delay_after_final_retry(self, mock_sleep: Any, mock_check_isp: Any):
+        check_isp_with_retries(retries=2, delay=10)
+        self.assertEqual(mock_sleep.call_count, 2)
+
+
+if __name__ == "__main__":
+    unittest.main()
