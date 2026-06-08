@@ -65,7 +65,8 @@ def check_isp_with_retries(
 
     if not isinstance(retries, int) or retries < 0 or retries > MAX_ISP_RETRIES:
         logger.error(
-            "Invalid retries parameter. Retries must be a non-negative number."
+            "Invalid retries parameter. Retries must be an integer between 0 and %d.",
+            MAX_ISP_RETRIES,
         )
         return None
 
