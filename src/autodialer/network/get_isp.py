@@ -51,7 +51,7 @@ def check_isp(verbose: bool = False) -> str | None:
 
 
 def check_isp_with_retries(
-    retries: int = MAX_ISP_RETRIES, delay: int = ISP_RETRY_DELAY
+    retries: int = ISP_RETRIES, delay: int = ISP_RETRY_DELAY
 ) -> str | None:
     """Check the ISP with retries if the initial check fails.
 
