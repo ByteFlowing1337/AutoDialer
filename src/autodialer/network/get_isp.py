@@ -63,26 +63,22 @@ def check_isp_with_retries(
         The ISP string if successful, or None if all retries fail.
     """
 
-    if retries < 0 or retries > MAX_ISP_RETRIES or not isinstance(retries, int):
+    if not isinstance(retries, int) or retries < 0 or retries > MAX_ISP_RETRIES:
         logger.error(
             "Invalid retries parameter. Retries must be a non-negative integer."
         )
         return None
 
-    if delay < 0 or not isinstance(delay, int):
+    if not isinstance(delay, int) or delay < 0:
         logger.error("Invalid delay parameter. Delay must be a non-negative integer.")
         return None
 
-    isp = check_isp()
-    if isp is not None:
-        return isp
-
-    # Retry logic: if the initial check fails, retry up to `retries` times.
-    for _ in range(retries):
+    for i in range(retries + 1):
         isp = check_isp()
         if isp is not None:
             return isp
-        time.sleep(delay)
+        if i < retries:
+            time.sleep(delay)
 
     logger.error("Failed to verify ISP after retries. Check your internet connection.")
     return None
