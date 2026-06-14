@@ -26,9 +26,7 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
 
     @patch("autodialer.config.config.logger")
     def test_parse_and_save_env_flags_no_env_value(self, mock_logger):
-        with self.assertRaises(SystemExit) as context:
-            parse_and_save_env_flags(["PANEL_PASSWORD="])
-        self.assertTrue(context.exception.code != 0)
+        self.assertEqual(parse_and_save_env_flags(["PANEL_PASSWORD="]), False)
         mock_logger.error.assert_called_with(
             "Error: -e/--env requires a KEY=VALUE argument "
             "(e.g., -e PANEL_PASSWORD=secret)."
@@ -36,9 +34,7 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
 
     @patch("autodialer.config.config.logger")
     def test_parse_and_save_env_flags_invalid_format(self, mock_logger):
-        with self.assertRaises(SystemExit) as context:
-            parse_and_save_env_flags(["INVALID_FORMAT"])
-        self.assertTrue(context.exception.code != 0)
+        self.assertEqual(parse_and_save_env_flags(["INVALID_FORMAT"]), False)
         mock_logger.error.assert_called_with(
             "Error: -e/--env requires a KEY=VALUE argument "
             "(e.g., -e PANEL_PASSWORD=secret)."
