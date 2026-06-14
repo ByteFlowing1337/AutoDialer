@@ -71,13 +71,18 @@ def main():
         return
 
     args = parser.parse_args()
+    if not (args.env or args.devices or args.force or args.asn or args.change):
+        parser.error(
+            "At least one of --env, --force, --asn, --change, or --devices "
+            "must be specified."
+        )
+
     if args.env:
         from autodialer.config import parse_and_save_env_flags
 
         if not parse_and_save_env_flags(args.env):
             sys.exit(1)
         print("Environment variables updated successfully.")
-        return
 
     if args.devices:
         from autodialer.get_devices import print_devices_table

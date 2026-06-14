@@ -53,6 +53,7 @@ def parse_and_save_env_flags(env_args: list[str]) -> bool:
     if not env_file_path.exists():
         env_file_path.touch()
 
+    parsed_pair = []
     for item in env_args:
         if "=" not in item:
             logger.error(
@@ -69,11 +70,15 @@ def parse_and_save_env_flags(env_args: list[str]) -> bool:
             )
             return False
 
+        parsed_pair.append((key, value))
+
+    for key, value in parsed_pair:
         # Write the key-value pair to the .env file
         dotenv.set_key(str(env_file_path), key, value)
 
         # Update the current environment immediately
         os.environ[key] = value
+
     return True
 
 
