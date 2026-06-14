@@ -44,7 +44,7 @@ def get_env_file_path() -> Path:
     return config_dir / ".env"
 
 
-def parse_and_save_env_flags(env_args: list[str]):
+def parse_and_save_env_flags(env_args: list[str]) -> bool:
     """Saves passed KEY=VALUE strings to .env and the current environment."""
 
     env_file_path = get_env_file_path()
@@ -59,7 +59,7 @@ def parse_and_save_env_flags(env_args: list[str]):
                 "Error: -e/--env requires a KEY=VALUE argument "
                 "(e.g., -e PANEL_PASSWORD=secret)."
             )
-            sys.exit(1)
+            return False
 
         key, value = item.split("=", 1)
         if not value or not key:
@@ -67,13 +67,14 @@ def parse_and_save_env_flags(env_args: list[str]):
                 "Error: -e/--env requires a KEY=VALUE argument "
                 "(e.g., -e PANEL_PASSWORD=secret)."
             )
-            sys.exit(1)
+            return False
 
         # Write the key-value pair to the .env file
         dotenv.set_key(str(env_file_path), key, value)
 
         # Update the current environment immediately
         os.environ[key] = value
+    return True
 
 
 def load_env_file():
