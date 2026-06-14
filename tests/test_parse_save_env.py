@@ -39,3 +39,16 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
             "Error: -e/--env requires a KEY=VALUE argument "
             "(e.g., -e PANEL_PASSWORD=secret)."
         )
+
+    @patch("autodialer.config.config.os.environ")
+    def test_only_save_env_var_when_all_args_valid(self, mock_environ):
+        env_flags = ["password=123", "invalid"]
+        self.assertEqual(parse_and_save_env_flags(env_flags), False)
+        mock_environ.assert_not_called()
+
+    @patch("autodialer.config.config.os.environ")
+    def test_only_save_env_var_when_all_args_valid_2(self, mock_environ):
+        env_flags = ["password=123", "username=123"]
+        self.assertEqual(parse_and_save_env_flags(env_flags), True)
+        mock_environ.__setitem__.assert_any_call("password", "123")
+        mock_environ.__setitem__.assert_any_call("username", "123")

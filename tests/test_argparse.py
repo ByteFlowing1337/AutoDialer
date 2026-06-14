@@ -75,3 +75,11 @@ class TestArgParse(unittest.TestCase):
                     for call in mock_stderr.call_args_list
                 )
             )
+
+    @patch("sys.argv", ["autodialer", "-e", "password=123", "-f"])
+    @patch("autodialer.reconnection.reconnect", return_value=None)
+    @patch("autodialer.config.config.os.environ")
+    def test_multiple_flags_parse_no_early_return(self, mock_environ, mock_reconnect):
+        cli_module.main()
+        mock_environ.__setitem__.assert_any_call("password", "123")
+        mock_reconnect.assert_called_once_with(mode="force", max_attempts=5)
