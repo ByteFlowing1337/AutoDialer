@@ -24,30 +24,51 @@ class TestParseAndSaveEnvFlags(unittest.TestCase):
         mock_environ.__setitem__.assert_any_call("TEST_KEY", "TEST_VALUE")
         mock_environ.__setitem__.assert_any_call("ANOTHER_KEY", "ANOTHER_VALUE")
 
+    @patch("autodialer.config.config.dotenv.set_key")
+    @patch("autodialer.config.config.os.environ")
+    @patch("autodialer.config.config.Path")
     @patch("autodialer.config.config.logger")
-    def test_parse_and_save_env_flags_no_env_value(self, mock_logger):
+    def test_parse_and_save_env_flags_no_env_value(
+        self, mock_logger, mock_path, mock_environ, mock_set_key
+    ):
+        mock_path.return_value.exists.return_value = True
         self.assertEqual(parse_and_save_env_flags(["PANEL_PASSWORD="]), False)
         mock_logger.error.assert_called_with(
             "Error: -e/--env requires a KEY=VALUE argument "
             "(e.g., -e PANEL_PASSWORD=secret)."
         )
 
+    @patch("autodialer.config.config.dotenv.set_key")
+    @patch("autodialer.config.config.os.environ")
+    @patch("autodialer.config.config.Path")
     @patch("autodialer.config.config.logger")
-    def test_parse_and_save_env_flags_invalid_format(self, mock_logger):
+    def test_parse_and_save_env_flags_invalid_format(
+        self, mock_logger, mock_path, mock_environ, mock_set_key
+    ):
+        mock_path.return_value.exists.return_value = True
         self.assertEqual(parse_and_save_env_flags(["INVALID_FORMAT"]), False)
         mock_logger.error.assert_called_with(
             "Error: -e/--env requires a KEY=VALUE argument "
             "(e.g., -e PANEL_PASSWORD=secret)."
         )
 
+    @patch("autodialer.config.config.Path")
+    @patch("autodialer.config.config.dotenv.set_key")
     @patch("autodialer.config.config.os.environ")
-    def test_only_save_env_var_when_all_args_valid(self, mock_environ):
+    def test_only_save_env_var_when_all_args_valid(
+        self, mock_environ, mock_set_key, mock_path
+    ):
         env_flags = ["password=123", "invalid"]
         self.assertEqual(parse_and_save_env_flags(env_flags), False)
         mock_environ.assert_not_called()
+        mock_set_key.assert_not_called()
 
+    @patch("autodialer.config.config.Path")
+    @patch("autodialer.config.config.dotenv.set_key")
     @patch("autodialer.config.config.os.environ")
-    def test_only_save_env_var_when_all_args_valid_2(self, mock_environ):
+    def test_only_save_env_var_when_all_args_valid_2(
+        self, mock_environ, mock_set_key, mock_path
+    ):
         env_flags = ["password=123", "username=123"]
         self.assertEqual(parse_and_save_env_flags(env_flags), True)
         mock_environ.__setitem__.assert_any_call("password", "123")
