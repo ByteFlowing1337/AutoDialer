@@ -37,7 +37,8 @@ def main():
         help="Number of reconnection attempts before giving up (default: 5)",
     )
 
-    group = parser.add_mutually_exclusive_group(required=True)
+    # Remove required=True because `-e` can be used individually
+    group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-f",
         "--force",
@@ -70,10 +71,18 @@ def main():
         return
 
     args = parser.parse_args()
+    if not (args.env or args.devices or args.force or args.asn or args.change):
+        parser.error(
+            "At least one of --env, --force, --asn, --change, or --devices "
+            "must be specified."
+        )
+
     if args.env:
         from autodialer.config import parse_and_save_env_flags
 
-        parse_and_save_env_flags(args.env)
+        if not parse_and_save_env_flags(args.env):
+            sys.exit(1)
+        print("Environment variables updated successfully.")
 
     if args.devices:
         from autodialer.get_devices import print_devices_table
