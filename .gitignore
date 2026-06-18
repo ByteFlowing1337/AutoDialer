@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 
 AutoDialer.egg-info/
+//coverage-py
+.coverage
