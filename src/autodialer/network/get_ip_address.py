@@ -3,18 +3,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+GET_IP_ADDRESS_SOURCE_URLS = [
+    "https://icanhazip.com",
+    "https://ipinfo.io/ip",
+    "https://ifconfig.me/ip",
+    "https://api.ipify.org",
+]
+
 
 def get_ip_address() -> str | None:
     import requests
 
-    api_sources = [
-        "https://icanhazip.com",
-        "https://ipinfo.io/ip",
-        "https://ifconfig.me/ip",
-        "https://api.ipify.org",
-    ]
-
-    for source in api_sources:
+    for source in GET_IP_ADDRESS_SOURCE_URLS:
         try:
             response = requests.get(
                 source, proxies={"http": "", "https": ""}, timeout=5
