@@ -33,19 +33,26 @@ class AsusAPI(RouterAPI):
     """Interact with ASUSWRT routers using the web API."""
 
     SUPPORTED_VENDORS = ("ASUS", "ASUS AiMesh")
+    router_ip: str | None
+    panel_username: str | None
+    panel_password: str | None
+    session: requests.Session
     base_url: str
+    verify_ssl: bool
+    token: str
 
     def __init__(self):
-        self.router_ip: str = get_gateway_ip()
-        self.panel_username: str = PANEL_USERNAME
-        self.panel_password: str = PANEL_PASSWORD
+        self.router_ip = None
+        self.panel_username = PANEL_USERNAME
+        self.panel_password = PANEL_PASSWORD
         self.session = requests.Session()
         login_result = self._login_router()
-        self.base_url: str = login_result[0]
-        self.verify_ssl: bool = login_result[1]
-        self.token: str = login_result[2]
+        self.base_url = login_result[0]
+        self.verify_ssl = login_result[1]
+        self.token = login_result[2]
 
     def _candidate_base_urls(self) -> list[tuple[str, bool]]:
+        self.router_ip = self.router_ip or get_gateway_ip()
         router_host = format_ip_for_url_host(self.router_ip)
         return [
             (f"http://{router_host}", True),
