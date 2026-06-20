@@ -384,7 +384,7 @@ class AsusAPI(RouterAPI):
 
         return any(self._run_service(service) for service in services_to_try)
 
-    def make_pppoe_reconnection(self) -> bool:
+    def pppoe_restart(self) -> bool:
         if self._restart_wan():
             return True
 

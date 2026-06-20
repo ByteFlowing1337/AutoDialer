@@ -2,17 +2,12 @@ __version__ = "0.4.0"
 __author__ = "Byteflow"
 
 
-TYPE_CHECKING = False
-
-if TYPE_CHECKING:
+if False:
     from autodialer.get_devices import get_devices, print_devices_table
     from autodialer.reconnection import reconnect
+    from autodialer.routers import RouterAPI, get_router
 
-__all__ = [
-    "get_devices",
-    "print_devices_table",
-    "reconnect",
-]
+__all__ = ["get_devices", "print_devices_table", "reconnect", "RouterAPI", "get_router"]
 
 
 def __getattr__(name):
@@ -21,13 +16,21 @@ def __getattr__(name):
 
         return get_devices
     elif name == "print_devices_table":
-        from .get_devices import print_devices_table
+        from autodialer.get_devices import print_devices_table
 
         return print_devices_table
     elif name == "reconnect":
-        from .reconnection import reconnect
+        from autodialer.reconnection import reconnect
 
         return reconnect
+    elif name == "RouterAPI":
+        from autodialer.routers import RouterAPI
+
+        return RouterAPI
+    elif name == "get_router":
+        from autodialer.network import get_router
+
+        return get_router
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

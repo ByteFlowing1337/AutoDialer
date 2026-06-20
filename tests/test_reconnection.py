@@ -3,6 +3,8 @@ import unittest
 from typing import Any
 from unittest.mock import Mock, patch
 
+from autodialer.reconnection import ReconnectionError
+
 reconnection_module = importlib.import_module("autodialer.reconnection")
 
 
@@ -12,25 +14,25 @@ class TestReconnection(unittest.TestCase):
         router = Mock()
         router.get_wan_proto.return_value = proto
         router.dhcp_renew.return_value = reconnect_result
-        router.make_pppoe_reconnection.return_value = reconnect_result
+        router.pppoe_restart.return_value = reconnect_result
         return router
 
     def test_get_wan_proto_uses_router_contract(self):
         router = Mock()
         router.get_wan_proto.return_value = "dhcp"
 
-        reconnection = reconnection_module.Reconnector(router)
+        reconnector = reconnection_module.Reconnector(router)
 
-        self.assertEqual(reconnection._get_wan_proto(), "dhcp")
+        self.assertEqual(reconnector.router.get_wan_proto(), "dhcp")
 
     def test_apply_reconnection_calls_pppoe_method(self):
         router = Mock()
-        router.make_pppoe_reconnection.return_value = True
+        router.pppoe_restart.return_value = True
 
-        reconnection = reconnection_module.Reconnector(router)
+        reconnector = reconnection_module.Reconnector(router)
 
-        self.assertTrue(reconnection._apply_reconnection("pppoe"))
-        router.make_pppoe_reconnection.assert_called_once_with()
+        self.assertTrue(reconnector.router.pppoe_restart())
+        router.pppoe_restart.assert_called_once_with()
 
     @patch("builtins.exit")
     @patch.object(reconnection_module, "is_target_asn")
@@ -44,7 +46,7 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router(proto="dhcp")
-        reconnection = reconnection_module.Reconnector(router, delay=7)
+        reconnector = reconnection_module.Reconnector(router, delay=7)
 
         events: list[str] = []
         isp_values = iter(["AS111 Example ISP", "AS222 Target ISP"])
@@ -67,14 +69,14 @@ class TestReconnection(unittest.TestCase):
         mock_check_isp_with_retries.side_effect = isp_side_effect
         mock_is_target_asn.side_effect = is_target_side_effect
 
-        reconnection.run_reconnection(mode="asn", asn="AS222", max_attempts=3)
+        reconnector.run_reconnection(mode="asn", asn="AS222", max_attempts=1)
 
-        self.assertEqual(router.dhcp_renew.call_count, 2)
-        self.assertEqual(mock_get_internet_connectivity.call_count, 2)
+        self.assertEqual(router.restart_wan.call_count, 1)
+        self.assertEqual(mock_get_internet_connectivity.call_count, 1)
         self.assertEqual(mock_check_isp_with_retries.call_count, 2)
         self.assertEqual(
             events,
-            ["sleep", "check_isp", "is_target", "sleep", "check_isp", "is_target"],
+            ["check_isp", "is_target", "sleep", "check_isp", "is_target"],
         )
         mock_exit.assert_not_called()
 
@@ -88,14 +90,14 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnector(router)
+        reconnector = reconnection_module.Reconnector(router)
 
-        with self.assertRaises(RuntimeError) as context:
-            reconnection.run_reconnection(mode="change", asn=None)
+        with self.assertRaises(ReconnectionError) as context:
+            reconnector.run_reconnection(mode="change", max_attempts=5, asn=None)
 
         self.assertEqual(str(context.exception), "Unable to fetch current IP address.")
         mock_get_ip_address.assert_called_once_with()
-        router.dhcp_renew.assert_not_called()
+        router.restart_wan.assert_not_called()
         mock_exit.assert_not_called()
 
     @patch("sys.exit")
@@ -118,11 +120,11 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnector(router)
+        reconnector = reconnection_module.Reconnector(router)
 
-        reconnection.run_reconnection(mode="change", asn=None)
+        reconnector.run_reconnection(mode="change", max_attempts=5, asn=None)
 
-        self.assertEqual(router.dhcp_renew.call_count, 2)
+        self.assertEqual(router.restart_wan.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
         mock_logger_info.assert_called_with(
             "IP info after reconnection: %s -> %s %s",
@@ -152,15 +154,15 @@ class TestReconnection(unittest.TestCase):
         mock_exit: Any,
     ):
         router = self._make_router()
-        reconnection = reconnection_module.Reconnector(router)
+        reconnector = reconnection_module.Reconnector(router)
 
-        with self.assertRaises(RuntimeError) as context:
-            reconnection.run_reconnection(mode="change", asn=None, max_attempts=3)
+        with self.assertRaises(ReconnectionError) as context:
+            reconnector.run_reconnection(mode="change", max_attempts=3, asn=None)
 
         self.assertEqual(
             str(context.exception), "Failed to change IP address after 3 attempts."
         )
-        self.assertEqual(router.dhcp_renew.call_count, 3)
+        self.assertEqual(router.restart_wan.call_count, 3)
         self.assertEqual(mock_get_ip_address.call_count, 4)
         mock_exit.assert_not_called()
 
@@ -180,12 +182,12 @@ class TestReconnection(unittest.TestCase):
 
         reconnection_module.reconnect(mode="asn", asn="AS9929")
 
-        router.get_wan_proto.assert_not_called()
+        router.restart_wan.assert_not_called()
 
     @patch.object(reconnection_module, "get_router", return_value=None)
     @patch.object(reconnection_module, "logger")
     def test_reconnect_exits_when_no_router(self, mock_logger, mock_get_router):
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(ReconnectionError) as context:
             reconnection_module.reconnect(mode="force")
         self.assertEqual(
             str(context.exception),

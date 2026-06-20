@@ -292,7 +292,7 @@ class ZTEApi(RouterAPI):
             logger.error("Failed to get WAN protocol: %s", e)
             return None
 
-    def make_pppoe_reconnection(self) -> bool:
+    def pppoe_restart(self) -> bool:
         first_attempt = self._restart_once()
         if first_attempt == "success":
             return True

@@ -31,7 +31,7 @@ class TestTPLinkAPI(unittest.TestCase):
 
         router = TPLinkAPI()
 
-        result = router.make_pppoe_reconnection()
+        result = router.pppoe_restart()
 
         self.assertTrue(result)
 
@@ -60,7 +60,7 @@ class TestTPLinkAPI(unittest.TestCase):
 
         router = TPLinkAPI()
 
-        result = router.make_pppoe_reconnection()
+        result = router.pppoe_restart()
 
         self.assertTrue(result)
 
@@ -88,11 +88,11 @@ class TestTPLinkAPI(unittest.TestCase):
         with (
             patch.object(
                 router,
-                "tplink_change_wan_status_request",
-                wraps=router.tplink_change_wan_status_request,
+                "_tplink_change_wan_status_request",
+                wraps=router._tplink_change_wan_status_request,
             ) as mock_change_status,
         ):
-            result = router.make_pppoe_reconnection()
+            result = router.pppoe_restart()
 
         self.assertFalse(result)
         mock_change_status.assert_not_called()

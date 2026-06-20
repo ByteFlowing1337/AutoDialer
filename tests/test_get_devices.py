@@ -2,6 +2,8 @@ import importlib
 import unittest
 from unittest.mock import patch
 
+from autodialer.get_devices import DeviceRetrievalError
+
 get_devices_module = importlib.import_module("autodialer.get_devices")
 
 
@@ -73,7 +75,7 @@ class TestGetDevices(unittest.TestCase):
     def test_get_devices_raises_runtime_error_when_router_none(self, mock_get_router):
         from autodialer.get_devices import get_devices
 
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(DeviceRetrievalError) as context:
             get_devices()
         self.assertIn(
             "Unable to detect router vendor or no API available.",
