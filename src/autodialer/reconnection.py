@@ -122,6 +122,8 @@ class Reconnector:
         )
 
     def _validate_asn(self, asn: str | None) -> bool:
+        if asn is None:
+            raise ReconnectionError("Target ASN must be provided for ASN mode.")
         current_isp = check_isp_with_retries()
         if current_isp is None:
             raise ReconnectionError("Unable to fetch ISP information.")
@@ -131,8 +133,6 @@ class Reconnector:
                 asn,
             )
             return False
-        if asn is None:
-            raise ReconnectionError("Target ASN must be provided for ASN mode.")
         return True
 
 
