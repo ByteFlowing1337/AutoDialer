@@ -142,6 +142,8 @@ def reconnect(
     asn: str | None = None,
     max_attempts: int = DEFAULT_MAX_ATTEMPTS,
 ) -> None:
+    if max_attempts <= 0:
+        raise ReconnectionError("The value of attempts must be at least 1.")
 
     router = get_router()
     if router is None:

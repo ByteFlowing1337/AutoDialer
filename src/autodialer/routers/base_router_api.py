@@ -8,17 +8,27 @@ class AbstractRouterAPI(ABC):
     @abstractmethod
     def get_wan_proto(self) -> str | None: ...
 
+    """Return the lower case of WLAN protocol, i.e. (pppoe,dhcp)."""
+
     @abstractmethod
     def pppoe_restart(self) -> bool: ...
+
+    """Restart the router by PPPoE protocol."""
 
     @abstractmethod
     def dhcp_renew(self) -> bool: ...
 
+    """Restart the router by DHCP protocol."""
+
     @abstractmethod
     def restart_wan(self) -> bool: ...
 
+    """Restart the router."""
+
     @abstractmethod
     def get_connected_devices(self) -> list: ...
+
+    """Get the infomation of connected devices."""
 
 
 class RouterAPI(AbstractRouterAPI):

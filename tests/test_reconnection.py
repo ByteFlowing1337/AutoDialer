@@ -17,22 +17,47 @@ class TestReconnection(unittest.TestCase):
         router.pppoe_restart.return_value = reconnect_result
         return router
 
-    def test_get_wan_proto_uses_router_contract(self):
-        router = Mock()
-        router.get_wan_proto.return_value = "dhcp"
+    def test_router_api_restart_wan_dhcp(self):
+        from autodialer.routers import RouterAPI
 
-        reconnector = reconnection_module.Reconnector(router)
+        class MockRouter(RouterAPI):
+            SUPPORTED_VENDORS = ("Mock",)
 
-        self.assertEqual(reconnector.router.get_wan_proto(), "dhcp")
+            def get_wan_proto(self):
+                return "dhcp"
 
-    def test_apply_reconnection_calls_pppoe_method(self):
-        router = Mock()
-        router.pppoe_restart.return_value = True
+            def pppoe_restart(self):
+                return False
 
-        reconnector = reconnection_module.Reconnector(router)
+            def dhcp_renew(self):
+                return True
 
-        self.assertTrue(reconnector.router.pppoe_restart())
-        router.pppoe_restart.assert_called_once_with()
+            def get_connected_devices(self):
+                return []
+
+        router = MockRouter()
+        self.assertTrue(router.restart_wan())
+
+    def test_router_api_restart_wan_pppoe(self):
+        from autodialer.routers import RouterAPI
+
+        class MockRouter(RouterAPI):
+            SUPPORTED_VENDORS = ("Mock",)
+
+            def get_wan_proto(self):
+                return "pppoe"
+
+            def pppoe_restart(self):
+                return True
+
+            def dhcp_renew(self):
+                return False
+
+            def get_connected_devices(self):
+                return []
+
+        router = MockRouter()
+        self.assertTrue(router.restart_wan())
 
     @patch("builtins.exit")
     @patch.object(reconnection_module, "is_target_asn")
@@ -185,8 +210,7 @@ class TestReconnection(unittest.TestCase):
         router.restart_wan.assert_not_called()
 
     @patch.object(reconnection_module, "get_router", return_value=None)
-    @patch.object(reconnection_module, "logger")
-    def test_reconnect_exits_when_no_router(self, mock_logger, mock_get_router):
+    def test_reconnect_exits_when_no_router(self, mock_get_router):
         with self.assertRaises(ReconnectionError) as context:
             reconnection_module.reconnect(mode="force")
         self.assertEqual(
@@ -194,6 +218,14 @@ class TestReconnection(unittest.TestCase):
             "Unable to detect router vendor or no API available.",
         )
         mock_get_router.assert_called_once_with()
+
+    @patch.object(reconnection_module, "get_router", return_value=None)
+    def test_reconnect_reject_illegal_attempts(self, mock_get_router):
+        with self.assertRaises(ReconnectionError) as context:
+            reconnection_module.reconnect(mode="force", max_attempts=0)
+        self.assertEqual(
+            str(context.exception), "The value of attempts must be at least 1."
+        )
 
 
 if __name__ == "__main__":
