@@ -19,7 +19,7 @@ class TestGetRouter(unittest.TestCase):
 
         self.assertTrue(hasattr(router, "get_wan_proto"))
         self.assertTrue(hasattr(router, "dhcp_renew"))
-        self.assertTrue(hasattr(router, "make_pppoe_reconnection"))
+        self.assertTrue(hasattr(router, "pppoe_restart"))
         self.assertTrue(hasattr(router, "get_connected_devices"))
 
     @patch.object(get_router_module, "check_router_vendor", return_value=None)

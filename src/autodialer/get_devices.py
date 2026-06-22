@@ -3,10 +3,16 @@ import sys
 from autodialer.network.get_router import get_router
 
 
+class DeviceRetrievalError(RuntimeError):
+    """Custom exception for device retrieval errors."""
+
+
 def get_devices() -> list:
     router = get_router()
     if router is None:
-        raise RuntimeError("Unable to detect router vendor or no API available.")
+        raise DeviceRetrievalError(
+            "Unable to detect router vendor or no API available."
+        )
     devices = router.get_connected_devices()
     return devices
 

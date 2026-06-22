@@ -2,6 +2,8 @@ import argparse
 import sys
 
 from autodialer import __version__
+from autodialer.get_devices import DeviceRetrievalError
+from autodialer.reconnection import ReconnectionError
 from autodialer.utils import validate_asn
 
 
@@ -89,7 +91,7 @@ def main():
 
         try:
             print_devices_table()
-        except RuntimeError as e:
+        except DeviceRetrievalError as e:
             # Lazy import logging as it has a not low overhead, and
             # should never be used when the user just wants
             # to see the help message or print devices
@@ -111,7 +113,7 @@ def main():
                 reconnect(mode="asn", asn=args.asn, max_attempts=args.attempts)
             elif args.change:
                 reconnect(mode="change", max_attempts=args.attempts)
-        except RuntimeError as e:
+        except ReconnectionError as e:
             import logging
 
             logger = logging.getLogger(__name__)

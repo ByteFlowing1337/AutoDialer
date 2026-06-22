@@ -80,7 +80,7 @@ class TPLinkAPI(RouterAPI):
             sys.exit(1)
         return stok if isinstance(stok, str) else None
 
-    def set_credentials(self) -> bool:
+    def _set_credentials(self) -> bool:
         if not self.username or not self.pppoe_password:
             logger.warning(
                 "Missing PPPoE credentials override. "
@@ -103,7 +103,7 @@ class TPLinkAPI(RouterAPI):
             return False
         return True
 
-    def tplink_change_wan_status_request(
+    def _tplink_change_wan_status_request(
         self, action: Literal["connect", "disconnect", "renew"], method: str, proto: str
     ) -> bool:
         payload = {
@@ -117,7 +117,7 @@ class TPLinkAPI(RouterAPI):
             return False
         return True
 
-    def tplink_get_wan_status(self) -> dict:
+    def _tplink_get_wan_status(self) -> dict:
         payload = {
             "network": {"name": ["wan_status", "wanv6_status"]},
             "protocol": {"name": ["dhcp", "ipv6_info"]},
@@ -131,23 +131,28 @@ class TPLinkAPI(RouterAPI):
         return response
 
     def get_wan_proto(self) -> str | None:
-        status = self.tplink_get_wan_status()
+        status = self._tplink_get_wan_status()
         wan_status = status.get("network", {}).get("wan_status", {})
         proto = wan_status.get("proto")
-        return proto if isinstance(proto, str) else None
+        return proto.lower() if isinstance(proto, str) else None
 
-    def make_pppoe_reconnection(self) -> bool:
+    def pppoe_restart(self) -> bool:
 
-        if self.username and self.pppoe_password and not self.set_credentials():
+        if self.username and self.pppoe_password and not self._set_credentials():
             return False
 
-        if not self.tplink_change_wan_status_request(
+        if not self._tplink_change_wan_status_request(
             action="disconnect", method="do", proto="pppoe"
         ):
             return False
 
-        return self.tplink_change_wan_status_request(
+        return self._tplink_change_wan_status_request(
             action="connect", method="do", proto="pppoe"
+        )
+
+    def dhcp_renew(self) -> bool:
+        return self._tplink_change_wan_status_request(
+            action="renew", method="do", proto="dhcp"
         )
 
     def get_connected_devices(self) -> list:
@@ -182,8 +187,3 @@ class TPLinkAPI(RouterAPI):
                 }
             )
         return devices
-
-    def dhcp_renew(self) -> bool:
-        return self.tplink_change_wan_status_request(
-            action="renew", method="do", proto="dhcp"
-        )
