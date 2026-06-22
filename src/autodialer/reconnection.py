@@ -36,10 +36,12 @@ class Reconnector:
         elif mode == "change":
             return self._reconnect_util_change_ip(max_attempts)
         elif mode == "asn":
+            if asn is None:
+                raise ReconnectionError("Target ASN must be provided for ASN mode.")
             if not self._validate_asn(asn):
                 return
             return self._reconnect_util_target_asn(
-                target_asn=asn,  # type: ignore
+                target_asn=asn,
                 max_attempts=max_attempts,
             )
         else:
@@ -122,8 +124,9 @@ class Reconnector:
         )
 
     def _validate_asn(self, asn: str | None) -> bool:
-        if asn is None:
-            raise ReconnectionError("Target ASN must be provided for ASN mode.")
+        # Used for ASN mode to check if the current ASN matches the target ASN.
+        # If cannot fetch current ASN, raise an error.
+        # If already connected to the target ASN, log and return False.
         current_isp = check_isp_with_retries()
         if current_isp is None:
             raise ReconnectionError("Unable to fetch ISP information.")

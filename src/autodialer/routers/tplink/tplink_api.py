@@ -134,7 +134,7 @@ class TPLinkAPI(RouterAPI):
         status = self._tplink_get_wan_status()
         wan_status = status.get("network", {}).get("wan_status", {})
         proto = wan_status.get("proto")
-        return proto if isinstance(proto, str) else None
+        return proto.lower() if isinstance(proto, str) else None
 
     def pppoe_restart(self) -> bool:
 
