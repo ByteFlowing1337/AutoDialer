@@ -31,7 +31,8 @@ class RouterAPI(AbstractRouterAPI):
         proto = self.get_wan_proto()
         if proto is None:
             return False
-        elif proto == "dhcp":
+        proto = proto.strip().lower()
+        if proto == "dhcp":
             return self.dhcp_renew()
         elif proto == "pppoe":
             return self.pppoe_restart()
