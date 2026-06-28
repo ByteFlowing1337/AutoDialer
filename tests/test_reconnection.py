@@ -152,7 +152,7 @@ class TestReconnection(unittest.TestCase):
         self.assertEqual(router.restart_wan.call_count, 2)
         self.assertEqual(mock_get_ip_address.call_count, 3)
         mock_logger_info.assert_called_with(
-            "IP info after reconnection: %s -> %s %s",
+            "Successfully changed IP: %s -> %s %s",
             "203.0.113.10",
             "198.51.100.25",
             "AS9999 Example ISP",
