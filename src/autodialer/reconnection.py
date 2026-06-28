@@ -91,7 +91,7 @@ class Reconnector:
         if current_ip != after_reconnection_ip:
             isp = check_isp_with_retries()
             logger.info(
-                "IP info after reconnection: %s -> %s %s",
+                "Successfully changed IP: %s -> %s %s",
                 current_ip,
                 after_reconnection_ip,
                 isp,
@@ -124,9 +124,7 @@ class Reconnector:
         )
 
     def _validate_asn(self, asn: str | None) -> bool:
-        # Used for ASN mode to check if the current ASN matches the target ASN.
-        # If cannot fetch current ASN, raise an error.
-        # If already connected to the target ASN, log and return False.
+        # Used for ASN mode to check.
         current_isp = check_isp_with_retries()
         if current_isp is None:
             raise ReconnectionError("Unable to fetch ISP information.")
